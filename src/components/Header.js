@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Header({ toggleSidebar }) {
   return (
-    <header className="bg-white shadow-md flex-shrink-0 p-4 font-poppins flex justify-between items-center">
+    <header className="bg-white bg-blue-50 shadow-md flex-shrink-0 px-4 mt-6 font-poppins flex justify-between items-center">
       {/* sidebar toggle icon in LHS of header */}
       <button onClick={toggleSidebar} className="text-2xl">
         <Image

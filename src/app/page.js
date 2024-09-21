@@ -24,10 +24,7 @@ export default function Home() {
     <div className="flex flex-col h-screen max-h-screen overflow-hidden">
       <Header />
       <main className="flex-grow flex flex-col p-4 overflow-hidden font-quicksand">
-        {/* Scrollable Container */}
         <div className="flex-grow overflow-y-auto no-scrollbar gap-y-10">
-          {" "}
-          {/* Use scrollbar-hidden here */}
           {/* Graph Visualisation Section */}
           <div className="flex-grow p-2">
             <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
