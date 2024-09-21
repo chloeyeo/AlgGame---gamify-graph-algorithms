@@ -19,20 +19,15 @@ export default function Home() {
     ],
   });
 
-  const handleStart = () => {
-    // Placeholder: Add logic to start the algorithm and update the graph
-    console.log("Algorithm Started:", selectedAlgorithm);
-  };
-
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden font-[family-name:var(--font-geist-sans)]">
-      <header className="flex-shrink-0 p-4">
+    <div className="flex flex-col h-screen max-h-screen overflow-hidden">
+      <header className="flex-shrink-0 p-4 font-poppins">
         <h1 className="text-2xl font-bold text-center">Graph Algorithm Game</h1>
       </header>
 
-      <main className="flex-grow flex flex-col p-4 overflow-hidden">
+      <main className="flex-grow flex flex-col p-4 overflow-hidden font-quicksand">
         <div className="flex-shrink-0 mb-4">
-          <h2 className="text-xl font-semibold mb-2">Select an Algorithm</h2>
+          <h2 className="text-xl mb-2 font-semibold">Select an Algorithm</h2>
           <div className="grid grid-cols-2 gap-2">
             {["BFS", "DFS", "Dijkstra", "Kruskal"].map((algo) => (
               <button
@@ -47,7 +42,7 @@ export default function Home() {
         </div>
 
         <div className="flex-grow flex flex-col overflow-hidden">
-          <h2 className="text-xl font-semibold mb-2">Graph Visualization</h2>
+          <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
           <div className="flex-grow bg-white border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
             {/* Placeholder for graph visualization component */}
             <GraphVisualisation
@@ -59,7 +54,7 @@ export default function Home() {
         </div>
 
         <div className="flex-shrink-0 mt-4">
-          <h2 className="text-xl font-semibold mb-2">Game Controls</h2>
+          <h2 className="text-xl mb-2 font-semibold">Game Controls</h2>
           <div className="flex justify-center space-x-4">
             <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-sm">
               Start
@@ -74,7 +69,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="flex-shrink-0 p-4 text-center text-sm text-gray-700">
+      <footer className="flex-shrink-0 p-4 text-center text-sm text-gray-700 font-quicksand">
         <p>Made by Chloe Yeo</p>
       </footer>
     </div>

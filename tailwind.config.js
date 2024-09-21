@@ -1,21 +1,3 @@
-// /** @type {import('tailwindcss').Config} */
-// module.exports = {
-//   content: [
-//     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-//     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-//     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-//   ],
-//   theme: {
-//     extend: {
-//       colors: {
-//         background: "var(--background)",
-//         foreground: "var(--foreground)",
-//       },
-//     },
-//   },
-//   plugins: [],
-// };
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -66,6 +48,11 @@ module.exports = {
       },
       boxShadow: {
         "custom-shadow": "4px 8px 4px rgba(0, 0, 0, 0.25)",
+      },
+      fontFamily: {
+        dancing: ["Dancing Script", "cursive"], // cursive as fallback. classname font-dancing
+        quicksand: ["Quicksand", "sans-serif"], // sans serif as fallback font classname font-quicksand
+        poppins: ["Poppins", "sans-serif"],
       },
     },
     primary: {
