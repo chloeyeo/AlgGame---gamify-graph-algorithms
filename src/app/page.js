@@ -22,66 +22,59 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden">
-      {/* <header className="flex-shrink-0 p-4 font-poppins">
-        <h1 className="text-2xl font-bold text-center">Graph Algorithm Game</h1>
-      </header> */}
       <Header />
-
       <main className="flex-grow flex flex-col p-4 overflow-hidden font-quicksand">
-        {/* <div className="flex-shrink-0 mb-4">
-          <h2 className="text-xl mb-2 font-semibold">Select an Algorithm</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {["BFS", "DFS", "Dijkstra", "Kruskal"].map((algo) => (
-              <button
-                key={algo}
-                onClick={() => setSelectedAlgorithm(algo)}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-sm"
-              >
-                {algo}
-              </button>
-            ))}
+        {/* Scrollable Container */}
+        <div className="flex-grow overflow-y-auto no-scrollbar gap-y-10">
+          {" "}
+          {/* Use scrollbar-hidden here */}
+          {/* Graph Visualisation Section */}
+          <div className="flex-grow p-2">
+            <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
+            <div className="h-64 bg-white border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+              <GraphVisualisation
+                data={graphData}
+                algorithm={selectedAlgorithm}
+              />
+            </div>
           </div>
-        </div> */}
-
-        <div className="flex-grow flex flex-col overflow-hidden">
-          <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="flex-grow bg-white border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
-            <GraphVisualisation
-              data={graphData}
-              algorithm={selectedAlgorithm}
-            />
+          {/* Explanation Section */}
+          <div className="flex-grow p-2">
+            <h2 className="text-xl mb-2 font-semibold">Explanation</h2>
+            <div className="h-64 bg-white border border-gray-300 rounded-lg flex flex-col overflow-hidden">
+              <div className="flex-grow overflow-auto no-scrollbar">
+                <p className="text-center px-4 py-4">
+                  {/* Add long text here for testing scrolling */}
+                  Some explanation given. Lorem ipsum dolor sit amet,
+                  consectetur adipiscing elit. Quisque gravida, eros et egestas
+                  gravida. Lorem ipsum dolor sit amet, consectetur adipiscing
+                  elit. Quisque gravida, eros et egestas gravida. Lorem ipsum
+                  dolor sit amet, consectetur adipiscing elit. Quisque gravida,
+                  eros et egestas gravida.Some explanation given. Lorem ipsum
+                  dolor sit amet, consectetur adipiscing elit. Quisque gravida,
+                  eros et egestas gravida. Lorem ipsum dolor sit amet,
+                  consectetur adipiscing elit. Quisque gravida, eros et egestas
+                  gravida. Lorem ipsum dolor sit amet, consectetur adipiscing
+                  elit. Quisque gravida, eros et egestas gravida.Some
+                  explanation given. Lorem ipsum dolor sit amet, consectetur
+                  adipiscing elit. Quisque gravida, eros et egestas gravida.
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Quisque gravida, eros et egestas gravida. Lorem ipsum dolor
+                  sit amet, consectetur adipiscing elit. Quisque gravida, eros
+                  et egestas gravida. Lorem ipsum dolor sit amet, consectetur
+                  adipiscing elit. Quisque gravida, eros et egestas gravida.Some
+                  explanation given. Lorem ipsum dolor sit amet, consectetur
+                  adipiscing elit. Quisque gravida, eros et egestas gravida.
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Quisque gravida, eros et egestas gravida. Lorem ipsum dolor
+                  sit amet, consectetur adipiscing elit. Quisque gravida, eros
+                  et egestas gravida.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="flex-grow mt-10 flex flex-col overflow-hidden">
-          <h2 className="text-xl mb-2 font-semibold">Explanation</h2>
-          <div className="flex-grow bg-white border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
-            <p className="text-center px-4 py-20">
-              Some explanation given. Lorem ipsum dolor sit amet, consectetur
-              adipiscing elit. Quisque gravida, eros et egestas gravida
-            </p>
-          </div>
-        </div>
-
-        {/* <div className="flex-shrink-0 mt-4">
-          <h2 className="text-xl mb-2 font-semibold">Game Controls</h2>
-          <div className="flex justify-center space-x-4">
-            <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-sm">
-              Start
-            </button>
-            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-sm">
-              Hint
-            </button>
-            <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-sm">
-              Reset
-            </button>
-          </div>
-        </div> */}
       </main>
-
-      <footer className="flex-shrink-0 p-4 text-center text-sm text-gray-700 font-quicksand">
-        <p>Made by Chloe Yeo</p>
-      </footer>
     </div>
   );
 }
