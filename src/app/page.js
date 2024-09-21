@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Header from "@/components/Header";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
@@ -37,7 +38,14 @@ export default function Home() {
           </div>
           {/* Explanation Section */}
           <div className="flex-grow p-2">
-            <h2 className="text-xl mb-2 font-semibold">Explanation</h2>
+            <h2 className="text-xl mb-2 font-semibold">
+              <Image
+                src="/images/person-speaking.png"
+                alt="person speaking icon for explanation section"
+                width={30}
+                height={30}
+              />
+            </h2>
             <div className="h-64 bg-white border border-gray-300 rounded-lg flex flex-col overflow-hidden">
               <div className="flex-grow overflow-auto no-scrollbar">
                 <p className="text-center px-4 py-4">

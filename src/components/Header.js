@@ -17,7 +17,7 @@ export default function Header({ toggleSidebar }) {
       {/* user icon in RHS of header */}
       <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
         <Image
-          src="/images/person.png"
+          src="/images/lion.png"
           alt="default user profile image"
           width={30}
           height={30}
