@@ -21,6 +21,23 @@
   }
 }
 
+/* to fix the non homepage having vertical extra space above header and below footer on mobile screen - start */
+/* Add this at the top of your globals.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Ensures padding and border are included in width/height */
+}
+
+html,
+body {
+  height: 100%; /* Ensures full height */
+  display: flex;
+  flex-direction: column; /* Allows for vertical stacking */
+}
+
+/* end */
+
 .shadow-custom {
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1); /* Top shadow */
 }
