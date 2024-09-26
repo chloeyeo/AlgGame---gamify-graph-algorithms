@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
@@ -9,6 +10,7 @@ import Modal from "@/components/Modal";
 import { Menu } from "lucide-react";
 
 export default function Home() {
+  const router = useRouter(); // Initialize useRouter
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
@@ -21,16 +23,22 @@ export default function Home() {
 
   const handleModeSelect = (mode) => {
     setSelectedMode(mode);
+    if (selectedAlgorithm && mode === "Education") {
+      // Navigate to the education page if both selections are made
+      router.push("/education"); // Navigate to the education page
+    }
     if (selectedAlgorithm) {
-      // Close sidebar if both are selected
       setIsSidebarOpen(false);
     }
   };
 
   const handleAlgorithmSelect = (algorithm) => {
     setSelectedAlgorithm(algorithm);
+    if (selectedMode && selectedMode === "Education") {
+      // Navigate to the education page if both selections are made
+      router.push("/education"); // Navigate to the education page
+    }
     if (selectedMode) {
-      // Close sidebar if both are selected
       setIsSidebarOpen(false);
     }
   };
@@ -39,14 +47,19 @@ export default function Home() {
     // Close the sidebar first
     setIsSidebarOpen(false);
 
-    // Then check if both mode and algorithm are selected
-    if (!selectedMode || !selectedAlgorithm) {
-      setTimeout(() => {
-        // Show the modal with a slight delay after sidebar closes
-        setMissingSelection(!selectedMode ? "mode" : "algorithm");
-        setIsModalOpen(true);
-      }, 300); // 300ms to wait for the sidebar transition
+    // Only show the modal if selections were made
+    if (!selectedMode && !selectedAlgorithm) {
+      // Do nothing if no selection was made
+      return;
     }
+
+    // Check if either mode or algorithm is missing
+    setTimeout(() => {
+      if (!selectedMode || !selectedAlgorithm) {
+        setMissingSelection(selectedMode ? "mode" : "algorithm");
+        setIsModalOpen(true);
+      }
+    }, 300); // 300ms to wait for the sidebar transition
   };
 
   return (

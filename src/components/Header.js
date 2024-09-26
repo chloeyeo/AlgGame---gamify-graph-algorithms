@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link"; // Import Link for navigation
 
 export default function Header({ toggleSidebar }) {
   return (
@@ -12,7 +13,9 @@ export default function Header({ toggleSidebar }) {
           height={30}
         />
       </button>
-      <h1 className="text-2xl font-bold text-center">Graph Algorithm Game</h1>
+      <Link href="/" className="text-2xl font-bold text-center">
+        Graph Algorithm Game
+      </Link>
       <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
         <Image
           src="/images/lion.png"
