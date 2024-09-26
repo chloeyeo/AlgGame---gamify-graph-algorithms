@@ -4,7 +4,6 @@ import Image from "next/image";
 export default function Header({ toggleSidebar }) {
   return (
     <header className="bg-white bg-blue-50 shadow-md flex-shrink-0 px-4 mt-6 font-poppins flex justify-between items-center">
-      {/* sidebar toggle icon in LHS of header */}
       <button onClick={toggleSidebar} className="text-2xl">
         <Image
           src="/images/list.png"
@@ -14,7 +13,6 @@ export default function Header({ toggleSidebar }) {
         />
       </button>
       <h1 className="text-2xl font-bold text-center">Graph Algorithm Game</h1>
-      {/* user icon in RHS of header */}
       <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
         <Image
           src="/images/lion.png"

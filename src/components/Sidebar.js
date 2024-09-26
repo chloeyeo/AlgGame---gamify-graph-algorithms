@@ -1,13 +1,13 @@
 import React from "react";
 
-export default function Sidebar({
+const Sidebar = ({
   isOpen,
-  toggleSidebar,
+  onClose,
+  onModeSelect,
+  onAlgorithmSelect,
   selectedMode,
-  setSelectedMode,
   selectedAlgorithm,
-  setSelectedAlgorithm,
-}) {
+}) => {
   const modes = ["Education", "Game"];
   const algorithms = [
     "Traversal",
@@ -19,44 +19,66 @@ export default function Sidebar({
 
   return (
     <div
-      className={`fixed inset-y-0 left-0 transform ${
+      className={`absolute inset-y-0 left-0 w-64 bg-white transition-transform duration-300 ease-in-out z-30 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
-      } w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out z-30`}
+      }`}
     >
-      <nav className="p-4">
-        <h2 className="text-xl font-bold mb-4">1. Mode:</h2>
-        <div className="space-y-2 mb-6">
+      <div className="p-4">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <h2 className="text-xl font-semibold mb-4">Settings</h2>
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-2">Mode:</h3>
           {modes.map((mode) => (
             <button
               key={mode}
-              className={`w-full py-2 px-4 rounded ${
+              onClick={() => onModeSelect(mode)}
+              className={`block w-full text-left px-4 py-2 rounded ${
                 selectedMode === mode
                   ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
+                  : "hover:bg-gray-100"
               }`}
-              onClick={() => setSelectedMode(mode)}
             >
               {mode}
             </button>
           ))}
         </div>
-        <h2 className="text-xl font-bold mb-4">2. Algorithm:</h2>
-        <div className="space-y-2">
-          {algorithms.map((algo) => (
+        <div>
+          <h3 className="text-lg font-medium mb-2">Algorithm:</h3>
+          {algorithms.map((algorithm) => (
             <button
-              key={algo}
-              className={`w-full py-2 px-4 rounded ${
-                selectedAlgorithm === algo
+              key={algorithm}
+              onClick={() => onAlgorithmSelect(algorithm)}
+              className={`block w-full text-left px-4 py-2 rounded ${
+                selectedAlgorithm === algorithm
                   ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700"
+                  : "hover:bg-gray-100"
               }`}
-              onClick={() => setSelectedAlgorithm(algo)}
             >
-              {algo}
+              {algorithm}
             </button>
           ))}
         </div>
-      </nav>
+      </div>
     </div>
   );
-}
+};
+
+export default Sidebar;
