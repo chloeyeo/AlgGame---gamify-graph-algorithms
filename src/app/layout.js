@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
         <div className="sm:bg-gray-50 w-full min-h-screen flex justify-center items-center">
           <div className="bg-white w-full h-full sm:w-[576px] sm:h-screen relative flex flex-col overflow-hidden sm:shadow-lg">
             <div className="flex-grow overflow-hidden">
-              <div className="h-full overflow-y-auto bg-white px-4 sm:px-4 py-0 no-scrollbar">
+              <div className="h-full overflow-y-auto bg-white px-0 py-0 no-scrollbar">
                 {children}
               </div>
             </div>
