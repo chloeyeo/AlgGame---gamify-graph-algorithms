@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { XCircle } from "lucide-react"; // Icon for close
 
 const Modal = ({ onClose, missingSelection }) => {
@@ -21,7 +22,7 @@ const Modal = ({ onClose, missingSelection }) => {
 
         {/* Lion icon on top (you can replace this with an actual lion image if desired) */}
         <div className="flex justify-center mb-4">
-          <img src="/images/lion.png" alt="Lion" className="w-16 h-16" />
+          <Image src="/images/lion.png" alt="Lion" width={64} height={64} />
         </div>
 
         {/* Modal Title */}
@@ -32,8 +33,10 @@ const Modal = ({ onClose, missingSelection }) => {
         {/* Modal Message */}
         <p className="text-gray-800 mb-4 text-center">
           You have only selected the <strong>{missingSelection}</strong>. Please
-          select the{" "}
-          <strong>{missingSelection === "mode" ? "algorithm" : "mode"}</strong>{" "}
+          select the
+          <strong>
+            {missingSelection === "mode" ? "algorithm" : "mode"}
+          </strong>{" "}
           to proceed!
         </p>
 
