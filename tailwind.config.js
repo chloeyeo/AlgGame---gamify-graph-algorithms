@@ -50,9 +50,24 @@ module.exports = {
         "custom-shadow": "4px 8px 4px rgba(0, 0, 0, 0.25)",
       },
       fontFamily: {
-        dancing: ["Dancing Script", "cursive"], // cursive as fallback. classname font-dancing
-        quicksand: ["Quicksand", "sans-serif"], // sans serif as fallback font classname font-quicksand
+        dancing: ["Dancing Script", "cursive"],
+        quicksand: ["Quicksand", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
+      },
+      animation: {
+        "fade-in-1": "fadeIn 1s ease-out 0.5s forwards",
+        "fade-in-2": "fadeIn 1s ease-out 1s forwards",
+        bounce: "bounce 1s infinite",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: 0, transform: "translateY(10px)" },
+          "100%": { opacity: 1, transform: "translateY(0)" },
+        },
+        bounce: {
+          "0%, 100%": { transform: "translateY(-5%)" },
+          "50%": { transform: "translateY(0)" },
+        },
       },
     },
     primary: {
