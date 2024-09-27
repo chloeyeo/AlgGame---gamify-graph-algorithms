@@ -4,7 +4,7 @@ import Link from "next/link"; // Import Link for navigation
 
 export default function Header({ toggleSidebar }) {
   return (
-    <header className="bg-white bg-blue-50 shadow-md flex-shrink-0 px-4 pt-6 font-poppins flex justify-between items-center">
+    <header className="bg-white bg-blue-50 shadow-md flex-shrink-0 p-4 pt-6 font-poppins flex justify-between items-center">
       <button onClick={toggleSidebar} className="text-2xl">
         <Image
           src="/images/list.png"
