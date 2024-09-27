@@ -64,7 +64,7 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-blue-200 to-purple-200">
-      <header className="sticky top-0 z-50">
+      <header className="fixed top-0 z-50">
         <Header toggleSidebar={toggleSidebar} />
       </header>
       <div className="relative flex-grow overflow-hidden">
@@ -98,7 +98,7 @@ export default function Home() {
           </div>
         </main>
       </div>
-      <footer className="sticky bottom-0 z-50">
+      <footer className="fixed bottom-0 z-50">
         <Footer />
       </footer>
 
