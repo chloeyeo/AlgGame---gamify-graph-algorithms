@@ -64,10 +64,10 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-blue-200 to-purple-200">
-      <header className="fixed top-0 z-50">
+      <header className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
         <Header toggleSidebar={toggleSidebar} />
       </header>
-      <div className="relative flex-grow overflow-hidden">
+      <div className="relative flex-grow overflow-hidden pt-[70px] pb-[32px]">
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose} // Sidebar closes first, then modal logic
@@ -76,7 +76,7 @@ export default function Home() {
           selectedMode={selectedMode}
           selectedAlgorithm={selectedAlgorithm}
         />
-        <main className="flex flex-col items-center justify-center p-8 text-center">
+        <main className="flex flex-col items-center justify-center p-8 text-center mb-12">
           <AnimatedLion />
           <div className="mt-8 space-y-6 max-w-2xl">
             <h2 className="text-3xl font-bold">
@@ -98,7 +98,7 @@ export default function Home() {
           </div>
         </main>
       </div>
-      <footer className="fixed bottom-0 z-50">
+      <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
         <Footer />
       </footer>
 
