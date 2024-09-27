@@ -64,7 +64,9 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-blue-200 to-purple-200">
-      <Header toggleSidebar={toggleSidebar} />
+      <header className="sticky top-0 z-50">
+        <Header toggleSidebar={toggleSidebar} />
+      </header>
       <div className="relative flex-grow overflow-hidden">
         <Sidebar
           isOpen={isSidebarOpen}
@@ -96,7 +98,9 @@ export default function Home() {
           </div>
         </main>
       </div>
-      <Footer />
+      <footer className="sticky bottom-0 z-50">
+        <Footer />
+      </footer>
 
       {isSidebarOpen && (
         <div

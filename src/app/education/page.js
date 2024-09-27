@@ -27,8 +27,10 @@ export default function EducationPage() {
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-gradient-to-br from-blue-200 to-purple-200">
-      <Header toggleSidebar={toggleSidebar} />
+    <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-blue-200 to-purple-200">
+      <header className="sticky top-0 z-50">
+        <Header toggleSidebar={toggleSidebar} />
+      </header>
       <div className="relative flex-grow overflow-hidden">
         <Sidebar
           isOpen={isSidebarOpen}
@@ -38,7 +40,7 @@ export default function EducationPage() {
           selectedMode={selectedMode}
           selectedAlgorithm={selectedAlgorithm}
         />
-        <main className="flex flex-col p-4 overflow-y-auto no-scrollbar">
+        <main className="flex flex-col p-4 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
           <div className="flex-grow">
             {/* Graph Visualisation Section */}
             <div className="mb-6">
@@ -74,7 +76,9 @@ export default function EducationPage() {
           </div>
         </main>
       </div>
-      <Footer />
+      <footer className="sticky bottom-0 z-50">
+        <Footer />
+      </footer>
       {isSidebarOpen && (
         <div
           className="absolute inset-0 bg-black bg-opacity-50 z-20"
