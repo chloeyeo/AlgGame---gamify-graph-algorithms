@@ -74,3 +74,17 @@ body {
   width: 2px;
   background-color: black;
 }
+
+@media (max-width: 768px) {
+  main {
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    height: calc(
+      100vh - 100px
+    ); /* Adjust height based on header/footer height */
+  }
+
+  footer,
+  header {
+    height: 50px; /* Ensure header and footer are always 50px in mobile */
+  }
+}
