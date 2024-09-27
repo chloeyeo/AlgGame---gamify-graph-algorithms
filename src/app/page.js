@@ -67,7 +67,7 @@ export default function Home() {
       <header className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
         <Header toggleSidebar={toggleSidebar} />
       </header>
-      <div className="relative flex-grow overflow-hidden pt-[70px] pb-[32px]">
+      <div className="relative flex-grow overflow-hidden pt-[20%] pb-[10%]">
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose} // Sidebar closes first, then modal logic
