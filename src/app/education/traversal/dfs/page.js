@@ -223,6 +223,7 @@ const dfsSteps = [
 
 export default function DFSEducationPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false); // Track if speech is active
 
   const nextStep = () => {
     if (currentStep < dfsSteps.length - 1) {
@@ -233,6 +234,20 @@ export default function DFSEducationPage() {
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const readAloud = (text) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US"; // can change this to other language codes if needed
+
+      utterance.onstart = () => setIsSpeaking(true); // Start highlight/animation
+      utterance.onend = () => setIsSpeaking(false); // Stop highlight/animation
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.log("Text-to-speech is not supported in this browser.");
     }
   };
 
@@ -259,6 +274,8 @@ export default function DFSEducationPage() {
               alt="person speaking icon for explanation section"
               width={30}
               height={30}
+              onClick={() => readAloud(dfsSteps[currentStep].explanation)}
+              className={`cursor-pointer ${isSpeaking ? "animate-icon" : ""}`}
             />
             <span className="ml-2">Explanation</span>
           </h2>

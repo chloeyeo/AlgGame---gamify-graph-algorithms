@@ -73,3 +73,21 @@ body {
   width: 2px;
   background-color: black;
 }
+
+/* Add your custom styles for the speaking icon */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-icon {
+  animation: pulse 1s infinite;
+  filter: brightness(1.5); /* Add a highlight effect */
+}
