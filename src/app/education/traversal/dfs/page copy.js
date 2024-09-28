@@ -13,39 +13,12 @@ const dfsSteps = [
         { id: "C", visited: false },
         { id: "D", visited: false },
         { id: "E", visited: false },
-        { id: "F", visited: false },
-        { id: "G", visited: false },
       ],
       edges: [
         { source: "A", target: "B" },
         { source: "A", target: "C" },
         { source: "B", target: "D" },
-        { source: "B", target: "E" },
-        { source: "C", target: "F" },
-        { source: "D", target: "G" },
-      ],
-      currentNode: null,
-    },
-    explanation: "Initial state: No nodes have been visited yet.",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: false },
-        { id: "C", visited: false },
-        { id: "D", visited: false },
-        { id: "E", visited: false },
-        { id: "F", visited: false },
-        { id: "G", visited: false },
-      ],
-      edges: [
-        { source: "A", target: "B" },
-        { source: "A", target: "C" },
-        { source: "B", target: "D" },
-        { source: "B", target: "E" },
-        { source: "C", target: "F" },
-        { source: "D", target: "G" },
+        { source: "C", target: "E" },
       ],
       currentNode: "A",
     },
@@ -60,16 +33,12 @@ const dfsSteps = [
         { id: "C", visited: false },
         { id: "D", visited: false },
         { id: "E", visited: false },
-        { id: "F", visited: false },
-        { id: "G", visited: false },
       ],
       edges: [
         { source: "A", target: "B" },
         { source: "A", target: "C" },
         { source: "B", target: "D" },
-        { source: "B", target: "E" },
-        { source: "C", target: "F" },
-        { source: "D", target: "G" },
+        { source: "C", target: "E" },
       ],
       currentNode: "B",
     },
@@ -123,24 +92,6 @@ export default function DFSEducationPage() {
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <p>{dfsSteps[currentStep].explanation}</p>
           </div>
-
-          {/* Navigation Buttons */}
-          <div className="mt-4 flex justify-between">
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className="bg-gray-300 p-2 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={nextStep}
-              disabled={currentStep === dfsSteps.length - 1}
-              className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
         </div>
 
         {/* DFS Concept Section */}
@@ -186,6 +137,24 @@ export default function DFSEducationPage() {
                 if neighbor not in Visited:
                     Stack.push(neighbor)`}
           </pre>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="mt-4 flex justify-between">
+          <button
+            onClick={prevStep}
+            disabled={currentStep === 0}
+            className="bg-gray-300 p-2 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={nextStep}
+            disabled={currentStep === dfsSteps.length - 1}
+            className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       </div>
     </main>

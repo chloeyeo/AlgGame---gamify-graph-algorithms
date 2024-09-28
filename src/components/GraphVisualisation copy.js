@@ -1,16 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import * as d3 from "d3";
 
-const GraphVisualisation = ({ graphState }) => {
-  const svgRef = useRef(null);
-
+const GraphVisualisation = () => {
   useEffect(() => {
-    if (!graphState) return;
-
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove(); // Clear previous rendering
-
-    svg
+    const svg = d3
+      .select("#graph")
       .attr("viewBox", "0 0 600 600")
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
@@ -26,9 +20,16 @@ const GraphVisualisation = ({ graphState }) => {
       { id: "G", x: 100, y: 500 },
     ];
 
-    const links = graphState.edges;
+    const links = [
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "B", target: "D" },
+      { source: "B", target: "E" },
+      { source: "C", target: "F" },
+      { source: "D", target: "G" },
+    ];
 
-    // Draw links
+    // Draw links with thicker stroke
     svg
       .selectAll("line")
       .data(links)
@@ -41,7 +42,7 @@ const GraphVisualisation = ({ graphState }) => {
       .attr("stroke", "black")
       .attr("stroke-width", 3);
 
-    // Draw nodes
+    // Draw nodes with toggleable color
     const circles = svg
       .selectAll("circle")
       .data(nodes)
@@ -50,15 +51,12 @@ const GraphVisualisation = ({ graphState }) => {
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
       .attr("r", 35)
-      .attr("fill", (d) => {
-        const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited ? "blue" : "white";
-      })
-      .attr("stroke", (d) => (d.id === graphState.currentNode ? "red" : "gray"))
-      .attr("stroke-width", (d) => (d.id === graphState.currentNode ? 4 : 2));
+      .attr("fill", "white")
+      .attr("stroke", "gray")
+      .attr("stroke-width", 2);
 
-    // Add labels
-    svg
+    // Add labels with toggleable color
+    const labels = svg
       .selectAll("text")
       .data(nodes)
       .enter()
@@ -69,11 +67,22 @@ const GraphVisualisation = ({ graphState }) => {
       .attr("dominant-baseline", "middle")
       .text((d) => d.id)
       .style("font-size", "18px")
-      .style("fill", (d) => {
-        const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited ? "white" : "black";
-      });
-  }, [graphState]);
+      .style("fill", "black"); // Initial text color
+
+    // Add click event for toggling background and text color
+    circles.on("click", function (event, d) {
+      const circle = d3.select(this);
+      const currentColor = circle.attr("fill");
+      const newColor = currentColor === "white" ? "blue" : "white";
+      const newTextColor = newColor === "blue" ? "white" : "black";
+
+      // Update circle color
+      circle.attr("fill", newColor);
+
+      // Update corresponding text color
+      labels.filter((n) => n.id === d.id).style("fill", newTextColor);
+    });
+  }, []);
 
   return (
     <div
@@ -86,7 +95,7 @@ const GraphVisualisation = ({ graphState }) => {
         padding: "20px",
       }}
     >
-      <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
+      <svg id="graph" style={{ width: "100%", height: "100%" }} />
     </div>
   );
 };
