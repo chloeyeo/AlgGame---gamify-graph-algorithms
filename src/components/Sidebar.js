@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const Sidebar = ({
   isOpen,
@@ -9,15 +10,12 @@ const Sidebar = ({
   selectedMode,
   selectedAlgorithm,
 }) => {
+  const router = useRouter();
   const [selectedMainAlgorithm, setSelectedMainAlgorithm] = useState(null);
 
   const modes = ["Education", "Game"];
   const algorithms = {
-    Traversal: [
-      "Depth-First Search (DFS)",
-      "Breadth-First Search (BFS)",
-      "Iterative Deepening Search (IDS)",
-    ],
+    Traversal: ["Depth-First Search (DFS)", "Breadth-First Search (BFS)"],
     "Shortest Path": [
       "Dijkstra's",
       "Bellman-Ford",
@@ -50,6 +48,13 @@ const Sidebar = ({
   const handleSubAlgorithmClick = (subAlgorithm) => {
     onAlgorithmSelect(subAlgorithm);
     setSelectedMainAlgorithm(null);
+
+    // Navigate based on the selected algorithm
+    if (subAlgorithm === "Depth-First Search (DFS)") {
+      router.push("/education/traversal/dfs");
+    } else if (subAlgorithm === "Breadth-First Search (BFS)") {
+      router.push("/education/traversal/bfs");
+    }
   };
 
   return (
@@ -113,33 +118,16 @@ const Sidebar = ({
                 <div className="ml-4 mt-2">
                   {subAlgorithms.map((subAlgorithm) => (
                     <div key={subAlgorithm}>
-                      {subAlgorithm === "Depth-First Search (DFS)" ? (
-                        <Link href="/education/traversal/dfs">
-                          <button
-                            onClick={() =>
-                              handleSubAlgorithmClick(subAlgorithm)
-                            }
-                            className={`block w-full text-left px-4 py-2 rounded ${
-                              selectedAlgorithm === subAlgorithm
-                                ? "bg-blue-300 text-white"
-                                : "hover:bg-gray-50"
-                            }`}
-                          >
-                            {subAlgorithm}
-                          </button>
-                        </Link>
-                      ) : (
-                        <button
-                          onClick={() => handleSubAlgorithmClick(subAlgorithm)}
-                          className={`block w-full text-left px-4 py-2 rounded ${
-                            selectedAlgorithm === subAlgorithm
-                              ? "bg-blue-300 text-white"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          {subAlgorithm}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleSubAlgorithmClick(subAlgorithm)}
+                        className={`block w-full text-left px-4 py-2 rounded ${
+                          selectedAlgorithm === subAlgorithm
+                            ? "bg-blue-300 text-white"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        {subAlgorithm}
+                      </button>
                     </div>
                   ))}
                 </div>
