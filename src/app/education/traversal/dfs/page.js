@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
@@ -223,7 +223,8 @@ const dfsSteps = [
 
 export default function DFSEducationPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false); // Track if speech is active
+  const [isSpeakingExplanation, setIsSpeakingExplanation] = useState(false);
+  const [isSpeakingConcept, setIsSpeakingConcept] = useState(false);
 
   const nextStep = () => {
     if (currentStep < dfsSteps.length - 1) {
@@ -237,19 +238,47 @@ export default function DFSEducationPage() {
     }
   };
 
-  const readAloud = (text) => {
+  const readAloud = (text, type) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US"; // can change this to other language codes if needed
+      utterance.lang = "en-US";
 
-      utterance.onstart = () => setIsSpeaking(true); // Start highlight/animation
-      utterance.onend = () => setIsSpeaking(false); // Stop highlight/animation
+      utterance.onstart = () => {
+        if (type === "explanation") {
+          setIsSpeakingExplanation(true);
+        } else {
+          setIsSpeakingConcept(true);
+        }
+      };
+
+      utterance.onend = () => {
+        if (type === "explanation") {
+          setIsSpeakingExplanation(false);
+        } else {
+          setIsSpeakingConcept(false);
+        }
+      };
 
       window.speechSynthesis.speak(utterance);
     } else {
       console.log("Text-to-speech is not supported in this browser.");
     }
   };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Reset both states to not speaking
+        setIsSpeakingExplanation(false);
+        setIsSpeakingConcept(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
@@ -275,12 +304,16 @@ export default function DFSEducationPage() {
               width={40}
               height={40}
               onClick={
-                !isSpeaking
-                  ? () => readAloud(dfsSteps[currentStep].explanation)
+                !isSpeakingExplanation && !isSpeakingConcept // Disable if either is speaking
+                  ? () =>
+                      readAloud(
+                        dfsSteps[currentStep].explanation,
+                        "explanation"
+                      )
                   : undefined
-              } // Disable click if speaking
+              }
               className={`cursor-pointer ${
-                isSpeaking ? "animate-icon" : ""
+                isSpeakingExplanation ? "animate-icon" : ""
               } w-12 h-12 mr-2`}
             />
             <span className="ml-2">Explanation</span>
@@ -310,7 +343,27 @@ export default function DFSEducationPage() {
 
         {/* DFS Concept Section */}
         <div className="mb-6">
-          <h2 className="text-xl mb-2 font-semibold">DFS Concept</h2>
+          <h2 className="text-xl mb-2 font-semibold flex items-center">
+            <Image
+              src="/images/person-speaking.png"
+              alt="person speaking icon for DFS concept section"
+              width={40}
+              height={40}
+              onClick={
+                !isSpeakingExplanation && !isSpeakingConcept // Disable if either is speaking
+                  ? () =>
+                      readAloud(
+                        "DFS Concept: Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible along each branch before backtracking. It uses a stack to keep track of nodes to visit and is often implemented recursively.",
+                        "concept"
+                      )
+                  : undefined
+              }
+              className={`cursor-pointer ${
+                isSpeakingConcept ? "animate-icon" : ""
+              } w-12 h-12 mr-2`}
+            />
+            <span className="ml-2">DFS Concept</span>
+          </h2>
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <p>
               Depth-First Search (DFS) is a graph traversal algorithm that
