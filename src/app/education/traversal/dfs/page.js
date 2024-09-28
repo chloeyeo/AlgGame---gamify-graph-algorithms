@@ -237,8 +237,8 @@ export default function DFSEducationPage() {
   };
 
   return (
-    <main className="flex flex-col p-4 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
-      <h1 className="text-3xl font-bold mb-6">
+    <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">
         Learn Depth-First Search (DFS)
       </h1>
 

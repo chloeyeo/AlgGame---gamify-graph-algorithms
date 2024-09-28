@@ -11,7 +11,7 @@ const GraphVisualisation = ({ graphState }) => {
     svg.selectAll("*").remove(); // Clear previous rendering
 
     svg
-      .attr("viewBox", "0 0 600 600")
+      .attr("viewBox", "0 -20 600 600")
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
       .attr("height", "100%");
@@ -20,10 +20,10 @@ const GraphVisualisation = ({ graphState }) => {
       { id: "A", x: 300, y: 50 },
       { id: "B", x: 200, y: 200 },
       { id: "C", x: 400, y: 200 },
-      { id: "D", x: 150, y: 350 },
-      { id: "E", x: 250, y: 350 },
-      { id: "F", x: 450, y: 350 },
-      { id: "G", x: 100, y: 500 },
+      { id: "D", x: 130, y: 350 },
+      { id: "E", x: 270, y: 350 },
+      { id: "F", x: 470, y: 350 },
+      { id: "G", x: 80, y: 500 },
     ];
 
     const links = graphState.edges;
@@ -49,7 +49,7 @@ const GraphVisualisation = ({ graphState }) => {
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", 35)
+      .attr("r", 60)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         return node && node.visited ? "blue" : "white";
@@ -68,7 +68,7 @@ const GraphVisualisation = ({ graphState }) => {
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
       .text((d) => d.id)
-      .style("font-size", "18px")
+      .style("font-size", "22px")
       .style("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         return node && node.visited ? "white" : "black";
@@ -83,7 +83,7 @@ const GraphVisualisation = ({ graphState }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: "20px",
+        padding: "15px",
       }}
     >
       <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
