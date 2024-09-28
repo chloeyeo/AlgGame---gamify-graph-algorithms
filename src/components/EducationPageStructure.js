@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
@@ -11,6 +12,7 @@ export default function EducationPageStructure({
   const [currentStep, setCurrentStep] = useState(0);
   const [isSpeakingExplanation, setIsSpeakingExplanation] = useState(false);
   const [isSpeakingConcept, setIsSpeakingConcept] = useState(false);
+  const router = useRouter();
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -26,7 +28,19 @@ export default function EducationPageStructure({
 
   const readAloud = (text, type) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
+      let textToRead = "";
+
+      if (type === "concept" && typeof text === "object") {
+        textToRead = `${
+          text.introduction
+        } Key Characteristics: ${text.keyCharacteristics.join(
+          ". "
+        )}. Applications: ${text.applications.join(". ")}`;
+      } else {
+        textToRead = text;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(textToRead);
       utterance.lang = "en-US";
 
       utterance.onstart = () => {
@@ -64,6 +78,40 @@ export default function EducationPageStructure({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
+
+  useEffect(() => {
+    // Stop speech when the path changes
+    const handlePathChange = () => {
+      window.speechSynthesis.cancel(); // Stop any ongoing speech
+      setIsSpeakingExplanation(false);
+      setIsSpeakingConcept(false);
+    };
+
+    const pathname = router.pathname;
+
+    // Re-run when pathname changes
+    handlePathChange();
+  }, [router.pathname]);
+
+  const renderConceptText = (text) => {
+    return (
+      <>
+        <p className="mb-4">{text.introduction}</p>
+        <h3 className="text-lg font-bold mb-2">Key Characteristics:</h3>
+        <ul className="list-disc pl-5 mb-4">
+          {text.keyCharacteristics.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+        <h3 className="text-lg font-bold mb-2">Applications:</h3>
+        <ul className="list-disc pl-5">
+          {text.applications.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      </>
+    );
+  };
 
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
@@ -154,7 +202,7 @@ export default function EducationPageStructure({
             <span className="ml-2">{title} Concept</span>
           </h2>
           <div className="bg-white border border-gray-300 rounded-lg p-4">
-            <p>{conceptText || "No concept text available"}</p>
+            {renderConceptText(conceptText) || "No text available"}
           </div>
         </div>
 

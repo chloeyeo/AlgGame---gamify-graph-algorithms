@@ -193,16 +193,22 @@ const bfsSteps = [
   },
 ];
 
-const bfsConceptText = `
-  BFS Concept: Breadth-First Search (BFS) is a graph traversal algorithm that explores all the neighbors of a node before moving to the next level of nodes. 
-  It uses a queue to keep track of nodes to visit and is often implemented iteratively.
-  
-  Key Characteristics:
-  - Explores all neighboring nodes before moving on to the next level
-  - Uses a queue to keep track of nodes to visit
-  - Marks nodes as visited to avoid cycles
-  - Can be used to find the shortest path in unweighted graphs
-`;
+const bfsConceptText = {
+  introduction:
+    "Breadth-First Search (BFS) is a graph traversal algorithm that explores all the neighbors of a node before moving to the next level of nodes. It uses a queue to keep track of nodes to visit and is often implemented iteratively.",
+  keyCharacteristics: [
+    "Explores all neighboring nodes before moving on to the next level",
+    "Uses a queue to keep track of nodes to visit",
+    "Marks nodes as visited to avoid cycles",
+    "Can be used to find the shortest path in unweighted graphs",
+  ],
+  applications: [
+    "Shortest path finding in unweighted graphs",
+    "Web crawling",
+    "Social networking features (e.g., finding all friends within N connections)",
+    "GPS navigation systems",
+  ],
+};
 
 const bfsPseudocode = `BFS(graph, start_node):
     Queue = [start_node]

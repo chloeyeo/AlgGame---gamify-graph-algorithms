@@ -219,16 +219,22 @@ const dfsSteps = [
   },
 ];
 
-const dfsConceptText = `
-  DFS Concept: Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible along each branch before backtracking. 
-  It uses a stack to keep track of nodes to visit and is often implemented recursively.
-  
-  Key Characteristics:
-  - Explores deep into the graph before backtracking
-  - Uses a stack (or recursion) to keep track of nodes to visit
-  - Marks nodes as visited to avoid cycles
-  - Can be used to detect cycles, find paths, and solve puzzles
-`;
+const dfsConceptText = {
+  introduction:
+    "Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible along each branch before backtracking. It uses a stack to keep track of nodes to visit and is often implemented recursively.",
+  keyCharacteristics: [
+    "Explores deep into the graph before backtracking",
+    "Uses a stack (or recursion) to keep track of nodes to visit",
+    "Marks nodes as visited to avoid cycles",
+    "Can be used to detect cycles, find paths, and solve puzzles",
+  ],
+  applications: [
+    "Topological sorting",
+    "Finding connected components in a graph",
+    "Maze generation and solving",
+    "Detecting cycles in a graph",
+  ],
+};
 
 const dfsPseudocode = `DFS(graph, start_node):
     Stack = [start_node]
