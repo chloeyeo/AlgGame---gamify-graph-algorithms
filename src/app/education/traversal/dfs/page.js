@@ -274,7 +274,11 @@ export default function DFSEducationPage() {
               alt="person speaking icon for explanation section"
               width={40}
               height={40}
-              onClick={() => readAloud(dfsSteps[currentStep].explanation)}
+              onClick={
+                !isSpeaking
+                  ? () => readAloud(dfsSteps[currentStep].explanation)
+                  : undefined
+              } // Disable click if speaking
               className={`cursor-pointer ${
                 isSpeaking ? "animate-icon" : ""
               } w-12 h-12 mr-2`}
