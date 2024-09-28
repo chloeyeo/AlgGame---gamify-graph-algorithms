@@ -58,7 +58,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`absolute top-[4.9\%] md:top-[5.3\%] inset-y-0 left-0 w-64 bg-white transition-transform duration-300 ease-in-out z-30 ${
+      className={`absolute top-20 inset-y-0 left-0 w-64 bg-white transition-transform duration-300 ease-in-out z-30 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
