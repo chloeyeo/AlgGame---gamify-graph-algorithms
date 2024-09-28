@@ -35,7 +35,6 @@ body {
   display: flex;
   flex-direction: column; /* Allows for vertical stacking */
 }
-
 /* end */
 
 .shadow-custom {

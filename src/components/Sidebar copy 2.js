@@ -112,35 +112,17 @@ const Sidebar = ({
               {selectedMainAlgorithm === mainAlgorithm && (
                 <div className="ml-4 mt-2">
                   {subAlgorithms.map((subAlgorithm) => (
-                    <div key={subAlgorithm}>
-                      {subAlgorithm === "Depth-First Search (DFS)" ? (
-                        <Link href="/education/traversal/dfs">
-                          <button
-                            onClick={() =>
-                              handleSubAlgorithmClick(subAlgorithm)
-                            }
-                            className={`block w-full text-left px-4 py-2 rounded ${
-                              selectedAlgorithm === subAlgorithm
-                                ? "bg-blue-300 text-white"
-                                : "hover:bg-gray-50"
-                            }`}
-                          >
-                            {subAlgorithm}
-                          </button>
-                        </Link>
-                      ) : (
-                        <button
-                          onClick={() => handleSubAlgorithmClick(subAlgorithm)}
-                          className={`block w-full text-left px-4 py-2 rounded ${
-                            selectedAlgorithm === subAlgorithm
-                              ? "bg-blue-300 text-white"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          {subAlgorithm}
-                        </button>
-                      )}
-                    </div>
+                    <button
+                      key={subAlgorithm}
+                      onClick={() => handleSubAlgorithmClick(subAlgorithm)}
+                      className={`block w-full text-left px-4 py-2 rounded ${
+                        selectedAlgorithm === subAlgorithm
+                          ? "bg-blue-300 text-white"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      {subAlgorithm}
+                    </button>
                   ))}
                 </div>
               )}
