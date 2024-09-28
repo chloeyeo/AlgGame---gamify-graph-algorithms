@@ -76,7 +76,149 @@ const dfsSteps = [
     explanation:
       "Visit the first unvisited adjacent node B. Push B onto the stack and mark it as visited.",
   },
-  // Add more steps here to complete the DFS traversal
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true },
+        { id: "E", visited: false },
+        { id: "F", visited: false },
+        { id: "G", visited: false },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "D",
+    },
+    explanation:
+      "Visit the first unvisited adjacent node of B, which is D. Push D onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true },
+        { id: "E", visited: false },
+        { id: "F", visited: false },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "G",
+    },
+    explanation:
+      "Visit the only unvisited adjacent node of D, which is G. Push G onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: false },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "E",
+    },
+    explanation:
+      "Backtrack to B and visit its unvisited adjacent node E. Push E onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: false },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "C",
+    },
+    explanation:
+      "Backtrack to A and visit its unvisited adjacent node C. Push C onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "F",
+    },
+    explanation:
+      "Visit the only unvisited adjacent node of C, which is F. Push F onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: null,
+    },
+    explanation: "All nodes have been visited. DFS traversal is complete.",
+  },
 ];
 
 export default function DFSEducationPage() {
