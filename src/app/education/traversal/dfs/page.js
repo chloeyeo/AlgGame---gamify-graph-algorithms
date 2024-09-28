@@ -130,10 +130,10 @@ const dfsSteps = [
         { id: "A", visited: true },
         { id: "B", visited: true },
         { id: "C", visited: false },
-        { id: "D", visited: true },
+        { id: "D", visited: true, backtracked: true },
         { id: "E", visited: true },
         { id: "F", visited: false },
-        { id: "G", visited: true },
+        { id: "G", visited: true, backtracked: true },
       ],
       edges: [
         { source: "A", target: "B" },
@@ -152,12 +152,12 @@ const dfsSteps = [
     graphState: {
       nodes: [
         { id: "A", visited: true },
-        { id: "B", visited: true },
+        { id: "B", visited: true, backtracked: true },
         { id: "C", visited: true },
-        { id: "D", visited: true },
-        { id: "E", visited: true },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
         { id: "F", visited: false },
-        { id: "G", visited: true },
+        { id: "G", visited: true, backtracked: true },
       ],
       edges: [
         { source: "A", target: "B" },
@@ -176,12 +176,12 @@ const dfsSteps = [
     graphState: {
       nodes: [
         { id: "A", visited: true },
-        { id: "B", visited: true },
+        { id: "B", visited: true, backtracked: true },
         { id: "C", visited: true },
-        { id: "D", visited: true },
-        { id: "E", visited: true },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
         { id: "F", visited: true },
-        { id: "G", visited: true },
+        { id: "G", visited: true, backtracked: true },
       ],
       edges: [
         { source: "A", target: "B" },
@@ -199,13 +199,13 @@ const dfsSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D", visited: true },
-        { id: "E", visited: true },
-        { id: "F", visited: true },
-        { id: "G", visited: true },
+        { id: "A", visited: true, backtracked: true },
+        { id: "B", visited: true, backtracked: true },
+        { id: "C", visited: true, backtracked: true },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
+        { id: "F", visited: true, backtracked: true },
+        { id: "G", visited: true, backtracked: true },
       ],
       edges: [
         { source: "A", target: "B" },
@@ -220,6 +220,17 @@ const dfsSteps = [
     explanation: "All nodes have been visited. DFS traversal is complete.",
   },
 ];
+
+const dfsConceptText = `
+  DFS Concept: Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible along each branch before backtracking. 
+  It uses a stack to keep track of nodes to visit and is often implemented recursively.
+  
+  Key Characteristics:
+  - Explores deep into the graph before backtracking
+  - Uses a stack (or recursion) to keep track of nodes to visit
+  - Marks nodes as visited to avoid cycles
+  - Can be used to detect cycles, find paths, and solve puzzles
+`;
 
 export default function DFSEducationPage() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -351,11 +362,7 @@ export default function DFSEducationPage() {
               height={40}
               onClick={
                 !isSpeakingExplanation && !isSpeakingConcept // Disable if either is speaking
-                  ? () =>
-                      readAloud(
-                        "DFS Concept: Depth-First Search (DFS) is a graph traversal algorithm that explores as far as possible along each branch before backtracking. It uses a stack to keep track of nodes to visit and is often implemented recursively.",
-                        "concept"
-                      )
+                  ? () => readAloud(dfsConceptText, "concept")
                   : undefined
               }
               className={`cursor-pointer ${

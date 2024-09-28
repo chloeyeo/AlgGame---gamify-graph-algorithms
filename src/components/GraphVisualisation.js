@@ -52,10 +52,22 @@ const GraphVisualisation = ({ graphState }) => {
       .attr("r", 60)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited ? "blue" : "white";
+        return node && node.visited && !node.backtracked ? "blue" : "white";
       })
-      .attr("stroke", (d) => (d.id === graphState.currentNode ? "red" : "gray"))
-      .attr("stroke-width", (d) => (d.id === graphState.currentNode ? 4 : 2));
+      .attr("stroke", (d) => {
+        const node = graphState.nodes.find((n) => n.id === d.id);
+        return node && node.backtracked
+          ? "red"
+          : d.id === graphState.currentNode
+          ? "red"
+          : "gray";
+      })
+      .attr("stroke-width", (d) => {
+        const node = graphState.nodes.find((n) => n.id === d.id);
+        return node && (node.backtracked || d.id === graphState.currentNode)
+          ? 4
+          : 2;
+      });
 
     // Add labels
     svg
@@ -71,7 +83,7 @@ const GraphVisualisation = ({ graphState }) => {
       .style("font-size", "22px")
       .style("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited ? "white" : "black";
+        return node && node.visited && !node.backtracked ? "white" : "black";
       });
   }, [graphState]);
 
