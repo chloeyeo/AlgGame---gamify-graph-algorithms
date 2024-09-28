@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const Sidebar = ({
@@ -59,7 +58,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`absolute top-[10%] inset-y-0 left-0 w-64 bg-white transition-transform duration-300 ease-in-out z-30 ${
+      className={`absolute top-[5%] inset-y-0 left-0 w-64 bg-white transition-transform duration-300 ease-in-out z-30 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
