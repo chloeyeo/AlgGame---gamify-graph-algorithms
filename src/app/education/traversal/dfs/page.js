@@ -272,10 +272,12 @@ export default function DFSEducationPage() {
             <Image
               src="/images/person-speaking.png"
               alt="person speaking icon for explanation section"
-              width={30}
-              height={30}
+              width={40}
+              height={40}
               onClick={() => readAloud(dfsSteps[currentStep].explanation)}
-              className={`cursor-pointer ${isSpeaking ? "animate-icon" : ""}`}
+              className={`cursor-pointer ${
+                isSpeaking ? "animate-icon" : ""
+              } w-12 h-12 mr-2`}
             />
             <span className="ml-2">Explanation</span>
           </h2>
