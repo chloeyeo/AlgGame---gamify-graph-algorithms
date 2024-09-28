@@ -33,10 +33,8 @@ const Modal = ({ onClose, missingSelection }) => {
         {/* Modal Message */}
         <p className="text-gray-800 mb-4 text-center">
           You have only selected the <strong>{missingSelection}</strong>. Please
-          select the
-          <strong>
-            {missingSelection === "mode" ? "algorithm" : "mode"}
-          </strong>{" "}
+          select the{" "}
+          <strong>{missingSelection === "mode" ? "algorithm" : "mode"}</strong>{" "}
           to proceed!
         </p>
 

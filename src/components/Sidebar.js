@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Sidebar = ({
   isOpen,
@@ -8,14 +8,48 @@ const Sidebar = ({
   selectedMode,
   selectedAlgorithm,
 }) => {
+  const [selectedMainAlgorithm, setSelectedMainAlgorithm] = useState(null);
+
   const modes = ["Education", "Game"];
-  const algorithms = [
-    "Traversal",
-    "Shortest Path",
-    "Minimum Spanning Tree",
-    "Network Flow",
-    "Matching",
-  ];
+  const algorithms = {
+    Traversal: [
+      "Depth-First Search (DFS)",
+      "Breadth-First Search (BFS)",
+      "Iterative Deepening Search (IDS)",
+    ],
+    "Shortest Path": [
+      "Dijkstra's",
+      "Bellman-Ford",
+      "Floyd-Warshall",
+      "A*",
+      "Johnson's",
+    ],
+    "Minimum Spanning Tree": ["Kruskal's", "Prim's", "Borůvka's"],
+    "Network Flow": [
+      "Ford-Fulkerson",
+      "Edmonds-Karp",
+      "Dinic's",
+      "Push-Relabel (Goldberg-Tarjan)",
+      "Capacity Scaling",
+    ],
+    Matching: [
+      "Hungarian (Kuhn-Munkres)",
+      "Hopcroft-Karp",
+      "Blossom (Edmonds')",
+      "Gale-Shapley (Stable Marriage)",
+    ],
+  };
+
+  const handleMainAlgorithmClick = (algorithm) => {
+    setSelectedMainAlgorithm(
+      algorithm === selectedMainAlgorithm ? null : algorithm
+    );
+  };
+
+  const handleSubAlgorithmClick = (subAlgorithm) => {
+    onAlgorithmSelect(subAlgorithm);
+    setSelectedMainAlgorithm(null);
+  };
 
   return (
     <div
@@ -23,7 +57,7 @@ const Sidebar = ({
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      <div className="p-4">
+      <div className="p-4 overflow-y-auto h-full">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -62,18 +96,36 @@ const Sidebar = ({
         </div>
         <div>
           <h3 className="text-lg font-medium mb-2">Algorithm:</h3>
-          {algorithms.map((algorithm) => (
-            <button
-              key={algorithm}
-              onClick={() => onAlgorithmSelect(algorithm)}
-              className={`block w-full text-left px-4 py-2 rounded ${
-                selectedAlgorithm === algorithm
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              {algorithm}
-            </button>
+          {Object.entries(algorithms).map(([mainAlgorithm, subAlgorithms]) => (
+            <div key={mainAlgorithm} className="mb-2">
+              <button
+                onClick={() => handleMainAlgorithmClick(mainAlgorithm)}
+                className={`block w-full text-left px-4 py-2 rounded ${
+                  selectedMainAlgorithm === mainAlgorithm
+                    ? "bg-blue-500 text-white"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                {mainAlgorithm}
+              </button>
+              {selectedMainAlgorithm === mainAlgorithm && (
+                <div className="ml-4 mt-2">
+                  {subAlgorithms.map((subAlgorithm) => (
+                    <button
+                      key={subAlgorithm}
+                      onClick={() => handleSubAlgorithmClick(subAlgorithm)}
+                      className={`block w-full text-left px-4 py-2 rounded ${
+                        selectedAlgorithm === subAlgorithm
+                          ? "bg-blue-300 text-white"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      {subAlgorithm}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>
