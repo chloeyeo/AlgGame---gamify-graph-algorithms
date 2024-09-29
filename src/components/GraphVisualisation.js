@@ -1,11 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-const GraphVisualisation = ({
-  graphState,
-  onNodeClick,
-  mode = "education", // Can be "education" or "game"
-}) => {
+const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -53,32 +49,22 @@ const GraphVisualisation = ({
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", 60)
+      .attr("r", 30)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        if (mode === "game") {
-          return node && node.highlighted ? "blue" : "white";
-        } else {
-          return node && node.visited ? "blue" : "white";
-        }
+        return node && node.visited ? "blue" : "white";
       })
       .attr("stroke", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        if (mode === "game") {
-          return node && node.visited && !node.highlighted ? "red" : "gray";
-        } else {
-          return node && node.backtracked
-            ? "red"
-            : d.id === graphState.currentNode
-            ? "red"
-            : "gray";
-        }
+        return node && node.backtracked
+          ? "red"
+          : d.id === graphState.currentNode
+          ? "red"
+          : "gray";
       })
       .attr("stroke-width", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return (mode === "game" && node && node.visited) ||
-          (mode === "education" &&
-            (node.backtracked || d.id === graphState.currentNode))
+        return node && (node.backtracked || d.id === graphState.currentNode)
           ? 4
           : 2;
       });
@@ -94,14 +80,10 @@ const GraphVisualisation = ({
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
       .text((d) => d.id)
-      .style("font-size", "22px")
+      .style("font-size", "18px")
       .style("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        if (mode === "game") {
-          return node && node.highlighted ? "white" : "black";
-        } else {
-          return node && node.visited ? "white" : "black";
-        }
+        return node && node.visited ? "white" : "black";
       });
 
     // Add click event listeners for game mode

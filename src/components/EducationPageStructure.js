@@ -129,7 +129,7 @@ export default function EducationPageStructure({
         {/* Graph Visualisation Section */}
         <div className="mb-6">
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-64 overflow-auto no-scrollbar">
+          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-auto no-scrollbar">
             {steps.length > 0 &&
             steps[currentStep] &&
             steps[currentStep].graphState ? (

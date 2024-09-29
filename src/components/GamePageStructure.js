@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
@@ -18,8 +17,6 @@ export default function GamePageStructure({
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
-  const router = useRouter();
-  //   const mode = useSelector((state) => state.algorithm.selectedMode);
   const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
 
   const isValidMove = useCallback(
@@ -68,15 +65,13 @@ export default function GamePageStructure({
         } else if (clickedNode.visited && !clickedNode.backtracked) {
           // Backtracking
           clickedNode.backtracked = true;
-          setScore((s) => s + 10);
+          setScore((s) => s + 5);
           setMessage(`Backtracked from Node ${nodeId}!`);
           setOverlayContent({ type: "correct", text: "Correct!" });
         } else {
           // Resetting a backtracked node
-          clickedNode.visited = false;
-          clickedNode.backtracked = false;
           setScore((s) => s - 5);
-          setMessage(`Reset Node ${nodeId}!`);
+          setMessage(`Node ${nodeId} already visited and backtracked!`);
           setOverlayContent({ type: "incorrect", text: "Incorrect!" });
         }
 
@@ -124,10 +119,11 @@ export default function GamePageStructure({
 
         <div className="mb-6 relative">
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-64 overflow-hidden">
+          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-hidden">
             <GraphVisualisation
               graphState={graphState}
               onNodeClick={handleNodeClick}
+              mode="game"
             />
             {showOverlay && (
               <div
@@ -135,7 +131,7 @@ export default function GamePageStructure({
                   overlayContent.type === "correct"
                     ? "bg-green-500"
                     : "bg-red-500"
-                }`}
+                } bg-opacity-75`}
               >
                 <p className="text-white text-2xl font-bold">
                   {overlayContent.text}
@@ -165,7 +161,7 @@ export default function GamePageStructure({
 
         {!isGameComplete && (
           <p className="text-red-800 text-center text-sm font-bold">
-            ! Click on a node to visit it using {algorithm}.
+            ! Click on a connected node to visit it using {algorithm}.
           </p>
         )}
       </div>
