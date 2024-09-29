@@ -96,19 +96,27 @@ export default function EducationPageStructure({
   const renderConceptText = (text) => {
     return (
       <>
-        <p className="mb-4">{text.introduction}</p>
-        <h3 className="text-lg font-bold mb-2">Key Characteristics:</h3>
-        <ul className="list-disc pl-5 mb-4">
-          {text.keyCharacteristics.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
-        <h3 className="text-lg font-bold mb-2">Applications:</h3>
-        <ul className="list-disc pl-5">
-          {text.applications.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
+        <p className="mb-4">{text?.introduction}</p>
+        {text.keyCharacteristics ? (
+          <>
+            <h3 className="text-lg font-bold mb-2">Key Characteristics:</h3>
+            <ul className="list-disc pl-5 mb-4">
+              {text.keyCharacteristics.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+        {text.keyCharacteristics ? (
+          <>
+            <h3 className="text-lg font-bold mb-2">Applications:</h3>
+            <ul className="list-disc pl-5">
+              {text.applications.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
       </>
     );
   };
@@ -155,7 +163,7 @@ export default function EducationPageStructure({
             />
             <span className="ml-2">Explanation</span>
           </h2>
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
+          <div className="bg-white border border-gray-300 rounded-lg p-4 text-center">
             <p>
               {steps.length > 0 && steps[currentStep]
                 ? steps[currentStep].explanation
@@ -201,8 +209,12 @@ export default function EducationPageStructure({
             />
             <span className="ml-2">{title} Concept</span>
           </h2>
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
-            {renderConceptText(conceptText) || "No text available"}
+          <div
+            className={`bg-white border border-gray-300 rounded-lg p-4 ${
+              !conceptText ? "text-center" : ""
+            }`}
+          >
+            {conceptText ? renderConceptText(conceptText) : "No text available"}
           </div>
         </div>
 
