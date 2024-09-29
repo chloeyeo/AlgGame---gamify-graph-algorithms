@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const Sidebar = ({
@@ -38,18 +38,6 @@ const Sidebar = ({
     ],
   };
 
-  useEffect(() => {
-    // Set the initial selectedMainAlgorithm based on the selectedAlgorithm
-    if (selectedAlgorithm) {
-      const mainAlgo = Object.entries(algorithms).find(([, subAlgos]) =>
-        subAlgos.includes(selectedAlgorithm)
-      );
-      if (mainAlgo) {
-        setSelectedMainAlgorithm(mainAlgo[0]);
-      }
-    }
-  }, [selectedAlgorithm]);
-
   const handleMainAlgorithmClick = (algorithm) => {
     setSelectedMainAlgorithm(
       algorithm === selectedMainAlgorithm ? null : algorithm
@@ -58,26 +46,14 @@ const Sidebar = ({
 
   const handleSubAlgorithmClick = (subAlgorithm) => {
     onAlgorithmSelect(subAlgorithm);
-    navigateToPage(selectedMode, subAlgorithm);
-  };
+    setSelectedMainAlgorithm(null);
 
-  const handleModeSelect = (mode) => {
-    onModeSelect(mode);
-    if (selectedAlgorithm) {
-      navigateToPage(mode, selectedAlgorithm);
+    // Navigate based on the selected algorithm
+    if (subAlgorithm === "Depth-First Search (DFS)") {
+      router.push("/education/traversal/dfs");
+    } else if (subAlgorithm === "Breadth-First Search (BFS)") {
+      router.push("/education/traversal/bfs");
     }
-  };
-
-  const navigateToPage = (mode, algorithm) => {
-    let path = `/${mode.toLowerCase()}`;
-
-    if (algorithm.includes("Depth-First Search")) {
-      path += "/traversal/dfs";
-    } else if (algorithm.includes("Breadth-First Search") && mode !== "Game") {
-      path += "/traversal/bfs";
-    }
-
-    router.push(path);
   };
 
   return (
@@ -113,7 +89,7 @@ const Sidebar = ({
           {modes.map((mode) => (
             <button
               key={mode}
-              onClick={() => handleModeSelect(mode)}
+              onClick={() => onModeSelect(mode)}
               className={`block w-full text-left px-4 py-2 rounded ${
                 selectedMode === mode
                   ? "bg-blue-500 text-white"
@@ -141,17 +117,18 @@ const Sidebar = ({
               {selectedMainAlgorithm === mainAlgorithm && (
                 <div className="ml-4 mt-2">
                   {subAlgorithms.map((subAlgorithm) => (
-                    <button
-                      key={subAlgorithm}
-                      onClick={() => handleSubAlgorithmClick(subAlgorithm)}
-                      className={`block w-full text-left px-4 py-2 rounded ${
-                        selectedAlgorithm === subAlgorithm
-                          ? "bg-blue-300 text-white"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      {subAlgorithm}
-                    </button>
+                    <div key={subAlgorithm}>
+                      <button
+                        onClick={() => handleSubAlgorithmClick(subAlgorithm)}
+                        className={`block w-full text-left px-4 py-2 rounded ${
+                          selectedAlgorithm === subAlgorithm
+                            ? "bg-blue-300 text-white"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        {subAlgorithm}
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}

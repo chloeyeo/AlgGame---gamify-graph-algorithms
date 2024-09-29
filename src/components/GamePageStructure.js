@@ -1,105 +1,155 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
-  steps = [],
+  initialGraphState,
 }) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [graphState, setGraphState] = useState(initialGraphState);
+  const [score, setScore] = useState(0);
+  const [moves, setMoves] = useState(0);
+  const [message, setMessage] = useState("");
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
+  const [isGameComplete, setIsGameComplete] = useState(false);
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const router = useRouter();
+  //   const mode = useSelector((state) => state.algorithm.selectedMode);
+  const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
 
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+  const isValidMove = useCallback(
+    (nodeId) => {
+      if (algorithm === "DFS") {
+        const currentNode = graphState?.nodes?.find(
+          (n) => n.id === graphState.currentNode
+        );
+        if (!currentNode) return true; // First move is always valid
+        const edge = graphState.edges.find(
+          (e) =>
+            (e.source === currentNode.id && e.target === nodeId) ||
+            (e.target === currentNode.id && e.source === nodeId)
+        );
+        return !!edge;
+      }
+      // Add logic for other algorithms here
+      return true;
+    },
+    [algorithm, graphState]
+  );
 
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  const handleNodeClick = useCallback(
+    (nodeId) => {
+      if (isGameComplete) return;
+
+      setGraphState((prevState) => {
+        const nodeIndex = prevState.nodes.findIndex((n) => n.id === nodeId);
+        if (nodeIndex === -1) return prevState;
+
+        const newNodes = [...prevState.nodes];
+        const clickedNode = newNodes[nodeIndex];
+
+        if (!clickedNode.visited) {
+          // Visiting a new node
+          if (isValidMove(nodeId)) {
+            clickedNode.visited = true;
+            setScore((s) => s + 10);
+            setMessage(`Visited Node ${nodeId}!`);
+            setOverlayContent({ type: "correct", text: "Correct!" });
+          } else {
+            setScore((s) => s - 5);
+            setMessage(`Invalid move to Node ${nodeId}!`);
+            setOverlayContent({ type: "incorrect", text: "Incorrect!" });
+          }
+        } else if (clickedNode.visited && !clickedNode.backtracked) {
+          // Backtracking
+          clickedNode.backtracked = true;
+          setScore((s) => s + 10);
+          setMessage(`Backtracked from Node ${nodeId}!`);
+          setOverlayContent({ type: "correct", text: "Correct!" });
+        } else {
+          // Resetting a backtracked node
+          clickedNode.visited = false;
+          clickedNode.backtracked = false;
+          setScore((s) => s - 5);
+          setMessage(`Reset Node ${nodeId}!`);
+          setOverlayContent({ type: "incorrect", text: "Incorrect!" });
+        }
+
+        setMoves((m) => m + 1);
+        setShowOverlay(true);
+        setTimeout(() => setShowOverlay(false), 1000);
+
+        return { ...prevState, nodes: newNodes, currentNode: nodeId };
+      });
+    },
+    [isValidMove, isGameComplete]
+  );
+
+  useEffect(() => {
+    const allVisited = graphState?.nodes?.every((node) => node.visited);
+    if (allVisited) {
+      setIsGameComplete(true);
+      setMessage(`Congratulations! ${algorithm} traversal complete!`);
     }
-  };
+  }, [graphState, algorithm]);
 
   const readAloud = (text) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
-
-      utterance.onstart = () => {
-        setIsSpeakingFeedback(true);
-      };
-
-      utterance.onend = () => {
-        setIsSpeakingFeedback(false);
-      };
-
+      utterance.onstart = () => setIsSpeakingFeedback(true);
+      utterance.onend = () => setIsSpeakingFeedback(false);
       window.speechSynthesis.speak(utterance);
-    } else {
-      console.log("Text-to-speech is not supported in this browser.");
     }
   };
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        setIsSpeakingFeedback(false);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    // Stop speech when the path changes
-    const handlePathChange = () => {
-      window.speechSynthesis.cancel(); // Stop any ongoing speech
-      setIsSpeakingFeedback(false);
-    };
-
-    const pathname = router.pathname;
-
-    // Re-run when pathname changes
-    handlePathChange();
-  }, [router.pathname]);
-
-  useEffect(() => {
-    // Automatically read the feedback when the step changes
-    if (steps.length > 0 && steps[currentStep]) {
-      readAloud(steps[currentStep].feedback);
-    }
-  }, [currentStep, steps]);
+    readAloud(message);
+  }, [message]);
 
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
       <h1 className="text-2xl md:text-3xl font-bold mb-6">{title}</h1>
 
       <div className="w-full max-w-4xl">
-        {/* Graph Visualisation Section */}
-        <div className="mb-6">
+        <div className="mb-4 flex justify-between">
+          <div>Score: {score}</div>
+          <div>Moves: {moves}</div>
+        </div>
+
+        <div className="mb-6 relative">
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-64 overflow-auto no-scrollbar">
-            {steps.length > 0 &&
-            steps[currentStep] &&
-            steps[currentStep].graphState ? (
-              <GraphVisualisation graphState={steps[currentStep].graphState} />
-            ) : (
-              <p>No graph data available</p>
+          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-64 overflow-hidden">
+            <GraphVisualisation
+              graphState={graphState}
+              onNodeClick={handleNodeClick}
+            />
+            {showOverlay && (
+              <div
+                className={`absolute inset-0 flex items-center justify-center ${
+                  overlayContent.type === "correct"
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
+              >
+                <p className="text-white text-2xl font-bold">
+                  {overlayContent.text}
+                </p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Feedback Section */}
         <div className="mb-6">
           <h2 className="text-xl mb-2 font-semibold flex items-center">
             <Image
               src="/images/person-speaking.png"
-              alt="person speaking icon for feedback section"
+              alt="person speaking icon"
               width={40}
               height={40}
               className={`${
@@ -109,31 +159,15 @@ export default function GamePageStructure({
             <span className="ml-2">Feedback</span>
           </h2>
           <div className="bg-white border border-gray-300 rounded-lg p-4 text-center">
-            <p>
-              {steps.length > 0 && steps[currentStep]
-                ? steps[currentStep].feedback
-                : "No feedback available"}
-            </p>
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="mt-4 flex justify-between">
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className="bg-gray-300 p-2 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={nextStep}
-              disabled={currentStep === steps.length - 1}
-              className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
+            <p>{message}</p>
           </div>
         </div>
+
+        {!isGameComplete && (
+          <p className="text-red-800 text-center text-sm font-bold">
+            ! Click on a node to visit it using {algorithm}.
+          </p>
+        )}
       </div>
     </main>
   );
