@@ -32,7 +32,10 @@ export default function LayoutContent({ children }) {
     dispatch(setSelectedMode(mode));
     if (selectedAlgorithm && mode === "Education") {
       router.push("/education");
+    } else if (selectedAlgorithm && mode === "Game") {
+      router.push("/game");
     }
+
     if (selectedAlgorithm) {
       setIsSidebarOpen(false);
     }
@@ -42,6 +45,8 @@ export default function LayoutContent({ children }) {
     dispatch(setSelectedAlgorithm(algorithm));
     if (selectedMode && selectedMode === "Education") {
       router.push("/education");
+    } else if (selectedMode && selectedMode === "Game") {
+      router.push("/game");
     }
     if (selectedMode) {
       setIsSidebarOpen(false);
