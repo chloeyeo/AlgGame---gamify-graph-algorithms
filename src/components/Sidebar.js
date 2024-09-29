@@ -82,7 +82,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`fixed top-20 pt-2 pb-30 w-64 h-[calc(100vh-5rem)] bg-white transition-transform transition-opacity overflow-y-auto no-scrollbar
+      className={`fixed top-20 pt-2 pb-40 w-64 h-[calc(100vh-5rem)] bg-white transition-transform transition-opacity overflow-y-auto no-scrollbar
                     transition-all duration-300 ease-in-out z-30 ${
                       isOpen ? "opacity-100 visible" : "opacity-0 invisible"
                     }`}
