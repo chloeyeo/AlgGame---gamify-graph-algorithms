@@ -58,14 +58,11 @@ const Sidebar = ({
 
   return (
     <div
-      className={`fixed top-20 pt-2 pb-20 w-64 h-[calc(100vh-5rem)] bg-white transition-transform transition-opacity overflow-y-auto no-scrollbar
-                    transition-all duration-300 ease-in-out z-30 ${
-                      isOpen
-                        ? "translate-x-0 opacity-100 visible"
-                        : "-translate-x-full opacity-0 invisible"
-                    }`}
+      className={`absolute top-20 inset-y-0 left-0 w-64 bg-white transition-transform duration-300 ease-in-out z-30 overflow-y-auto no-scrollbar ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
     >
-      <div className="p-4 overflow-y-auto no-scrollbar">
+      <div className="p-4 overflow-y-auto h-full">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"

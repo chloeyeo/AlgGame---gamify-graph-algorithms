@@ -22,7 +22,6 @@
 }
 
 /* to fix the non homepage having vertical extra space above header and below footer on mobile screen - start */
-/* Add this at the top of your globals.css */
 * {
   margin: 0;
   padding: 0;
@@ -74,7 +73,7 @@ body {
   background-color: black;
 }
 
-/* Add your custom styles for the speaking icon */
+/* speaking icon */
 @keyframes pulse {
   0% {
     transform: scale(1);
