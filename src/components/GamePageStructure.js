@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
@@ -26,27 +24,23 @@ export default function GamePageStructure({
   const handleNodeClick = (nodeId) => {
     if (isGameComplete(graphState)) return;
 
-    setGraphState((prevState) => {
-      const newState = { ...prevState };
-      const nodeStatus = getNodeStatus(newState, nodeId);
+    const { newState, validMove, nodeStatus } = isValidMove(graphState, nodeId);
 
-      if (isValidMove(newState, nodeId)) {
-        const newScore = getScore(nodeStatus);
-        setScore((s) => s + newScore);
-        setMessage(getMessage(nodeStatus, nodeId));
-        setOverlayContent({ type: "correct", text: "Correct!" });
-      } else {
-        setScore((s) => s - 5);
-        setMessage(`Invalid move to Node ${nodeId}!`);
-        setOverlayContent({ type: "incorrect", text: "Incorrect!" });
-      }
+    if (validMove) {
+      const newScore = getScore(nodeStatus);
+      setScore((s) => s + newScore);
+      setMessage(getMessage(nodeStatus, nodeId));
+      setOverlayContent({ type: "correct", text: "Correct!" });
+      setGraphState(newState);
+    } else {
+      setScore((s) => s - 5);
+      setMessage(`Invalid move to Node ${nodeId}!`);
+      setOverlayContent({ type: "incorrect", text: "Incorrect!" });
+    }
 
-      setMoves((m) => m + 1);
-      setShowOverlay(true);
-      setTimeout(() => setShowOverlay(false), 1000);
-
-      return { ...newState, currentNode: nodeId };
-    });
+    setMoves((m) => m + 1);
+    setShowOverlay(true);
+    setTimeout(() => setShowOverlay(false), 1000);
   };
 
   const readAloud = (text) => {
@@ -115,7 +109,7 @@ export default function GamePageStructure({
           </div>
         </div>
 
-        {isGameComplete && !isGameComplete(graphState) && (
+        {!isGameComplete(graphState) && (
           <p className="text-red-800 text-center text-sm font-bold">
             ! Click on a connected node to visit it using {algorithm}.
           </p>

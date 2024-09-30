@@ -1,16 +1,17 @@
 "use client";
 
+import React from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 
 const initialGraphState = {
   nodes: [
-    { id: "A", visited: false },
-    { id: "B", visited: false },
-    { id: "C", visited: false },
-    { id: "D", visited: false },
-    { id: "E", visited: false },
-    { id: "F", visited: false },
-    { id: "G", visited: false },
+    { id: "A", visited: false, backtracked: false, current: false },
+    { id: "B", visited: false, backtracked: false, current: false },
+    { id: "C", visited: false, backtracked: false, current: false },
+    { id: "D", visited: false, backtracked: false, current: false },
+    { id: "E", visited: false, backtracked: false, current: false },
+    { id: "F", visited: false, backtracked: false, current: false },
+    { id: "G", visited: false, backtracked: false, current: false },
   ],
   edges: [
     { source: "A", target: "B" },
@@ -21,65 +22,107 @@ const initialGraphState = {
     { source: "D", target: "G" },
   ],
   currentNode: null,
+  stack: [],
 };
 
 const isValidMove = (graphState, nodeId) => {
-  if (!graphState.currentNode) return true; // First move is always valid
-  const edge = graphState.edges.find(
-    (e) =>
-      (e.source === graphState.currentNode && e.target === nodeId) ||
-      (e.target === graphState.currentNode && e.source === nodeId)
-  );
-  return !!edge;
-};
+  const newState = JSON.parse(JSON.stringify(graphState));
+  const clickedNode = newState.nodes.find((n) => n.id === nodeId);
 
-const getNodeStatus = (graphState, nodeId) => {
-  const node = graphState.nodes.find((n) => n.id === nodeId);
-  if (!node.visited) return "new";
-  if (node.visited && !node.backtracked) return "backtrack";
-  return "reset";
-};
-
-const getScore = (nodeStatus) => {
-  switch (nodeStatus) {
-    case "new":
-      return 10;
-    case "backtrack":
-      return 5;
-    case "reset":
-      return -5;
-    default:
-      return 0;
+  if (!newState.currentNode) {
+    if (nodeId === "A") {
+      clickedNode.visited = true;
+      clickedNode.current = true;
+      newState.currentNode = nodeId;
+      newState.stack.push(nodeId);
+      return { newState, validMove: true, nodeStatus: "unvisited" };
+    }
+    return { newState: graphState, validMove: false, nodeStatus: null };
   }
+
+  const edge = newState.edges.find(
+    (e) =>
+      (e.source === newState.currentNode && e.target === nodeId) ||
+      (e.target === newState.currentNode && e.source === nodeId)
+  );
+  if (!edge)
+    return { newState: graphState, validMove: false, nodeStatus: null };
+
+  if (!clickedNode.visited) {
+    // Valid move to unvisited node
+    const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
+    prevNode.current = false;
+    clickedNode.visited = true;
+    clickedNode.current = true;
+    newState.currentNode = nodeId;
+    newState.stack.push(nodeId);
+    return { newState, validMove: true, nodeStatus: "unvisited" };
+  } else if (!clickedNode.backtracked) {
+    // Backtracking
+    const children = newState.edges
+      .filter((e) => e.source === newState.currentNode)
+      .map((e) => newState.nodes.find((n) => n.id === e.target));
+    if (children.every((child) => child.visited)) {
+      const prevNode = newState.nodes.find(
+        (n) => n.id === newState.currentNode
+      );
+      prevNode.backtracked = true;
+      prevNode.current = false;
+      clickedNode.current = true;
+      newState.currentNode = nodeId;
+      newState.stack.pop();
+      return { newState, validMove: true, nodeStatus: "visited" };
+    }
+  }
+
+  return { newState: graphState, validMove: false, nodeStatus: null };
+};
+
+const getNodeStatus = (node) => {
+  if (node.current) return "current";
+  if (node.backtracked) return "backtracked";
+  if (node.visited) return "visited";
+  return "unvisited";
+};
+
+const isGameComplete = (graphState) => {
+  return graphState.nodes.every((node) => node.backtracked);
 };
 
 const getMessage = (nodeStatus, nodeId) => {
   switch (nodeStatus) {
-    case "new":
+    case "unvisited":
       return `Visited Node ${nodeId}!`;
-    case "backtrack":
-      return `Backtracked from Node ${nodeId}!`;
-    case "reset":
-      return `Node ${nodeId} already visited and backtracked!`;
+    case "visited":
+      return `Backtracked to Node ${nodeId}!`;
     default:
       return "";
   }
 };
 
-const isGameComplete = (graphState) => {
-  return graphState.nodes.every((node) => node.visited);
+const getScore = (nodeStatus) => {
+  switch (nodeStatus) {
+    case "unvisited":
+      return 10;
+    case "visited":
+      return 5;
+    default:
+      return 0;
+  }
 };
 
-export default function DFSGamePage() {
+const DFSGame = () => {
   return (
     <GamePageStructure
-      title="Depth-First Search (DFS) Game"
+      title="DFS Graph Game"
       initialGraphState={initialGraphState}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
-      getScore={getScore}
-      getMessage={getMessage}
       isGameComplete={isGameComplete}
+      getMessage={getMessage}
+      getScore={getScore}
     />
   );
-}
+};
+
+export default DFSGame;

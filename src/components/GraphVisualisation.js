@@ -52,13 +52,13 @@ const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
       .attr("r", 30)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited && !node.backtracked ? "blue" : "white"; // Changed back to "blue"
+        return node && node.visited && !node.backtracked ? "blue" : "white";
       })
       .attr("stroke", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return "#2ecc71"; // Green for current node
         if (node && node.backtracked) return "#e74c3c"; // Red for backtracked nodes
-        return "#95a5a6"; // Gray for unvisited nodes
+        return node && node.visited ? "blue" : "black"; // Blue for visited, black for unvisited
       })
       .attr("stroke-width", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
@@ -92,20 +92,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
     });
   }, [graphState, mode, onNodeClick]);
 
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "15px",
-      }}
-    >
-      <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
-    </div>
-  );
+  return <svg ref={svgRef} />;
 };
 
 export default GraphVisualisation;
