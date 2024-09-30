@@ -121,9 +121,9 @@ export default function GamePageStructure({
           </div>
         </div>
 
-        {!isGameComplete(graphState) && (
+        {!isGameComplete(graphState) && graphState.currentNode === null && (
           <p className="text-red-800 text-center text-sm font-bold">
-            ! Click on a connected node to visit it using {algorithm}.
+            ! Please click on a node to visit it
           </p>
         )}
       </div>
