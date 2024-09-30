@@ -5,12 +5,12 @@ import GraphVisualisation from "@/components/GraphVisualisation";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
-  initialGraphState,
-  isValidMove,
-  getNodeStatus,
-  getScore,
-  getMessage,
-  isGameComplete,
+  initialGraphState = null, // Default to null if not provided
+  isValidMove = () => {}, // Default to an empty function
+  getNodeStatus = () => {}, // Default to an empty function
+  getScore = () => 0, // Default to return 0
+  getMessage = () => "No moves made yet.", // Default message
+  isGameComplete = () => false, // Default to return false
 }) {
   const [graphState, setGraphState] = useState(initialGraphState);
   const [score, setScore] = useState(0);
@@ -20,6 +20,14 @@ export default function GamePageStructure({
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
+  useEffect(() => {
+    if (message) {
+      readAloud(message);
+    }
+  }, [message]);
+  if (!initialGraphState) {
+    return <p className="text-center">No content available at the moment.</p>; // Fallback content if no initialGraphState
+  }
 
   const handleNodeClick = (nodeId) => {
     if (isGameComplete(graphState)) return;
@@ -53,9 +61,9 @@ export default function GamePageStructure({
     }
   };
 
-  useEffect(() => {
-    readAloud(message);
-  }, [message]);
+  // useEffect(() => {
+  //   readAloud(message);
+  // }, [message]);
 
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
