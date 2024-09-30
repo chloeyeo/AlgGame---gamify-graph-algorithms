@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
@@ -8,6 +8,11 @@ import GraphVisualisation from "@/components/GraphVisualisation";
 export default function GamePageStructure({
   title = "Graph Traversal Game",
   initialGraphState,
+  isValidMove,
+  getNodeStatus,
+  getScore,
+  getMessage,
+  isGameComplete,
 }) {
   const [graphState, setGraphState] = useState(initialGraphState);
   const [score, setScore] = useState(0);
@@ -15,83 +20,34 @@ export default function GamePageStructure({
   const [message, setMessage] = useState("");
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
-  const [isGameComplete, setIsGameComplete] = useState(false);
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
 
-  const isValidMove = useCallback(
-    (nodeId) => {
-      if (algorithm === "DFS") {
-        const currentNode = graphState?.nodes?.find(
-          (n) => n.id === graphState.currentNode
-        );
-        if (!currentNode) return true; // First move is always valid
-        const edge = graphState.edges.find(
-          (e) =>
-            (e.source === currentNode.id && e.target === nodeId) ||
-            (e.target === currentNode.id && e.source === nodeId)
-        );
-        return !!edge;
+  const handleNodeClick = (nodeId) => {
+    if (isGameComplete(graphState)) return;
+
+    setGraphState((prevState) => {
+      const newState = { ...prevState };
+      const nodeStatus = getNodeStatus(newState, nodeId);
+
+      if (isValidMove(newState, nodeId)) {
+        const newScore = getScore(nodeStatus);
+        setScore((s) => s + newScore);
+        setMessage(getMessage(nodeStatus, nodeId));
+        setOverlayContent({ type: "correct", text: "Correct!" });
+      } else {
+        setScore((s) => s - 5);
+        setMessage(`Invalid move to Node ${nodeId}!`);
+        setOverlayContent({ type: "incorrect", text: "Incorrect!" });
       }
-      // Add logic for other algorithms here
-      return true;
-    },
-    [algorithm, graphState]
-  );
 
-  const handleNodeClick = useCallback(
-    (nodeId) => {
-      if (isGameComplete) return;
+      setMoves((m) => m + 1);
+      setShowOverlay(true);
+      setTimeout(() => setShowOverlay(false), 1000);
 
-      setGraphState((prevState) => {
-        const nodeIndex = prevState.nodes.findIndex((n) => n.id === nodeId);
-        if (nodeIndex === -1) return prevState;
-
-        const newNodes = [...prevState.nodes];
-        const clickedNode = newNodes[nodeIndex];
-
-        if (!clickedNode.visited) {
-          // Visiting a new node
-          if (isValidMove(nodeId)) {
-            clickedNode.visited = true;
-            setScore((s) => s + 10);
-            setMessage(`Visited Node ${nodeId}!`);
-            setOverlayContent({ type: "correct", text: "Correct!" });
-          } else {
-            setScore((s) => s - 5);
-            setMessage(`Invalid move to Node ${nodeId}!`);
-            setOverlayContent({ type: "incorrect", text: "Incorrect!" });
-          }
-        } else if (clickedNode.visited && !clickedNode.backtracked) {
-          // Backtracking
-          clickedNode.backtracked = true;
-          setScore((s) => s + 5);
-          setMessage(`Backtracked from Node ${nodeId}!`);
-          setOverlayContent({ type: "correct", text: "Correct!" });
-        } else {
-          // Resetting a backtracked node
-          setScore((s) => s - 5);
-          setMessage(`Node ${nodeId} already visited and backtracked!`);
-          setOverlayContent({ type: "incorrect", text: "Incorrect!" });
-        }
-
-        setMoves((m) => m + 1);
-        setShowOverlay(true);
-        setTimeout(() => setShowOverlay(false), 1000);
-
-        return { ...prevState, nodes: newNodes, currentNode: nodeId };
-      });
-    },
-    [isValidMove, isGameComplete]
-  );
-
-  useEffect(() => {
-    const allVisited = graphState?.nodes?.every((node) => node.visited);
-    if (allVisited) {
-      setIsGameComplete(true);
-      setMessage(`Congratulations! ${algorithm} traversal complete!`);
-    }
-  }, [graphState, algorithm]);
+      return { ...newState, currentNode: nodeId };
+    });
+  };
 
   const readAloud = (text) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -119,7 +75,7 @@ export default function GamePageStructure({
 
         <div className="mb-6 relative">
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-hidden">
+          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-hidden relative">
             <GraphVisualisation
               graphState={graphState}
               onNodeClick={handleNodeClick}
@@ -159,7 +115,7 @@ export default function GamePageStructure({
           </div>
         </div>
 
-        {!isGameComplete && (
+        {isGameComplete && !isGameComplete(graphState) && (
           <p className="text-red-800 text-center text-sm font-bold">
             ! Click on a connected node to visit it using {algorithm}.
           </p>

@@ -52,19 +52,17 @@ const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
       .attr("r", 30)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited ? "blue" : "white";
+        return node && node.visited && !node.backtracked ? "blue" : "white"; // Changed back to "blue"
       })
       .attr("stroke", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.backtracked
-          ? "red"
-          : d.id === graphState.currentNode
-          ? "red"
-          : "gray";
+        if (d.id === graphState.currentNode) return "#2ecc71"; // Green for current node
+        if (node && node.backtracked) return "#e74c3c"; // Red for backtracked nodes
+        return "#95a5a6"; // Gray for unvisited nodes
       })
       .attr("stroke-width", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && (node.backtracked || d.id === graphState.currentNode)
+        return (node && node.backtracked) || d.id === graphState.currentNode
           ? 4
           : 2;
       });
@@ -83,15 +81,15 @@ const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
       .style("font-size", "18px")
       .style("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited ? "white" : "black";
+        return node && node.visited && !node.backtracked ? "white" : "black";
       });
 
-    // Add click event listeners for game mode
-    if (mode === "game" && onNodeClick) {
-      circles.on("click", (event, d) => {
+    // Add click event listeners for both game and education modes
+    circles.on("click", (event, d) => {
+      if (onNodeClick) {
         onNodeClick(d.id);
-      });
-    }
+      }
+    });
   }, [graphState, mode, onNodeClick]);
 
   return (
