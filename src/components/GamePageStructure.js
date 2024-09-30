@@ -26,7 +26,11 @@ export default function GamePageStructure({
     }
   }, [message]);
   if (!initialGraphState) {
-    return <p className="text-center">No content available at the moment.</p>; // Fallback content if no initialGraphState
+    return (
+      <p className="text-center mt-[50%]">
+        No content available at the moment.
+      </p>
+    ); // Fallback content if no initialGraphState
   }
 
   const handleNodeClick = (nodeId) => {
