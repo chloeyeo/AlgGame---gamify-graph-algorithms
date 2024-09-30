@@ -68,6 +68,19 @@ const isValidMove = (graphState, nodeId) => {
       );
       prevNode.backtracked = true;
       prevNode.current = false;
+
+      // Check if this is the final backtrack to node A
+      if (
+        nodeId === "A" &&
+        newState.nodes.every((n) => n.id === "A" || n.backtracked)
+      ) {
+        clickedNode.backtracked = true; // Mark node A as backtracked
+        clickedNode.current = false;
+        newState.currentNode = null; // Game finished
+        newState.stack.pop();
+        return { newState, validMove: true, nodeStatus: "final-move" };
+      }
+
       clickedNode.current = true;
       newState.currentNode = nodeId;
       newState.stack.pop();
@@ -95,6 +108,8 @@ const getMessage = (nodeStatus, nodeId) => {
       return `Visited Node ${nodeId}!`;
     case "visited":
       return `Backtracked to Node ${nodeId}!`;
+    case "final-move":
+      return `Backtracked to Node A. Game complete!`;
     default:
       return "";
   }
