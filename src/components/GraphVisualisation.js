@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { useSelector } from "react-redux";
@@ -6,8 +9,9 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
   const selectedAlgorithm = useSelector(
     (state) => state.algorithm.selectedAlgorithm
   );
-
+  const pathname = usePathname();
   const svgRef = useRef(null);
+  const isDijkstraPage = pathname.includes("dijkstras");
 
   useEffect(() => {
     if (!graphState) return;
@@ -51,7 +55,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       .attr("stroke-width", 2);
 
     // Add edge weights for Dijkstra's algorithm
-    if (selectedAlgorithm === "Dijkstra's") {
+    if (selectedAlgorithm === "Dijkstra's" || isDijkstraPage) {
       edgeGroups
         .append("text")
         .attr("class", "edge-weight")
@@ -129,7 +133,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       });
 
     // Add distance labels for Dijkstra's algorithm
-    if (selectedAlgorithm === "Dijkstra's") {
+    if (selectedAlgorithm === "Dijkstra's" || isDijkstraPage) {
       nodeGroups
         .append("text")
         .attr("class", "distance-label")
