@@ -20,11 +20,11 @@ export default function GamePageStructure({
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
-  useEffect(() => {
-    if (message) {
-      readAloud(message);
-    }
-  }, [message]);
+  // useEffect(() => {
+  //   if (message) {
+  //     readAloud(message);
+  //   }
+  // }, [message]);
   if (!initialGraphState) {
     return (
       <p className="text-center mt-[50%]">
@@ -113,6 +113,7 @@ export default function GamePageStructure({
               className={`${
                 isSpeakingFeedback ? "animate-icon" : ""
               } w-12 h-12 mr-2`}
+              onClick={() => readAloud(message)}
             />
             <span className="ml-2">Feedback</span>
           </h2>
