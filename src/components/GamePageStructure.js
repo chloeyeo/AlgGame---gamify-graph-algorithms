@@ -51,19 +51,21 @@ export default function GamePageStructure({
     setTimeout(() => setShowOverlay(false), 1000);
   };
 
-  const readAloud = (text) => {
+  const toggleSpeech = (text) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.onstart = () => setIsSpeakingFeedback(true);
-      utterance.onend = () => setIsSpeakingFeedback(false);
-      window.speechSynthesis.speak(utterance);
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel(); // Stop the speech if it's currently speaking
+        setIsSpeakingFeedback(false); // Reset the state to not speaking
+      } else {
+        // Start reading the message aloud
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US";
+        utterance.onstart = () => setIsSpeakingFeedback(true); // Set speaking state to true
+        utterance.onend = () => setIsSpeakingFeedback(false); // Reset when done speaking
+        window.speechSynthesis.speak(utterance); // Start speaking
+      }
     }
   };
-
-  // useEffect(() => {
-  //   readAloud(message);
-  // }, [message]);
 
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
@@ -109,7 +111,7 @@ export default function GamePageStructure({
               className={`${
                 isSpeakingFeedback ? "animate-icon" : ""
               } w-12 h-12 mr-2`}
-              onClick={() => readAloud(message)}
+              onClick={() => toggleSpeech(message)}
             />
             <span className="ml-2">Feedback</span>
           </h2>

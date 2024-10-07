@@ -26,45 +26,6 @@ export default function EducationPageStructure({
     }
   };
 
-  const readAloud = (text, type) => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      let textToRead = "";
-
-      if (type === "concept" && typeof text === "object") {
-        textToRead = `${
-          text.introduction
-        } Key Characteristics: ${text.keyCharacteristics.join(
-          ". "
-        )}. Applications: ${text.applications.join(". ")}`;
-      } else {
-        textToRead = text;
-      }
-
-      const utterance = new SpeechSynthesisUtterance(textToRead);
-      utterance.lang = "en-US";
-
-      utterance.onstart = () => {
-        if (type === "explanation") {
-          setIsSpeakingExplanation(true);
-        } else {
-          setIsSpeakingConcept(true);
-        }
-      };
-
-      utterance.onend = () => {
-        if (type === "explanation") {
-          setIsSpeakingExplanation(false);
-        } else {
-          setIsSpeakingConcept(false);
-        }
-      };
-
-      window.speechSynthesis.speak(utterance);
-    } else {
-      console.log("Text-to-speech is not supported in this browser.");
-    }
-  };
-
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
@@ -121,6 +82,53 @@ export default function EducationPageStructure({
     );
   };
 
+  const toggleSpeech = (text, type) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      // If it's currently speaking, stop the speech
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel(); // Stop the speech
+        setIsSpeakingExplanation(false);
+        setIsSpeakingConcept(false);
+      } else {
+        // Start speech if not speaking
+        let textToRead = "";
+
+        if (type === "concept" && typeof text === "object") {
+          textToRead = `${
+            text.introduction
+          } Key Characteristics: ${text.keyCharacteristics.join(
+            ". "
+          )}. Applications: ${text.applications.join(". ")}`;
+        } else {
+          textToRead = text;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.lang = "en-US";
+
+        utterance.onstart = () => {
+          if (type === "explanation") {
+            setIsSpeakingExplanation(true);
+          } else {
+            setIsSpeakingConcept(true);
+          }
+        };
+
+        utterance.onend = () => {
+          if (type === "explanation") {
+            setIsSpeakingExplanation(false);
+          } else {
+            setIsSpeakingConcept(false);
+          }
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+    } else {
+      console.log("Text-to-speech is not supported in this browser.");
+    }
+  };
+
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
       <h1 className="text-2xl md:text-3xl font-bold mb-6">Learn {title}</h1>
@@ -149,12 +157,12 @@ export default function EducationPageStructure({
               width={40}
               height={40}
               onClick={
-                !isSpeakingExplanation &&
-                !isSpeakingConcept &&
-                steps.length > 0 &&
-                steps[currentStep]
+                steps.length > 0 && steps[currentStep]
                   ? () =>
-                      readAloud(steps[currentStep].explanation, "explanation")
+                      toggleSpeech(
+                        steps[currentStep].explanation,
+                        "explanation"
+                      )
                   : undefined
               }
               className={`cursor-pointer ${
@@ -199,8 +207,8 @@ export default function EducationPageStructure({
               width={40}
               height={40}
               onClick={
-                !isSpeakingExplanation && !isSpeakingConcept && conceptText
-                  ? () => readAloud(conceptText, "concept")
+                conceptText
+                  ? () => toggleSpeech(conceptText, "concept")
                   : undefined
               }
               className={`cursor-pointer ${
