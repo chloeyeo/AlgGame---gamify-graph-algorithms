@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
@@ -19,12 +19,8 @@ export default function GamePageStructure({
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
-  const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
-  // useEffect(() => {
-  //   if (message) {
-  //     readAloud(message);
-  //   }
-  // }, [message]);
+  // const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
+
   if (!initialGraphState) {
     return (
       <p className="text-center mt-[50%]">

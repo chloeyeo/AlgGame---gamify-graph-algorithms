@@ -30,12 +30,15 @@ const isValidMove = (graphState, nodeId) => {
   const newState = JSON.parse(JSON.stringify(graphState));
   const clickedNode = newState.nodes.find((n) => n.id === nodeId);
 
+  // Initial move
   if (!newState.currentNode) {
     if (nodeId === "A") {
       clickedNode.visited = true;
       clickedNode.current = true;
       newState.currentNode = nodeId;
-      newState.queue = [nodeId];
+      newState.currentLevel = [];
+      newState.nextLevel = [];
+      // Add unvisited children of A to the current level
       newState.currentLevel = newState.edges
         .filter((e) => e.source === "A")
         .map((e) => e.target);
@@ -44,14 +47,12 @@ const isValidMove = (graphState, nodeId) => {
     return { newState: graphState, validMove: false, nodeStatus: null };
   }
 
+  // Check if the clicked node is in the current level
   if (!newState.currentLevel.includes(nodeId)) {
     return { newState: graphState, validMove: false, nodeStatus: null };
   }
 
-  if (clickedNode.visited) {
-    return { newState: graphState, validMove: false, nodeStatus: null };
-  }
-
+  // Valid move
   const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
   prevNode.current = false;
   clickedNode.visited = true;
@@ -61,22 +62,21 @@ const isValidMove = (graphState, nodeId) => {
   // Remove the visited node from the current level
   newState.currentLevel = newState.currentLevel.filter((id) => id !== nodeId);
 
-  // Add the clicked node to the queue
-  newState.queue.push(nodeId);
+  // Add unvisited children to the next level
+  const childrenNodes = newState.edges
+    .filter((e) => e.source === nodeId)
+    .map((e) => e.target)
+    .filter((id) => !newState.nodes.find((n) => n.id === id).visited);
+  newState.nextLevel.push(...childrenNodes);
 
   // If current level is empty, move to the next level
   if (newState.currentLevel.length === 0) {
-    newState.queue.shift(); // Remove the first element from the queue
-    if (newState.queue.length > 0) {
-      const nextNode = newState.queue[0];
-      newState.currentLevel = newState.edges
-        .filter((e) => e.source === nextNode)
-        .map((e) => e.target)
-        .filter((id) => !newState.nodes.find((n) => n.id === id).visited);
-    }
+    newState.currentLevel = newState.nextLevel;
+    newState.nextLevel = [];
   }
 
-  if (newState.currentLevel.length === 0 && newState.queue.length === 0) {
+  // Check if BFS is complete
+  if (newState.currentLevel.length === 0 && newState.nextLevel.length === 0) {
     clickedNode.current = false;
     newState.currentNode = null;
     return { newState, validMove: true, nodeStatus: "final-move" };

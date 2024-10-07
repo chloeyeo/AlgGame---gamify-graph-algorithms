@@ -22,7 +22,6 @@ const Sidebar = ({
   };
 
   useEffect(() => {
-    // Set the initial selectedMainAlgorithm based on the selectedAlgorithm
     if (selectedAlgorithm) {
       const mainAlgo = Object.entries(algorithms).find(([, subAlgos]) =>
         subAlgos.includes(selectedAlgorithm)
@@ -41,14 +40,19 @@ const Sidebar = ({
 
   const handleSubAlgorithmClick = (subAlgorithm) => {
     onAlgorithmSelect(subAlgorithm);
-    navigateToPage(selectedMode, subAlgorithm);
+    attemptNavigation(selectedMode, subAlgorithm);
   };
 
   const handleModeSelect = (mode) => {
     onModeSelect(mode);
-    if (selectedAlgorithm) {
-      navigateToPage(mode, selectedAlgorithm);
+    attemptNavigation(mode, selectedAlgorithm);
+  };
+
+  const attemptNavigation = (mode, algorithm) => {
+    if (mode && algorithm) {
+      navigateToPage(mode, algorithm);
     }
+    // If both aren't selected, the modal will handle it
   };
 
   const navigateToPage = (mode, algorithm) => {
@@ -56,7 +60,7 @@ const Sidebar = ({
 
     if (algorithm.includes("Depth-First Search")) {
       path += "/traversal/dfs";
-    } else if (algorithm.includes("Breadth-First Search") && mode !== "Game") {
+    } else if (algorithm.includes("Breadth-First Search")) {
       path += "/traversal/bfs";
     }
 
