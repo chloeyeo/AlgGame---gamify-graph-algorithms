@@ -15,27 +15,10 @@ const Sidebar = ({
   const modes = ["Education", "Game"];
   const algorithms = {
     Traversal: ["Depth-First Search (DFS)", "Breadth-First Search (BFS)"],
-    "Shortest Path": [
-      "Dijkstra's",
-      "Bellman-Ford",
-      "Floyd-Warshall",
-      "A*",
-      "Johnson's",
-    ],
-    "Minimum Spanning Tree": ["Kruskal's", "Prim's", "Borůvka's"],
-    "Network Flow": [
-      "Ford-Fulkerson",
-      "Edmonds-Karp",
-      "Dinic's",
-      "Push-Relabel (Goldberg-Tarjan)",
-      "Capacity Scaling",
-    ],
-    Matching: [
-      "Hungarian (Kuhn-Munkres)",
-      "Hopcroft-Karp",
-      "Blossom (Edmonds')",
-      "Gale-Shapley (Stable Marriage)",
-    ],
+    "Shortest Path": ["Dijkstra's", "A*"],
+    "Minimum Spanning Tree": ["Kruskal's", "Prim's"],
+    "Network Flow": ["Ford-Fulkerson", "Edmonds-Karp"],
+    Matching: ["Hungarian (Kuhn-Munkres)"],
   };
 
   useEffect(() => {
