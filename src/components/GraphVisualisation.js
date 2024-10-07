@@ -1,7 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { useSelector } from "react-redux";
 
-const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
+const GraphVisualisation = ({ graphState, onNodeClick }) => {
+  const selectedAlgorithm = useSelector(
+    (state) => state.algorithm.selectedAlgorithm
+  );
+
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -28,30 +33,66 @@ const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
 
     const links = graphState.edges;
 
-    svg
-      .selectAll("line")
+    // Draw edges
+    const edgeGroups = svg
+      .selectAll(".edge")
       .data(links)
       .enter()
+      .append("g")
+      .attr("class", "edge");
+
+    edgeGroups
       .append("line")
       .attr("x1", (d) => nodes.find((n) => n.id === d.source).x)
       .attr("y1", (d) => nodes.find((n) => n.id === d.source).y)
       .attr("x2", (d) => nodes.find((n) => n.id === d.target).x)
       .attr("y2", (d) => nodes.find((n) => n.id === d.target).y)
       .attr("stroke", "black")
-      .attr("stroke-width", 3);
+      .attr("stroke-width", 2);
 
+    // Add edge weights for Dijkstra's algorithm
+    if (selectedAlgorithm === "Dijkstra's") {
+      edgeGroups
+        .append("text")
+        .attr("class", "edge-weight")
+        .attr(
+          "x",
+          (d) =>
+            (nodes.find((n) => n.id === d.source).x +
+              nodes.find((n) => n.id === d.target).x) /
+            2
+        )
+        .attr(
+          "y",
+          (d) =>
+            (nodes.find((n) => n.id === d.source).y +
+              nodes.find((n) => n.id === d.target).y) /
+              2 -
+            10
+        )
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .text((d) => d.weight || d.distance || "")
+        .attr("fill", "blue")
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .attr("dy", -5);
+    }
+
+    // Draw nodes
     const nodeGroups = svg
-      .selectAll("g")
+      .selectAll(".node")
       .data(nodes)
       .enter()
       .append("g")
+      .attr("class", "node")
       .on("click", (event, d) => {
         if (onNodeClick) {
           onNodeClick(d.id);
         }
       });
 
-    const circles = nodeGroups
+    nodeGroups
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
@@ -73,21 +114,41 @@ const GraphVisualisation = ({ graphState, onNodeClick, mode }) => {
           : 2;
       });
 
-    const labels = nodeGroups
+    // Add node labels
+    nodeGroups
       .append("text")
       .attr("x", (d) => d.x)
       .attr("y", (d) => d.y)
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
       .text((d) => d.id)
-      .style("font-size", "18px")
-      .style("fill", (d) => {
+      .attr("font-size", "18px")
+      .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         return node && node.visited && !node.backtracked ? "white" : "black";
       });
-  }, [graphState, mode, onNodeClick]);
 
-  return <svg ref={svgRef} />;
+    // Add distance labels for Dijkstra's algorithm
+    if (selectedAlgorithm === "Dijkstra's") {
+      nodeGroups
+        .append("text")
+        .attr("class", "distance-label")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + 40)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .text((d) => {
+          const node = graphState.nodes.find((n) => n.id === d.id);
+          return node.distance === Infinity ? "∞" : node.distance;
+        })
+        .attr("font-size", "20px")
+        .attr("fill", "red")
+        .attr("stroke", "white")
+        .attr("stroke-width", "0.5px");
+    }
+  }, [graphState, selectedAlgorithm, onNodeClick]);
+
+  return <svg ref={svgRef}></svg>;
 };
 
 export default GraphVisualisation;

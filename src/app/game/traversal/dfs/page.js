@@ -5,13 +5,13 @@ import GamePageStructure from "@/components/GamePageStructure";
 
 const initialGraphState = {
   nodes: [
-    { id: "A", visited: false, current: false },
-    { id: "B", visited: false, current: false },
-    { id: "C", visited: false, current: false },
-    { id: "D", visited: false, current: false },
-    { id: "E", visited: false, current: false },
-    { id: "F", visited: false, current: false },
-    { id: "G", visited: false, current: false },
+    { id: "A", visited: false, backtracked: false, current: false },
+    { id: "B", visited: false, backtracked: false, current: false },
+    { id: "C", visited: false, backtracked: false, current: false },
+    { id: "D", visited: false, backtracked: false, current: false },
+    { id: "E", visited: false, backtracked: false, current: false },
+    { id: "F", visited: false, backtracked: false, current: false },
+    { id: "G", visited: false, backtracked: false, current: false },
   ],
   edges: [
     { source: "A", target: "B" },
@@ -22,8 +22,7 @@ const initialGraphState = {
     { source: "D", target: "G" },
   ],
   currentNode: null,
-  queue: [],
-  currentLevel: [],
+  stack: [],
 };
 
 const isValidMove = (graphState, nodeId) => {
@@ -35,75 +34,82 @@ const isValidMove = (graphState, nodeId) => {
       clickedNode.visited = true;
       clickedNode.current = true;
       newState.currentNode = nodeId;
-      newState.queue = [nodeId];
-      newState.currentLevel = newState.edges
-        .filter((e) => e.source === "A")
-        .map((e) => e.target);
+      newState.stack.push(nodeId);
       return { newState, validMove: true, nodeStatus: "unvisited" };
     }
     return { newState: graphState, validMove: false, nodeStatus: null };
   }
 
-  if (!newState.currentLevel.includes(nodeId)) {
+  const edge = newState.edges.find(
+    (e) =>
+      (e.source === newState.currentNode && e.target === nodeId) ||
+      (e.target === newState.currentNode && e.source === nodeId)
+  );
+  if (!edge)
     return { newState: graphState, validMove: false, nodeStatus: null };
-  }
 
-  if (clickedNode.visited) {
-    return { newState: graphState, validMove: false, nodeStatus: null };
-  }
+  if (!clickedNode.visited) {
+    // Valid move to unvisited node
+    const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
+    prevNode.current = false;
+    clickedNode.visited = true;
+    clickedNode.current = true;
+    newState.currentNode = nodeId;
+    newState.stack.push(nodeId);
+    return { newState, validMove: true, nodeStatus: "unvisited" };
+  } else if (!clickedNode.backtracked) {
+    // Backtracking
+    const children = newState.edges
+      .filter((e) => e.source === newState.currentNode)
+      .map((e) => newState.nodes.find((n) => n.id === e.target));
+    if (children.every((child) => child.visited)) {
+      const prevNode = newState.nodes.find(
+        (n) => n.id === newState.currentNode
+      );
+      prevNode.backtracked = true;
+      prevNode.current = false;
 
-  const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
-  prevNode.current = false;
-  clickedNode.visited = true;
-  clickedNode.current = true;
-  newState.currentNode = nodeId;
+      // Check if this is the final backtrack to node A
+      if (
+        nodeId === "A" &&
+        newState.nodes.every((n) => n.id === "A" || n.backtracked)
+      ) {
+        clickedNode.backtracked = true; // Mark node A as backtracked
+        clickedNode.current = false;
+        newState.currentNode = null; // Game finished
+        newState.stack.pop();
+        return { newState, validMove: true, nodeStatus: "final-move" };
+      }
 
-  // Remove the visited node from the current level
-  newState.currentLevel = newState.currentLevel.filter((id) => id !== nodeId);
-
-  // Add the clicked node to the queue
-  newState.queue.push(nodeId);
-
-  // If current level is empty, move to the next level
-  if (newState.currentLevel.length === 0) {
-    newState.queue.shift(); // Remove the first element from the queue
-    if (newState.queue.length > 0) {
-      const nextNode = newState.queue[0];
-      newState.currentLevel = newState.edges
-        .filter((e) => e.source === nextNode)
-        .map((e) => e.target)
-        .filter((id) => !newState.nodes.find((n) => n.id === id).visited);
+      clickedNode.current = true;
+      newState.currentNode = nodeId;
+      newState.stack.pop();
+      return { newState, validMove: true, nodeStatus: "visited" };
     }
   }
 
-  if (newState.currentLevel.length === 0 && newState.queue.length === 0) {
-    clickedNode.current = false;
-    newState.currentNode = null;
-    return { newState, validMove: true, nodeStatus: "final-move" };
-  }
-
-  return { newState, validMove: true, nodeStatus: "unvisited" };
+  return { newState: graphState, validMove: false, nodeStatus: null };
 };
 
 const getNodeStatus = (node) => {
   if (node.current) return "current";
+  if (node.backtracked) return "backtracked";
   if (node.visited) return "visited";
   return "unvisited";
 };
 
 const isGameComplete = (graphState) => {
-  return (
-    graphState.nodes.every((node) => node.visited) &&
-    graphState.queue.length === 0
-  );
+  return graphState.nodes.every((node) => node.backtracked);
 };
 
 const getMessage = (nodeStatus, nodeId) => {
   switch (nodeStatus) {
     case "unvisited":
       return `Visited Node ${nodeId}!`;
+    case "visited":
+      return `Backtracked to Node ${nodeId}!`;
     case "final-move":
-      return `Visited Node ${nodeId}. BFS complete!`;
+      return `Backtracked to Node A. Game complete!`;
     default:
       return "";
   }
@@ -113,15 +119,17 @@ const getScore = (nodeStatus) => {
   switch (nodeStatus) {
     case "unvisited":
       return 10;
+    case "visited":
+      return 5;
     default:
       return 0;
   }
 };
 
-const BFSGame = () => {
+const DFSGame = () => {
   return (
     <GamePageStructure
-      title="BFS Graph Game"
+      title="DFS Graph Game"
       initialGraphState={initialGraphState}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
@@ -132,4 +140,4 @@ const BFSGame = () => {
   );
 };
 
-export default BFSGame;
+export default DFSGame;

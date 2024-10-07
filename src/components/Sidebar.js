@@ -62,6 +62,8 @@ const Sidebar = ({
       path += "/traversal/dfs";
     } else if (algorithm.includes("Breadth-First Search")) {
       path += "/traversal/bfs";
+    } else if (algorithm.includes("Dijkstra's")) {
+      path += "/shortest-path/dijkstras";
     }
 
     router.push(path);
