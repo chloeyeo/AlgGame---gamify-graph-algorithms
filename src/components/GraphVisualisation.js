@@ -12,6 +12,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
   const pathname = usePathname();
   const svgRef = useRef(null);
   const isDijkstraPage = pathname.includes("dijkstras");
+  const isAStarPage = pathname.includes("astar");
 
   useEffect(() => {
     if (!graphState) return;
@@ -55,7 +56,12 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       .attr("stroke-width", 2);
 
     // Add edge weights for Dijkstra's algorithm
-    if (selectedAlgorithm === "Dijkstra's" || isDijkstraPage) {
+    if (
+      selectedAlgorithm === "Dijkstra's" ||
+      isDijkstraPage ||
+      selectedAlgorithm === "A*" ||
+      isAStarPage
+    ) {
       edgeGroups
         .append("text")
         .attr("class", "edge-weight")
@@ -149,6 +155,28 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
         .attr("fill", "red")
         .attr("stroke", "white")
         .attr("stroke-width", "0.5px");
+    }
+
+    // Add A* specific labels
+    if (selectedAlgorithm == "A*" || isAStarPage) {
+      console.log("here in A*");
+      console.log("selectedAlgorhtm: ", selectedAlgorithm);
+      nodeGroups
+        .append("text")
+        .attr("class", "astar-label")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + 45)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .text((d) => {
+          const node = graphState.nodes.find((n) => n.id === d.id);
+          return `f: ${node.f === Infinity ? "∞" : node.f}, g: ${
+            node.g === Infinity ? "∞" : node.g
+          }, h: ${node.h === Infinity ? "∞" : node.h}`;
+        })
+        .attr("font-size", "18px")
+        .attr("font-weight", "bold")
+        .attr("fill", "red");
     }
   }, [graphState, selectedAlgorithm, onNodeClick]);
 
