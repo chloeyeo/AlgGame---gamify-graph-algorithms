@@ -13,6 +13,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
   const svgRef = useRef(null);
   const isDijkstraPage = pathname.includes("dijkstras");
   const isAStarPage = pathname.includes("astar");
+  const isKruskalsPage = pathname.includes("kruskals");
 
   useEffect(() => {
     if (!graphState) return;
@@ -52,15 +53,39 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       .attr("y1", (d) => nodes.find((n) => n.id === d.source).y)
       .attr("x2", (d) => nodes.find((n) => n.id === d.target).x)
       .attr("y2", (d) => nodes.find((n) => n.id === d.target).y)
-      .attr("stroke", "black")
-      .attr("stroke-width", 2);
+      .attr("stroke", (d) => {
+        if (isKruskalsPage) {
+          return graphState.mstEdges.some(
+            (e) =>
+              (e.source === d.source && e.target === d.target) ||
+              (e.source === d.target && e.target === d.source)
+          )
+            ? "red"
+            : "black";
+        }
+        return "black";
+      })
+      .attr("stroke-width", (d) => {
+        if (isKruskalsPage) {
+          return graphState.mstEdges.some(
+            (e) =>
+              (e.source === d.source && e.target === d.target) ||
+              (e.source === d.target && e.target === d.source)
+          )
+            ? 4
+            : 2;
+        }
+        return 2;
+      });
 
     // Add edge weights for Dijkstra's algorithm
     if (
       selectedAlgorithm === "Dijkstra's" ||
       isDijkstraPage ||
       selectedAlgorithm === "A*" ||
-      isAStarPage
+      isAStarPage ||
+      selectedAlgorithm === "Kruskal's" ||
+      isKruskalsPage
     ) {
       edgeGroups
         .append("text")

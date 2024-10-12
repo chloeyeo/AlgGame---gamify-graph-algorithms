@@ -183,7 +183,7 @@ const astarSteps = [
       currentNode: "G",
     },
     explanation:
-      "Visit node G (goal). A* algorithm is complete. The shortest path is A -> C -> F -> G with a total cost of 9.",
+      "Visit node G (goal). A* algorithm is complete. The shortest path is A -> C -> F -> G with a total cost of 9 (3+4+2 = 9). Node D was not visited because the goal was reached via a more optimal path before D needed to be explored.",
   },
 ];
 

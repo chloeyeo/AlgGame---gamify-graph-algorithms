@@ -66,6 +66,8 @@ const Sidebar = ({
       path += "/shortest-path/dijkstras";
     } else if (algorithm.includes("A*")) {
       path += "/shortest-path/astar";
+    } else if (algorithm.includes("Kruskal's")) {
+      path += "/minimum-spanning-tree/kruskals";
     }
 
     router.push(path);
