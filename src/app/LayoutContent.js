@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setSelectedMode,
@@ -11,12 +11,30 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
+import NotFoundPage from "@/components/NotFoundPage";
 
 export default function LayoutContent({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [missingSelection, setMissingSelection] = useState("");
+  const [isValidPage, setIsValidPage] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const validPaths = [
+    "/",
+    "/education",
+    "/game",
+    "/education/traversal/dfs",
+    "/game/traversal/dfs",
+    "/education/traversal/bfs",
+    "/game/traversal/bfs",
+    "/education/shortest-path/dijkstras",
+    "/education/shortest-path/astar",
+    "/education/minimum-spanning-tree/kruskals",
+  ];
+
+  const pageExists = validPaths.includes(pathname);
 
   const dispatch = useDispatch();
   const selectedMode = useSelector((state) => state.algorithm.selectedMode);
@@ -80,7 +98,7 @@ export default function LayoutContent({ children }) {
           selectedMode={selectedMode}
           selectedAlgorithm={selectedAlgorithm}
         />
-        {children}
+        {pageExists ? children : <NotFoundPage />}
       </div>
       <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
         <Footer />
