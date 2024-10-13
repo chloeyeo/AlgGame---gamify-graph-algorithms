@@ -1,6 +1,7 @@
 "use client";
 
-import AnimatedLion from "@/components/AnimatedLion";
+// import AnimatedLion from "@/components/AnimatedLion";
+import AnimatedTetrahedron from "@/components/AnimatedTetrahedron";
 import { Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -105,9 +106,9 @@ export default function Home() {
   ];
 
   return (
-    <main className="flex flex-col items-center justify-center p-8 text-center min-h-screen">
-      <AnimatedLion />
-      <div className="mt-10 space-y-8 max-w-2xl p-6 bg-white rounded-lg shadow-lg">
+    <main className="flex flex-col items-center justify-center px-8 text-center min-h-screen">
+      <AnimatedTetrahedron />
+      <div className="mt-8 space-y-8 max-w-2xl p-6 bg-white rounded-lg shadow-lg">
         <h1 className="text-4xl font-extrabold text-gray-900">
           Welcome to <span className="text-blue-700">AlgGame!</span>
         </h1>
