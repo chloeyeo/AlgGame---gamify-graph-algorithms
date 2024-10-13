@@ -14,7 +14,7 @@ export default function Header({ toggleSidebar }) {
         />
       </button>
       <Link href="/" className="text-xl md:text-2xl font-bold text-center">
-        Graph Algorithm Game
+        AlgGame
       </Link>
       <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
         <Image
