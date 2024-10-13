@@ -48,7 +48,7 @@ export default function EducationPageStructure({
       setIsSpeakingConcept(false);
     };
 
-    const pathname = router.pathname;
+    // const pathname = router.pathname;
 
     // Re-run when pathname changes
     handlePathChange();
@@ -137,7 +137,7 @@ export default function EducationPageStructure({
         {/* Graph Visualisation Section */}
         <div className="mb-6">
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-auto no-scrollbar">
+          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-auto no-scrollbar relative">
             {steps.length > 0 &&
             steps[currentStep] &&
             steps[currentStep].graphState ? (
@@ -145,6 +145,20 @@ export default function EducationPageStructure({
             ) : (
               <p>No graph data available</p>
             )}
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className="absolute left-4 bottom-4 bg-gray-300 p-2 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              onClick={nextStep}
+              disabled={currentStep === steps.length - 1}
+              className="absolute right-4 bottom-4 bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
           </div>
         </div>
 
@@ -180,7 +194,7 @@ export default function EducationPageStructure({
           </div>
 
           {/* Navigation Buttons */}
-          <div className="mt-4 flex justify-between">
+          {/* <div className="mt-4 flex justify-between">
             <button
               onClick={prevStep}
               disabled={currentStep === 0}
@@ -195,7 +209,7 @@ export default function EducationPageStructure({
             >
               Next
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Concept Section */}
