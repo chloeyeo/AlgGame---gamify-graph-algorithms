@@ -12,12 +12,13 @@ import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import NotFoundPage from "@/components/NotFoundPage";
+import ChatBot from "@/components/ChatBot";
 
 export default function LayoutContent({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [missingSelection, setMissingSelection] = useState("");
-  const [isValidPage, setIsValidPage] = useState(true);
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -104,6 +105,7 @@ export default function LayoutContent({ children }) {
       <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
         <Footer />
       </footer>
+      <ChatBot />
       {isSidebarOpen && (
         <div
           className="absolute inset-0 bg-black bg-opacity-50 z-20"

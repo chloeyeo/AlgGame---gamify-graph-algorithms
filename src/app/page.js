@@ -3,7 +3,6 @@
 import { Menu } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import AnimatedTetrahedron from "@/components/AnimatedTetrahedron";
-import ChatBot from "@/components/ChatBot";
 
 const DraggableWord = ({ word }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -168,7 +167,6 @@ export default function Home() {
           </li>
         </ol>
       </div>
-      <ChatBot />
       <div ref={bottomRef} className="h-20" />
     </main>
   );

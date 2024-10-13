@@ -1,18 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
 
-  const questions = [
+  const quickQuestions = [
     "How do I navigate the page?",
     "What are the different algorithms available?",
     "How do I switch between education and game mode?",
   ];
 
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([
+        {
+          type: "bot",
+          text: "Hello! How can I assist you today? Here are some questions I can help with:",
+        },
+        ...quickQuestions.map((q) => ({
+          type: "bot",
+          text: q,
+          isQuestion: true,
+        })),
+      ]);
+    }
+  }, [isOpen]);
+
   const handleQuestionClick = (question) => {
-    setMessages([...messages, { type: "user", text: question }]);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { type: "user", text: question },
+    ]);
+
     let answer = "";
     switch (question) {
       case "How do I navigate the page?":
@@ -29,17 +49,28 @@ const ChatBot = () => {
         break;
       default:
         answer =
-          "I'm sorry, I don't have an answer for that question. Please try another one or contact support for more help.";
+          "I'm sorry, I don't have an answer for that question. Is there anything else I can help you with?";
     }
-    setMessages([
-      ...messages,
-      { type: "user", text: question },
-      { type: "bot", text: answer },
-    ]);
+
+    setTimeout(() => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { type: "bot", text: answer },
+        {
+          type: "bot",
+          text: "Do you have any other questions? I can help with:",
+        },
+        ...quickQuestions.map((q) => ({
+          type: "bot",
+          text: q,
+          isQuestion: true,
+        })),
+      ]);
+    }, 500);
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50 sm:bottom-[calc(50vh-288px+1rem)] sm:right-[calc(50vw-288px+1rem)]">
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -49,7 +80,7 @@ const ChatBot = () => {
         </button>
       )}
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-xl w-80 max-h-96 flex flex-col">
+        <div className="bg-white rounded-lg shadow-xl w-80 h-96 flex flex-col">
           <div className="flex justify-between items-center p-4 border-b">
             <h3 className="font-bold">Chat Assistant</h3>
             <button
@@ -68,25 +99,22 @@ const ChatBot = () => {
                 }`}
               >
                 <span
-                  className={`inline-block p-2 rounded-lg ${
-                    message.type === "user" ? "bg-blue-100" : "bg-gray-100"
+                  className={`inline-block p-2 rounded-md ${
+                    message.type === "user"
+                      ? "bg-blue-500 text-white"
+                      : message.isQuestion
+                      ? "bg-yellow-100 cursor-pointer hover:bg-yellow-200"
+                      : "bg-pink-100"
+                  } ${
+                    message.type === "user" ? "max-w-[70%]" : "max-w-[100%]"
                   }`}
+                  onClick={() =>
+                    message.isQuestion && handleQuestionClick(message.text)
+                  }
                 >
                   {message.text}
                 </span>
               </div>
-            ))}
-          </div>
-          <div className="p-4 border-t">
-            <h4 className="font-semibold mb-2">Quick Questions:</h4>
-            {questions.map((question, index) => (
-              <button
-                key={index}
-                onClick={() => handleQuestionClick(question)}
-                className="block w-full text-left p-2 hover:bg-gray-100 rounded mb-1"
-              >
-                {question}
-              </button>
             ))}
           </div>
         </div>
