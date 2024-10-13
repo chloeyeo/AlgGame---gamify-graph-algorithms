@@ -90,3 +90,10 @@ body {
   animation: pulse 1s infinite;
   filter: brightness(1.5); /* Add a highlight effect */
 }
+
+.chat-assistant {
+  position: fixed;
+  bottom: 60px; /* Adjust based on your footer height */
+  right: 20px;
+  z-index: 1000; /* Ensure it's above other elements */
+}

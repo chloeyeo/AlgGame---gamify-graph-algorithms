@@ -68,6 +68,8 @@ const Sidebar = ({
       path += "/shortest-path/astar";
     } else if (algorithm.includes("Kruskal's")) {
       path += "/minimum-spanning-tree/kruskals";
+    } else if (algorithm.includes("Prim's")) {
+      path += "/minimum-spanning-tree/prims";
     }
 
     router.push(path);

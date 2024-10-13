@@ -32,6 +32,7 @@ export default function LayoutContent({ children }) {
     "/education/shortest-path/dijkstras",
     "/education/shortest-path/astar",
     "/education/minimum-spanning-tree/kruskals",
+    "/education/minimum-spanning-tree/prims",
   ];
 
   const pageExists = validPaths.includes(pathname);

@@ -1,9 +1,7 @@
-"use client";
-
-import { usePathname } from "next/navigation";
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { useSelector } from "react-redux";
+import { usePathname } from "next/navigation";
 
 const GraphVisualisation = ({ graphState, onNodeClick }) => {
   const selectedAlgorithm = useSelector(
@@ -14,6 +12,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
   const isDijkstraPage = pathname.includes("dijkstras");
   const isAStarPage = pathname.includes("astar");
   const isKruskalsPage = pathname.includes("kruskals");
+  const isPrimsPage = pathname.includes("prims");
 
   useEffect(() => {
     if (!graphState) return;
@@ -27,7 +26,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       .attr("width", "100%")
       .attr("height", "100%");
 
-    const nodes = [
+    const allNodes = [
       { id: "A", x: 300, y: 50 },
       { id: "B", x: 200, y: 200 },
       { id: "C", x: 400, y: 200 },
@@ -36,6 +35,10 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       { id: "F", x: 470, y: 350 },
       { id: "G", x: 80, y: 500 },
     ];
+
+    const nodes = isPrimsPage
+      ? allNodes.filter((node) => node.id !== "G")
+      : allNodes;
 
     const links = graphState.edges;
 
@@ -47,64 +50,117 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       .append("g")
       .attr("class", "edge");
 
-    edgeGroups
-      .append("line")
-      .attr("x1", (d) => nodes.find((n) => n.id === d.source).x)
-      .attr("y1", (d) => nodes.find((n) => n.id === d.source).y)
-      .attr("x2", (d) => nodes.find((n) => n.id === d.target).x)
-      .attr("y2", (d) => nodes.find((n) => n.id === d.target).y)
-      .attr("stroke", (d) => {
-        if (isKruskalsPage) {
-          return graphState.mstEdges.some(
-            (e) =>
-              (e.source === d.source && e.target === d.target) ||
-              (e.source === d.target && e.target === d.source)
-          )
-            ? "red"
-            : "black";
-        }
-        return "black";
-      })
-      .attr("stroke-width", (d) => {
-        if (isKruskalsPage) {
-          return graphState.mstEdges.some(
-            (e) =>
-              (e.source === d.source && e.target === d.target) ||
-              (e.source === d.target && e.target === d.source)
-          )
-            ? 4
-            : 2;
-        }
-        return 2;
-      });
+    edgeGroups.each(function (d) {
+      const elem = d3.select(this);
+      const sourceNode = nodes.find((n) => n.id === d.source);
+      const targetNode = nodes.find((n) => n.id === d.target);
 
-    // Add edge weights for Dijkstra's algorithm
+      if (
+        isPrimsPage &&
+        ((d.source === "A" && d.target === "F") ||
+          (d.source === "F" && d.target === "A"))
+      ) {
+        // Create a curved path for A-F edge in Prim's algorithm
+        const midX = (sourceNode.x + targetNode.x) / 2;
+        const midY = (sourceNode.y + targetNode.y) / 2 - 300;
+
+        elem
+          .append("path")
+          .attr(
+            "d",
+            `M${sourceNode.x},${sourceNode.y} Q${midX},${midY} ${targetNode.x},${targetNode.y}`
+          )
+          .attr("fill", "none")
+          .attr("stroke", (d) =>
+            graphState.mstEdges.some(
+              (e) =>
+                (e.source === d.source && e.target === d.target) ||
+                (e.source === d.target && e.target === d.source)
+            )
+              ? "red"
+              : "black"
+          )
+          .attr("stroke-width", (d) =>
+            graphState.mstEdges.some(
+              (e) =>
+                (e.source === d.source && e.target === d.target) ||
+                (e.source === d.target && e.target === d.source)
+            )
+              ? 4
+              : 2
+          );
+      } else {
+        // Straight lines for other edges
+        elem
+          .append("line")
+          .attr("x1", sourceNode.x)
+          .attr("y1", sourceNode.y)
+          .attr("x2", targetNode.x)
+          .attr("y2", targetNode.y)
+          .attr("stroke", (d) => {
+            if (isKruskalsPage || isPrimsPage) {
+              return graphState.mstEdges.some(
+                (e) =>
+                  (e.source === d.source && e.target === d.target) ||
+                  (e.source === d.target && e.target === d.source)
+              )
+                ? "red"
+                : "black";
+            }
+            return "black";
+          })
+          .attr("stroke-width", (d) => {
+            if (isKruskalsPage || isPrimsPage) {
+              return graphState.mstEdges.some(
+                (e) =>
+                  (e.source === d.source && e.target === d.target) ||
+                  (e.source === d.target && e.target === d.source)
+              )
+                ? 4
+                : 2;
+            }
+            return 2;
+          });
+      }
+    });
+
+    // Add edge weights
     if (
       selectedAlgorithm === "Dijkstra's" ||
       isDijkstraPage ||
       selectedAlgorithm === "A*" ||
       isAStarPage ||
       selectedAlgorithm === "Kruskal's" ||
-      isKruskalsPage
+      isKruskalsPage ||
+      isPrimsPage
     ) {
       edgeGroups
         .append("text")
         .attr("class", "edge-weight")
-        .attr(
-          "x",
-          (d) =>
-            (nodes.find((n) => n.id === d.source).x +
-              nodes.find((n) => n.id === d.target).x) /
-            2
-        )
-        .attr(
-          "y",
-          (d) =>
-            (nodes.find((n) => n.id === d.source).y +
-              nodes.find((n) => n.id === d.target).y) /
-              2 -
-            10
-        )
+        .attr("x", (d) => {
+          const sourceNode = nodes.find((n) => n.id === d.source);
+          const targetNode = nodes.find((n) => n.id === d.target);
+          if (
+            isPrimsPage &&
+            ((d.source === "A" && d.target === "F") ||
+              (d.source === "F" && d.target === "A"))
+          ) {
+            return (sourceNode.x + targetNode.x) / 2;
+          }
+          return (sourceNode.x + targetNode.x) / 2;
+        })
+        .attr("y", (d) => {
+          const sourceNode = nodes.find((n) => n.id === d.source);
+          const targetNode = nodes.find((n) => n.id === d.target);
+          if (
+            isPrimsPage &&
+            ((d.source === "A" && d.target === "F") ||
+              (d.source === "F" && d.target === "A"))
+          ) {
+            return (sourceNode.y + targetNode.y) / 2 - 120;
+          }
+          return (sourceNode.y + targetNode.y) / 2 - 10;
+        })
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .text((d) => d.weight || d.distance || "")
@@ -183,25 +239,37 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
     }
 
     // Add A* specific labels
-    if (selectedAlgorithm == "A*" || isAStarPage) {
-      console.log("here in A*");
-      console.log("selectedAlgorhtm: ", selectedAlgorithm);
-      nodeGroups
-        .append("text")
-        .attr("class", "astar-label")
-        .attr("x", (d) => d.x)
-        .attr("y", (d) => d.y + 45)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .text((d) => {
-          const node = graphState.nodes.find((n) => n.id === d.id);
-          return `f: ${node.f === Infinity ? "∞" : node.f}, g: ${
-            node.g === Infinity ? "∞" : node.g
-          }, h: ${node.h === Infinity ? "∞" : node.h}`;
-        })
-        .attr("font-size", "18px")
-        .attr("font-weight", "bold")
-        .attr("fill", "red");
+    if (selectedAlgorithm === "A*" || isAStarPage) {
+      nodeGroups.each(function (d) {
+        const node = graphState.nodes.find((n) => n.id === d.id);
+        if (node) {
+          const fValue = node.f;
+          const gValue = node.g;
+          const hValue = node.h;
+
+          if (
+            fValue !== undefined ||
+            gValue !== undefined ||
+            hValue !== undefined
+          ) {
+            d3.select(this)
+              .append("text")
+              .attr("class", "astar-label")
+              .attr("x", d.x)
+              .attr("y", d.y + 45)
+              .attr("text-anchor", "middle")
+              .attr("dominant-baseline", "middle")
+              .text(
+                `f: ${fValue === Infinity ? "∞" : fValue}, g: ${
+                  gValue === Infinity ? "∞" : gValue
+                }, h: ${hValue === Infinity ? "∞" : hValue}`.trim()
+              )
+              .attr("font-size", "18px")
+              .attr("font-weight", "bold")
+              .attr("fill", "red");
+          }
+        }
+      });
     }
   }, [graphState, selectedAlgorithm, onNodeClick]);
 
