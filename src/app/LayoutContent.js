@@ -88,8 +88,10 @@ export default function LayoutContent({ children }) {
 
   return (
     <>
-      <header className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
-        <Header toggleSidebar={toggleSidebar} />
+      <header className="fixed top-0 w-screen z-50">
+        <div className="sm:max-w-[576px] sm:mx-auto">
+          <Header toggleSidebar={toggleSidebar} />
+        </div>
       </header>
       <div className="relative flex-grow overflow-hidden pt-[16%] pb-[10%]">
         <Sidebar
@@ -102,8 +104,10 @@ export default function LayoutContent({ children }) {
         />
         {pageExists ? children : <NotFoundPage />}
       </div>
-      <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50 w-full sm:max-w-[576px]">
-        <Footer />
+      <footer className="fixed bottom-0 w-screen z-50">
+        <div className="sm:max-w-[576px] sm:mx-auto">
+          <Footer />
+        </div>
       </footer>
       <ChatBot />
       {isSidebarOpen && (

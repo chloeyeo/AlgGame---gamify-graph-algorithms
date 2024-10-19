@@ -4,6 +4,7 @@
 // const ChatBot = () => {
 //   const [isOpen, setIsOpen] = useState(false);
 //   const [messages, setMessages] = useState([]);
+//   const [showOptions, setShowOptions] = useState(true);
 
 //   const quickQuestions = [
 //     "How do I navigate the page?",
@@ -18,16 +19,13 @@
 //           type: "bot",
 //           text: "Hello! How can I assist you today? Here are some questions I can help with:",
 //         },
-//         ...quickQuestions.map((q) => ({
-//           type: "bot",
-//           text: q,
-//           isQuestion: true,
-//         })),
 //       ]);
+//       setShowOptions(true);
 //     }
 //   }, [isOpen]);
 
 //   const handleQuestionClick = (question) => {
+//     setShowOptions(false);
 //     setMessages((prevMessages) => [
 //       ...prevMessages,
 //       { type: "user", text: question },
@@ -56,21 +54,22 @@
 //       setMessages((prevMessages) => [
 //         ...prevMessages,
 //         { type: "bot", text: answer },
-//         {
-//           type: "bot",
-//           text: "Do you have any other questions? I can help with:",
-//         },
-//         ...quickQuestions.map((q) => ({
-//           type: "bot",
-//           text: q,
-//           isQuestion: true,
-//         })),
 //       ]);
+//       setTimeout(() => {
+//         setShowOptions(true);
+//         setMessages((prevMessages) => [
+//           ...prevMessages,
+//           {
+//             type: "bot",
+//             text: "Do you have any other questions? I can help with:",
+//           },
+//         ]);
+//       }, 500);
 //     }, 500);
 //   };
 
 //   return (
-//     <div className="fixed bottom-20 right-6 z-50 sm:bottom-[calc(50vh-288px+1rem)] sm:right-[calc(50vw-288px+1rem)]">
+//     <div className="fixed z-50 sm:bottom-[calc(50vh-288px+1rem)] sm:right-[calc(50vw-288px+1rem)]">
 //       {!isOpen && (
 //         <button
 //           onClick={() => setIsOpen(true)}
@@ -102,20 +101,28 @@
 //                   className={`inline-block p-2 rounded-md ${
 //                     message.type === "user"
 //                       ? "bg-blue-500 text-white"
-//                       : message.isQuestion
-//                       ? "bg-yellow-100 cursor-pointer hover:bg-yellow-200"
-//                       : "bg-pink-100"
+//                       : "bg-gray-100 text-black"
 //                   } ${
 //                     message.type === "user" ? "max-w-[70%]" : "max-w-[100%]"
 //                   }`}
-//                   onClick={() =>
-//                     message.isQuestion && handleQuestionClick(message.text)
-//                   }
 //                 >
 //                   {message.text}
 //                 </span>
 //               </div>
 //             ))}
+//             {showOptions && (
+//               <div className="mt-4 space-y-2">
+//                 {quickQuestions.map((question, index) => (
+//                   <div
+//                     key={index}
+//                     onClick={() => handleQuestionClick(question)}
+//                     className="p-2 bg-blue-50 text-blue-700 rounded-md cursor-pointer hover:bg-blue-100 transition-colors border border-blue-200"
+//                   >
+//                     {question}
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
 //           </div>
 //         </div>
 //       )}
@@ -196,7 +203,11 @@ const ChatBot = () => {
   };
 
   return (
-    <div className="fixed z-50 sm:bottom-[calc(50vh-288px+1rem)] sm:right-[calc(50vw-288px+1rem)]">
+    <div
+      className={`fixed z-50 bottom-[12%] right-[6%] md:bottom-[15%] ${
+        isOpen ? "max-w-none" : ""
+      }`}
+    >
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -229,9 +240,7 @@ const ChatBot = () => {
                     message.type === "user"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-100 text-black"
-                  } ${
-                    message.type === "user" ? "max-w-[70%]" : "max-w-[100%]"
-                  }`}
+                  } max-w-[70%]`}
                 >
                   {message.text}
                 </span>

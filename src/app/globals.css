@@ -90,3 +90,88 @@ body {
   animation: pulse 1s infinite;
   filter: brightness(1.5); /* Add a highlight effect */
 }
+
+h1 {
+  font-size: 1.5rem; /* For small screens */
+}
+@media (min-width: 640px) {
+  h1 {
+    font-size: 2.5rem; /* Larger font for medium screens */
+  }
+}
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 3rem; /* Larger font for bigger screens */
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem; /* Padding for spacing */
+}
+
+/* Responsive container for the layout */
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .flex-container {
+    flex-direction: row;
+    padding: 2rem;
+  }
+}
+
+/* Responsive grid for items */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+img,
+.icon {
+  width: 100%;
+  max-width: 50px;
+  height: auto; /* Ensure proper scaling */
+}
+
+@media (min-width: 768px) {
+  img,
+  .icon {
+    max-width: 80px;
+  }
+}
+
+/* Word styling for touch devices */
+@media (max-width: 640px) {
+  .draggable-word {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .draggable-word {
+    font-size: 1.2rem;
+  }
+}
