@@ -3,11 +3,11 @@
 import React from "react";
 import EducationPageStructure from "@/components/EducationPageStructure";
 
-const primSteps = [
+const primStepsGraphA = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
+        { id: "A", visited: true },
         { id: "B" },
         { id: "C" },
         { id: "D" },
@@ -33,8 +33,8 @@ const primSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
-        { id: "B" },
+        { id: "A", visited: true },
+        { id: "B", visited: true },
         { id: "C" },
         { id: "D" },
         { id: "E" },
@@ -59,9 +59,9 @@ const primSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
-        { id: "B" },
-        { id: "C" },
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
         { id: "D" },
         { id: "E" },
         { id: "F" },
@@ -88,12 +88,12 @@ const primSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
-        { id: "B" },
-        { id: "C" },
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
         { id: "D" },
         { id: "E" },
-        { id: "F" },
+        { id: "F", visited: true },
       ],
       edges: [
         { source: "A", target: "B", weight: 7 },
@@ -118,12 +118,12 @@ const primSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
-        { id: "B" },
-        { id: "C" },
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
         { id: "D" },
-        { id: "E" },
-        { id: "F" },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
       ],
       edges: [
         { source: "A", target: "B", weight: 7 },
@@ -149,12 +149,12 @@ const primSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
-        { id: "B" },
-        { id: "C" },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
       ],
       edges: [
         { source: "A", target: "B", weight: 7 },
@@ -177,6 +177,218 @@ const primSteps = [
     },
     explanation:
       "Add edge D-E (weight 6) to the MST. This is the final edge needed to connect all nodes in the graph. Our Minimum Spanning Tree is now complete with a total weight of 33.",
+  },
+];
+
+const primStepsGraphB = [
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B" },
+        { id: "C" },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [],
+    },
+    explanation:
+      "Initial state: We start with node A. No edges are in the Minimum Spanning Tree (MST) yet.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B" },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [{ source: "A", target: "C", weight: 3 }],
+    },
+    explanation:
+      "Add edge A-C (weight 3) to the MST. It's the lowest weight edge connected to A.",
+  },
+
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "C", weight: 3 },
+        { source: "A", target: "B", weight: 4 },
+      ],
+    },
+    explanation:
+      "Add edge A-B (weight 4) to the MST. It's the lowest weight edge connecting a new node to the MST.",
+  },
+
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "C", weight: 3 },
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "E", weight: 2 },
+      ],
+    },
+    explanation:
+      "Add edge B-E (weight 2) to the MST. It's the lowest weight edge connecting a new node to the MST.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "C", weight: 3 },
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+      ],
+    },
+    explanation:
+      "Add edge C-F (weight 4) to the MST. It's the lowest weight edge connecting a new node to the MST.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "C", weight: 3 },
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+    },
+    explanation:
+      "Add edge F-G (weight 2) to the MST. It's the lowest weight edge connecting a new node to the MST.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A" },
+        { id: "B" },
+        { id: "C" },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "C", weight: 3 },
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+        { source: "D", target: "G", weight: 3 },
+      ],
+    },
+    explanation:
+      "Add edge D-G (weight 3) to the MST. This completes the Minimum Spanning Tree, connecting all nodes with the minimum total weight of 18.",
   },
 ];
 
@@ -213,7 +425,9 @@ const primPseudocode = `function prim(graph):
 export default function PrimsAlgorithmEducationPage() {
   return (
     <EducationPageStructure
-      steps={primSteps}
+      title="Prim's Algorithm"
+      steps={primStepsGraphA}
+      comparisonSteps={primStepsGraphB}
       conceptText={primConceptText}
       pseudocode={primPseudocode}
     />

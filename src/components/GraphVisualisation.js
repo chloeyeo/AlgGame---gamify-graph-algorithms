@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
 
-const GraphVisualisation = ({ graphState, onNodeClick }) => {
+const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const selectedAlgorithm = useSelector(
     (state) => state.algorithm.selectedAlgorithm
   );
@@ -36,9 +36,16 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       { id: "G", x: 80, y: 500 },
     ];
 
-    const nodes = isPrimsPage
-      ? allNodes.filter((node) => node.id !== "G")
-      : allNodes;
+    // const nodes = isPrimsPage
+    //   ? allNodes.filter((node) => node.id !== "G")
+    //   : allNodes;
+
+    // const nodes = allNodes;
+
+    const nodes =
+      (isPrimsPage || isKruskalsPage) && isGraphA
+        ? allNodes.filter((node) => node.id !== "G")
+        : allNodes;
 
     const links = graphState.edges;
 
@@ -55,8 +62,10 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
       const sourceNode = nodes.find((n) => n.id === d.source);
       const targetNode = nodes.find((n) => n.id === d.target);
 
+      if (!sourceNode || !targetNode) return; // Skip if either node is undefined
+
       if (
-        isPrimsPage &&
+        (isPrimsPage || isKruskalsPage) &&
         ((d.source === "A" && d.target === "F") ||
           (d.source === "F" && d.target === "A"))
       ) {
@@ -140,8 +149,9 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
         .attr("x", (d) => {
           const sourceNode = nodes.find((n) => n.id === d.source);
           const targetNode = nodes.find((n) => n.id === d.target);
+          if (!sourceNode || !targetNode) return 0; // Return a default value if nodes are undefined
           if (
-            isPrimsPage &&
+            (isPrimsPage || isKruskalsPage) &&
             ((d.source === "A" && d.target === "F") ||
               (d.source === "F" && d.target === "A"))
           ) {
@@ -152,8 +162,9 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
         .attr("y", (d) => {
           const sourceNode = nodes.find((n) => n.id === d.source);
           const targetNode = nodes.find((n) => n.id === d.target);
+          if (!sourceNode || !targetNode) return 0; // Return a default value if nodes are undefined
           if (
-            isPrimsPage &&
+            (isPrimsPage || isKruskalsPage) &&
             ((d.source === "A" && d.target === "F") ||
               (d.source === "F" && d.target === "A"))
           ) {
@@ -271,7 +282,7 @@ const GraphVisualisation = ({ graphState, onNodeClick }) => {
         }
       });
     }
-  }, [graphState, selectedAlgorithm, onNodeClick]);
+  }, [graphState, isGraphA, selectedAlgorithm, onNodeClick]);
 
   return <svg ref={svgRef}></svg>;
 };
