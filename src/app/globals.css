@@ -28,6 +28,13 @@
   box-sizing: border-box;
 }
 
+/* Prevent text selection for all elements */
+* {
+  user-select: none; /* For modern browsers */
+  -webkit-user-select: none; /* For Safari */
+  -moz-user-select: none; /* For Firefox */
+}
+
 html,
 body {
   height: 100%;
