@@ -93,7 +93,7 @@ export default function LayoutContent({ children }) {
           <Header toggleSidebar={toggleSidebar} />
         </div>
       </header>
-      <div className="relative flex-grow overflow-hidden pt-[16%] pb-[10%]">
+      <div className="relative flex-grow overflow-hidden py-[10%]">
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose}

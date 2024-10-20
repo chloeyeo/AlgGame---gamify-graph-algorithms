@@ -175,3 +175,50 @@ img,
     font-size: 1.2rem;
   }
 }
+
+/* newly added */
+
+@media (min-width: 640px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    font-size: 18px;
+  }
+}
+
+.max-w-7xl {
+  max-width: 1280px;
+}
+
+@media (min-width: 1280px) {
+  .max-w-7xl {
+    max-width: 1440px;
+  }
+}
+
+.responsive-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(
+    100vh - 120px
+  ); /* Adjust based on header and footer height */
+}
+
+@media (min-width: 768px) {
+  .responsive-content {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-content {
+    padding: 3rem;
+  }
+}
