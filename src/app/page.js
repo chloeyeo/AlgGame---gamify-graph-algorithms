@@ -154,7 +154,7 @@ export default function Home() {
           <li className="animate-fade-in-1 flex items-start space-x-2">
             <span className="text-blue-600 font-bold">1.</span>
             <span>
-              Choose <strong className="text-blue-600">education</strong> or{" "}
+              Choose <strong className="text-purple-600">education</strong> or{" "}
               <strong className="text-purple-600">game</strong> mode
             </span>
           </li>
