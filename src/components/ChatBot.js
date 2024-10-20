@@ -204,7 +204,7 @@ const ChatBot = () => {
 
   return (
     <div
-      className={`fixed z-50 bottom-[12%] right-[6%] md:bottom-[15%] lg:bottom-[10%] ${
+      className={`fixed z-50 bottom-[12%] right-[6%] md:bottom-[15%] lg:bottom-[13%] ${
         isOpen ? "max-w-none" : ""
       }`}
     >
