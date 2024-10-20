@@ -59,6 +59,8 @@ body {
   text-align: center;
   line-height: 40px;
   font-weight: bold;
+  user-select: none;
+  cursor: pointer;
 }
 
 .edges {

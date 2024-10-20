@@ -24,6 +24,7 @@ export default function LayoutContent({ children }) {
 
   const validPaths = [
     "/",
+    "/about",
     "/education",
     "/game",
     "/education/traversal/dfs",

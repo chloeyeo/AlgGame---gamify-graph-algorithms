@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import Link from "next/link"; // Import Link for navigation
+import Link from "next/link";
 
 export default function Header({ toggleSidebar }) {
   return (
@@ -13,9 +13,14 @@ export default function Header({ toggleSidebar }) {
           height={30}
         />
       </button>
-      <Link href="/" className="text-xl md:text-2xl font-bold text-center">
-        AlgGame
-      </Link>
+      <div className="flex items-center space-x-4">
+        <Link href="/" className="text-xl md:text-2xl font-bold">
+          AlgGame
+        </Link>
+        <Link href="/about" className="text-md md:text-lg hover:text-blue-600">
+          About
+        </Link>
+      </div>
       <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
         <Image
           src="/images/lion.png"
