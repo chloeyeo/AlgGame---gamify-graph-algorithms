@@ -35,6 +35,9 @@ export default function LayoutContent({ children }) {
     "/education/shortest-path/astar",
     "/education/minimum-spanning-tree/kruskals",
     "/education/minimum-spanning-tree/prims",
+    // "/education/network-flow/edmonds-karp",
+    // "/education/network-flow/fold-fulkerson",
+    // "/education/matching/hungarian",
   ];
 
   const pageExists = validPaths.includes(pathname);

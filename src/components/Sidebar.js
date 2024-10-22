@@ -70,6 +70,12 @@ const Sidebar = ({
       path += "/minimum-spanning-tree/kruskals";
     } else if (algorithm.includes("Prim's")) {
       path += "/minimum-spanning-tree/prims";
+    } else if (algorithm.includes("Edmonds-Karp")) {
+      path += "/network-flow/edmonds-karp";
+    } else if (algorithm.includes("Ford-Fulkerson")) {
+      path += "/network-flow/fold-fulkerson";
+    } else if (algorithm.includes("Hungarian (Kuhn-Munkres)")) {
+      path += "/matching/hungarian";
     }
 
     router.push(path);

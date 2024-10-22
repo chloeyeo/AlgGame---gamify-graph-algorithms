@@ -213,45 +213,55 @@ const dijkstraSteps = [
 ];
 
 const dijkstraConceptText = {
-  introduction:
-    "Dijkstra's algorithm is a graph traversal algorithm used to find the shortest path between a starting node and all other nodes in a weighted graph with non-negative edge weights.",
+  introduction: `Dijkstra's algorithm finds the shortest path from a starting node to all other nodes in a weighted graph. It works by maintaining a set of distances to each node and continuously updating them as shorter paths are found. The algorithm guarantees the shortest path in graphs where all edge weights are non-negative.`,
   keyCharacteristics: [
-    "Maintains a set of unvisited nodes and their tentative distances from the start",
-    "Always selects the unvisited node with the smallest tentative distance",
-    "Updates the tentative distances of neighboring nodes",
-    "Marks visited nodes to avoid revisiting",
+    "Always selects the unvisited node with the smallest current distance (NOT first-in-first-out)",
+    "Updates neighbor distances only if a shorter path is found through the current node",
+    "Guarantees shortest path in graphs with non-negative weights",
+    "Processes each node exactly once",
+    "Maintains a running tally of the total distance to each node",
   ],
   applications: [
-    "GPS and mapping systems for finding shortest routes",
-    "Network routing protocols",
-    "Flight scheduling",
-    "Robotics path planning",
+    "GPS and navigation systems for finding optimal routes",
+    "Network routing protocols for data packet transmission",
+    "Social networks for finding shortest connection between users",
+    "Games for pathfinding and AI movement",
+    "Supply chain optimization for delivery routes",
   ],
 };
 
-const dijkstraPseudocode = `function Dijkstra(Graph, source):
+const dijkstraPseudocode = `function DijkstraShortestPath(Graph, source):
+    // Initialize distances
     for each vertex v in Graph:
-        dist[v] := infinity
-        prev[v] := undefined
-        add v to Q
-    dist[source] := 0
-    
-    while Q is not empty:
-        u := vertex in Q with min dist[u]
-        remove u from Q
+        distance[v] := infinity
+        previous[v] := undefined
+        add v to unvisited
+    distance[source] := 0
+
+    while unvisited is not empty:
+        // Select unvisited node with minimum distance
+        current := node in unvisited with minimum distance
         
-        for each neighbor v of u:
-            alt := dist[u] + length(u, v)
-            if alt < dist[v]:
-                dist[v] := alt
-                prev[v] := u
-    
-    return dist[], prev[]`;
+        if distance[current] = infinity:
+            break // All remaining vertices are inaccessible
+            
+        remove current from unvisited
+        
+        for each neighbor v of current:
+            // Calculate potential new distance
+            newDistance := distance[current] + weight(current, v)
+            
+            // Update if new path is shorter
+            if newDistance < distance[v]:
+                distance[v] := newDistance
+                previous[v] := current
+                
+    return distance[], previous[]`;
 
 export default function DijkstraEducationPage() {
   return (
     <EducationPageStructure
-      title="Dijkstra's Algorithm"
+      title="Dijkstra's Algorithm Visualization"
       steps={dijkstraSteps}
       conceptText={dijkstraConceptText}
       pseudocode={dijkstraPseudocode}

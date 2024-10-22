@@ -14,6 +14,21 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const isKruskalsPage = pathname.includes("kruskals");
   const isPrimsPage = pathname.includes("prims");
 
+  // Color constants
+  const COLORS = {
+    CURRENT_NODE: "#2ecc71",
+    VISITED_NODE: "#3498db",
+    UPDATED_NODE: "#ff69b4",
+    UNVISITED_NODE: "#ffffff",
+    UNVISITED_BORDER: "#e74c3c",
+    EDGE_NORMAL: "#95a5a6",
+    EDGE_MST: "#e74c3c",
+    EDGE_WEIGHT: "#2980b9",
+    NODE_TEXT_VISITED: "#ffffff",
+    NODE_TEXT_UNVISITED: "#2c3e50",
+    DISTANCE_LABEL: "#e74c3c",
+  };
+
   useEffect(() => {
     if (!graphState) return;
 
@@ -36,12 +51,6 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       { id: "G", x: 80, y: 500 },
     ];
 
-    // const nodes = isPrimsPage
-    //   ? allNodes.filter((node) => node.id !== "G")
-    //   : allNodes;
-
-    // const nodes = allNodes;
-
     const nodes =
       (isPrimsPage || isKruskalsPage) && isGraphA
         ? allNodes.filter((node) => node.id !== "G")
@@ -57,12 +66,24 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .append("g")
       .attr("class", "edge");
 
+    // Function to determine if edge is part of MST or current path
+    const isActiveEdge = (d) => {
+      if (isKruskalsPage || isPrimsPage) {
+        return graphState.mstEdges.some(
+          (e) =>
+            (e.source === d.source && e.target === d.target) ||
+            (e.source === d.target && e.target === d.source)
+        );
+      }
+      return false;
+    };
+
     edgeGroups.each(function (d) {
       const elem = d3.select(this);
       const sourceNode = nodes.find((n) => n.id === d.source);
       const targetNode = nodes.find((n) => n.id === d.target);
 
-      if (!sourceNode || !targetNode) return; // Skip if either node is undefined
+      if (!sourceNode || !targetNode) return;
 
       if (
         (isPrimsPage || isKruskalsPage) &&
@@ -81,23 +102,10 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           )
           .attr("fill", "none")
           .attr("stroke", (d) =>
-            graphState.mstEdges.some(
-              (e) =>
-                (e.source === d.source && e.target === d.target) ||
-                (e.source === d.target && e.target === d.source)
-            )
-              ? "red"
-              : "black"
+            isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
           )
-          .attr("stroke-width", (d) =>
-            graphState.mstEdges.some(
-              (e) =>
-                (e.source === d.source && e.target === d.target) ||
-                (e.source === d.target && e.target === d.source)
-            )
-              ? 4
-              : 2
-          );
+          .attr("stroke-width", (d) => (isActiveEdge(d) ? 4 : 1))
+          .attr("opacity", (d) => (isActiveEdge(d) ? 1 : 0.3));
       } else {
         // Straight lines for other edges
         elem
@@ -106,50 +114,23 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("y1", sourceNode.y)
           .attr("x2", targetNode.x)
           .attr("y2", targetNode.y)
-          .attr("stroke", (d) => {
-            if (isKruskalsPage || isPrimsPage) {
-              return graphState.mstEdges.some(
-                (e) =>
-                  (e.source === d.source && e.target === d.target) ||
-                  (e.source === d.target && e.target === d.source)
-              )
-                ? "red"
-                : "black";
-            }
-            return "black";
-          })
-          .attr("stroke-width", (d) => {
-            if (isKruskalsPage || isPrimsPage) {
-              return graphState.mstEdges.some(
-                (e) =>
-                  (e.source === d.source && e.target === d.target) ||
-                  (e.source === d.target && e.target === d.source)
-              )
-                ? 4
-                : 2;
-            }
-            return 2;
-          });
+          .attr("stroke", (d) =>
+            isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
+          )
+          .attr("stroke-width", (d) => (isActiveEdge(d) ? 6 : 3))
+          .attr("opacity", (d) => (isActiveEdge(d) ? 1 : 0.4));
       }
     });
 
-    // Add edge weights
-    if (
-      selectedAlgorithm === "Dijkstra's" ||
-      isDijkstraPage ||
-      selectedAlgorithm === "A*" ||
-      isAStarPage ||
-      selectedAlgorithm === "Kruskal's" ||
-      isKruskalsPage ||
-      isPrimsPage
-    ) {
+    // Add edge weight labels
+    if (isDijkstraPage || isAStarPage || isKruskalsPage || isPrimsPage) {
       edgeGroups
         .append("text")
         .attr("class", "edge-weight")
         .attr("x", (d) => {
           const sourceNode = nodes.find((n) => n.id === d.source);
           const targetNode = nodes.find((n) => n.id === d.target);
-          if (!sourceNode || !targetNode) return 0; // Return a default value if nodes are undefined
+          if (!sourceNode || !targetNode) return 0;
           if (
             (isPrimsPage || isKruskalsPage) &&
             ((d.source === "A" && d.target === "F") ||
@@ -162,7 +143,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         .attr("y", (d) => {
           const sourceNode = nodes.find((n) => n.id === d.source);
           const targetNode = nodes.find((n) => n.id === d.target);
-          if (!sourceNode || !targetNode) return 0; // Return a default value if nodes are undefined
+          if (!sourceNode || !targetNode) return 0;
           if (
             (isPrimsPage || isKruskalsPage) &&
             ((d.source === "A" && d.target === "F") ||
@@ -175,10 +156,13 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .text((d) => d.weight || d.distance || "")
-        .attr("fill", "blue")
-        .attr("font-size", "16px")
+        .attr("fill", COLORS.EDGE_WEIGHT)
+        .attr("font-size", "15px")
         .attr("font-weight", "bold")
-        .attr("dy", -5);
+        .attr("dy", -5)
+        .attr("stroke", "white")
+        .attr("stroke-width", "10px")
+        .attr("paint-order", "stroke");
     }
 
     // Draw nodes
@@ -198,25 +182,25 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", 30)
+      .attr("r", 35)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited && !node.backtracked ? "blue" : "white";
+        if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
+        if (node && node.visited) return COLORS.VISITED_NODE;
+        if (node && node.recentlyUpdated) return COLORS.UPDATED_NODE;
+        return COLORS.UNVISITED_NODE;
       })
       .attr("stroke", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        if (d.id === graphState.currentNode) return "#2ecc71";
-        if (node && node.backtracked) return "#e74c3c";
-        return node && node.visited ? "blue" : "black";
+        if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
+        if (node && node.visited) return COLORS.VISITED_NODE;
+        return COLORS.UNVISITED_BORDER;
       })
-      .attr("stroke-width", (d) => {
-        const node = graphState.nodes.find((n) => n.id === d.id);
-        return (node && node.backtracked) || d.id === graphState.currentNode
-          ? 4
-          : 2;
-      });
+      .attr("stroke-width", 3)
+      .style("cursor", "pointer")
+      .style("transition", "all 0.3s ease");
 
-    // Add node labels
+    // Enhanced node labels
     nodeGroups
       .append("text")
       .attr("x", (d) => d.x)
@@ -224,19 +208,22 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
       .text((d) => d.id)
-      .attr("font-size", "18px")
+      .attr("font-size", "20px")
+      .attr("font-weight", "bold")
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited && !node.backtracked ? "white" : "black";
+        return node && node.visited
+          ? COLORS.NODE_TEXT_VISITED
+          : COLORS.NODE_TEXT_UNVISITED;
       });
 
-    // Add distance labels for Dijkstra's algorithm
-    if (selectedAlgorithm === "Dijkstra's" || isDijkstraPage) {
+    // Enhanced distance labels for Dijkstra's algorithm
+    if (isDijkstraPage) {
       nodeGroups
         .append("text")
         .attr("class", "distance-label")
         .attr("x", (d) => d.x)
-        .attr("y", (d) => d.y + 40)
+        .attr("y", (d) => d.y + 47)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
         .text((d) => {
@@ -244,41 +231,38 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           return node.distance === Infinity ? "∞" : node.distance;
         })
         .attr("font-size", "20px")
-        .attr("fill", "red")
+        .attr("fill", COLORS.DISTANCE_LABEL)
         .attr("stroke", "white")
-        .attr("stroke-width", "0.5px");
+        .attr("stroke-width", "0.5px")
+        .attr("paint-order", "stroke");
     }
 
-    // Add A* specific labels
-    if (selectedAlgorithm === "A*" || isAStarPage) {
+    // Enhanced A* labels
+    if (isAStarPage) {
       nodeGroups.each(function (d) {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        if (node) {
-          const fValue = node.f;
-          const gValue = node.g;
-          const hValue = node.h;
-
-          if (
-            fValue !== undefined ||
-            gValue !== undefined ||
-            hValue !== undefined
-          ) {
-            d3.select(this)
-              .append("text")
-              .attr("class", "astar-label")
-              .attr("x", d.x)
-              .attr("y", d.y + 45)
-              .attr("text-anchor", "middle")
-              .attr("dominant-baseline", "middle")
-              .text(
-                `f: ${fValue === Infinity ? "∞" : fValue}, g: ${
-                  gValue === Infinity ? "∞" : gValue
-                }, h: ${hValue === Infinity ? "∞" : hValue}`.trim()
-              )
-              .attr("font-size", "18px")
-              .attr("font-weight", "bold")
-              .attr("fill", "red");
-          }
+        if (
+          node &&
+          (node.f !== undefined || node.g !== undefined || node.h !== undefined)
+        ) {
+          d3.select(this)
+            .append("text")
+            .attr("class", "astar-label")
+            .attr("x", d.x)
+            .attr("y", d.y + 45)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "middle")
+            .text(
+              `f=${node.f === Infinity ? "∞" : node.f}
+               g=${node.g === Infinity ? "∞" : node.g}
+               h=${node.h === Infinity ? "∞" : node.h}`.trim()
+            )
+            .attr("font-size", "16px")
+            .attr("font-weight", "bold")
+            .attr("fill", COLORS.DISTANCE_LABEL)
+            .attr("stroke", "white")
+            .attr("stroke-width", "1px")
+            .attr("paint-order", "stroke");
         }
       });
     }
