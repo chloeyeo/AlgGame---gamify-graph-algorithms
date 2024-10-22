@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import GraphVisualisation from "@/components/GraphVisualisation";
 import * as Tabs from "@radix-ui/react-tabs";
+import CodeEditorPseudocode from "./CodeEditorPseudocode";
 
 export default function EducationPageStructure({
   title = "Graph Algorithm",
@@ -128,23 +129,6 @@ export default function EducationPageStructure({
       )}
     </div>
   );
-
-  // const renderGraphSection = (graphSteps, isGraphA) => {
-  //   return (
-  //     <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] lg:h-[calc(100%-4rem)] overflow-auto no-scrollbar relative">
-  //       {isLoadingGraphA || isLoadingGraphB ? (
-  //         <p>Loading graph...</p>
-  //       ) : graphSteps[currentStep]?.graphState ? (
-  //         <GraphVisualisationComponent
-  //           graphState={graphSteps[currentStep].graphState}
-  //           isGraphA={isGraphA}
-  //         />
-  //       ) : (
-  //         <p>No graph data available</p>
-  //       )}
-  //     </div>
-  //   );
-  // };
 
   // Mobile content
   const mobileContent = (
@@ -285,9 +269,7 @@ export default function EducationPageStructure({
         {pseudocode && (
           <div className="mb-6">
             <h2 className="text-xl mb-2 font-semibold">Pseudocode</h2>
-            <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto">
-              {pseudocode}
-            </pre>
+            <CodeEditorPseudocode pseudocode={pseudocode} />
           </div>
         )}
       </div>
@@ -408,9 +390,7 @@ export default function EducationPageStructure({
         {pseudocode && (
           <div className="bg-white rounded-lg shadow-md p-4">
             <h2 className="text-xl font-bold mb-2">Pseudocode</h2>
-            <pre className="bg-gray-50 p-4 rounded-md overflow-x-auto font-mono text-sm">
-              {pseudocode}
-            </pre>
+            <CodeEditorPseudocode pseudocode={pseudocode} />
           </div>
         )}
       </div>
