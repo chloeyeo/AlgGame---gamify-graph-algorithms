@@ -9,7 +9,6 @@ import {
 } from "@/store/slices/algorithmSlice";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import Footer from "@/components/Footer";
 import Modal from "@/components/Modal";
 import NotFoundPage from "@/components/NotFoundPage";
 import ChatBot from "@/components/ChatBot";
@@ -108,11 +107,6 @@ export default function LayoutContent({ children }) {
         />
         {pageExists ? children : <NotFoundPage />}
       </div>
-      <footer className="fixed bottom-0 w-screen z-50">
-        <div className="sm:max-w-[576px] sm:mx-auto">
-          <Footer />
-        </div>
-      </footer>
       <ChatBot />
       {isSidebarOpen && (
         <div
