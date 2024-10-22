@@ -129,22 +129,22 @@ export default function EducationPageStructure({
     </div>
   );
 
-  const renderGraphSection = (graphSteps, isGraphA) => {
-    return (
-      <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] lg:h-[calc(100%-4rem)] overflow-auto no-scrollbar relative">
-        {isLoadingGraphA || isLoadingGraphB ? (
-          <p>Loading graph...</p>
-        ) : graphSteps[currentStep]?.graphState ? (
-          <GraphVisualisationComponent
-            graphState={graphSteps[currentStep].graphState}
-            isGraphA={isGraphA}
-          />
-        ) : (
-          <p>No graph data available</p>
-        )}
-      </div>
-    );
-  };
+  // const renderGraphSection = (graphSteps, isGraphA) => {
+  //   return (
+  //     <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] lg:h-[calc(100%-4rem)] overflow-auto no-scrollbar relative">
+  //       {isLoadingGraphA || isLoadingGraphB ? (
+  //         <p>Loading graph...</p>
+  //       ) : graphSteps[currentStep]?.graphState ? (
+  //         <GraphVisualisationComponent
+  //           graphState={graphSteps[currentStep].graphState}
+  //           isGraphA={isGraphA}
+  //         />
+  //       ) : (
+  //         <p>No graph data available</p>
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   // Mobile content
   const mobileContent = (
@@ -181,15 +181,7 @@ export default function EducationPageStructure({
                   Graph B
                 </Tabs.Trigger>
               </Tabs.List>
-              {/* <div className="flex space-x-4">
-                <Tabs.Content value="graph1" className="flex-1">
-                  {renderGraphSection(steps, true)}
-                </Tabs.Content>
-                <Tabs.Content value="graph2" className="flex-1">
-                  {renderGraphSection(comparisonSteps, false)}
-                </Tabs.Content>
-              </div>
-            </Tabs.Root> */}
+
               <div className="flex space-x-4">
                 <Tabs.Content value="graph1" className="flex-1">
                   <div className="h-[400px] bg-white border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
@@ -218,26 +210,6 @@ export default function EducationPageStructure({
               </div>
             </Tabs.Root>
           ) : (
-            //   (
-            //     renderGraphSection(steps, true)
-            //   )}
-            //   <div className="flex justify-between mt-4">
-            //     <button
-            //       onClick={prevStep}
-            //       disabled={currentStep === 0}
-            //       className="bg-gray-300 p-2 rounded disabled:opacity-50"
-            //     >
-            //       Prev
-            //     </button>
-            //     <button
-            //       onClick={nextStep}
-            //       disabled={currentStep === steps.length - 1}
-            //       className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
-            //     >
-            //       Next
-            //     </button>
-            //   </div>
-            // </div>
             <div className="h-[400px] bg-white border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
               {isLoadingGraphA ? (
                 <p>Loading graph...</p>
