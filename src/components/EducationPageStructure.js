@@ -148,12 +148,16 @@ export default function EducationPageStructure({
   );
 
   const renderGraphSection = (isDesktop = false) => (
-    <div className={`${isDesktop ? "h-[500px]" : "h-[400px]"} relative`}>
+    <div
+      className={`${
+        isDesktop ? "h-[500px]" : "h-[400px]"
+      } relative bg-white bg-opacity-50 rounded-lg`}
+    >
       {comparisonSteps.length > 0 ? (
         <Tabs.Root
           value={activeTab}
           onValueChange={setActiveTab}
-          className="w-full"
+          className="w-full h-full"
         >
           <Tabs.List className="flex mb-2 border-b">
             <Tabs.Trigger
@@ -174,9 +178,9 @@ export default function EducationPageStructure({
             </Tabs.Trigger>
           </Tabs.List>
 
-          <div className="flex space-x-4">
-            <Tabs.Content value="graph1" className="flex-1">
-              <div className="h-full bg-white bg-opacity-50 border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+          <div className="flex space-x-4 h-[calc(100%-3rem)]">
+            <Tabs.Content value="graph1" className="flex-1 h-full">
+              <div className="h-full flex items-center justify-center">
                 {isLoadingGraphA ? (
                   <p>Loading graph...</p>
                 ) : (
@@ -187,8 +191,8 @@ export default function EducationPageStructure({
                 )}
               </div>
             </Tabs.Content>
-            <Tabs.Content value="graph2" className="flex-1">
-              <div className="h-full bg-white bg-opacity-50 border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+            <Tabs.Content value="graph2" className="flex-1 h-full">
+              <div className="h-full flex items-center justify-center">
                 {isLoadingGraphB ? (
                   <p>Loading graph...</p>
                 ) : (
@@ -202,7 +206,7 @@ export default function EducationPageStructure({
           </div>
         </Tabs.Root>
       ) : (
-        <div className="h-full bg-white bg-opacity-50 border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+        <div className="h-full flex items-center justify-center">
           {isLoadingGraphA ? (
             <p>Loading graph...</p>
           ) : (
@@ -238,7 +242,7 @@ export default function EducationPageStructure({
       <h1 className="text-2xl md:text-3xl font-bold mb-6">Learn {title}</h1>
 
       <div className="w-full max-w-4xl space-y-6">
-        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
+        <div className="rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-2">Graph Visualisation</h2>
           {renderGraphSection()}
         </div>
@@ -287,12 +291,10 @@ export default function EducationPageStructure({
 
   // Desktop content
   const desktopContent = (
-    <div className="hidden lg:flex flex-row h-screen">
+    <div className="hidden px-4 lg:flex flex-row h-screen">
       <div className="w-1/2 p-4 border-r border-gray-300">
-        <h1 className="text-2xl font-bold mb-4">Learn {title}</h1>
-        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
-          {renderGraphSection(true)}
-        </div>
+        <h1 className="text-2xl font-bold mb-4 text-center">Learn {title}</h1>
+        {renderGraphSection(true)}
       </div>
 
       <div className="w-1/2 p-4 overflow-y-auto no-scrollbar">
