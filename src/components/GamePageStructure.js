@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
@@ -35,17 +37,23 @@ export default function GamePageStructure({
   const handleNodeClick = (nodeId) => {
     if (isGameComplete(graphState)) return;
 
-    const { newState, validMove, nodeStatus } = isValidMove(graphState, nodeId);
+    const {
+      newState,
+      validMove,
+      nodeStatus,
+      message: customMessage,
+    } = isValidMove(graphState, nodeId);
 
     if (validMove) {
       const newScore = getScore(nodeStatus);
       setScore((s) => s + newScore);
-      setMessage(getMessage(nodeStatus, nodeId));
+      // Use the custom message from isValidMove if provided, otherwise fall back to getMessage
+      setMessage(customMessage || getMessage(nodeStatus, nodeId));
       setOverlayContent({ type: "correct", text: "Correct!" });
       setGraphState(newState);
     } else {
       setScore((s) => s - 5);
-      setMessage(`Invalid move to Node ${nodeId}!`);
+      setMessage(customMessage || `Invalid move to Node ${nodeId}!`);
       setOverlayContent({ type: "incorrect", text: "Incorrect!" });
     }
 
