@@ -6,13 +6,13 @@ const dijkstraSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: false, distance: 0 },
-        { id: "B", visited: false, distance: Infinity },
-        { id: "C", visited: false, distance: Infinity },
-        { id: "D", visited: false, distance: Infinity },
-        { id: "E", visited: false, distance: Infinity },
-        { id: "F", visited: false, distance: Infinity },
-        { id: "G", visited: false, distance: Infinity },
+        { id: "A", visited: false, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "C", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "D", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "E", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "F", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "G", visited: false, distance: Infinity, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -26,19 +26,26 @@ const dijkstraSteps = [
       ],
       currentNode: null,
     },
-    explanation:
-      "Initial state: Set distance to start node (A) as 0 and all others as infinity.",
+    explanation: `Initial state:
+• All nodes are white (unvisited)
+• Distance(A) = 0 (starting node)
+• Distance(B) = ∞
+• Distance(C) = ∞
+• Distance(D) = ∞
+• Distance(E) = ∞
+• Distance(F) = ∞
+• Distance(G) = ∞`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: false, distance: 4 },
-        { id: "C", visited: false, distance: 2 },
-        { id: "D", visited: false, distance: Infinity },
-        { id: "E", visited: false, distance: Infinity },
-        { id: "F", visited: false, distance: Infinity },
-        { id: "G", visited: false, distance: Infinity },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: false, distance: 4, recentlyUpdated: true },
+        { id: "C", visited: false, distance: 2, recentlyUpdated: true },
+        { id: "D", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "E", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "F", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "G", visited: false, distance: Infinity, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -52,19 +59,32 @@ const dijkstraSteps = [
       ],
       currentNode: "A",
     },
-    explanation:
-      "Visit node A. Update distances to its neighbors B (4) and C (2).",
+    explanation: `Visit node A (shown in green):
+• Identify neighbors of A: B and C
+• Calculate Distance(B) = Distance(A) + weight(A→B) = 0 + 4 = 4
+• Calculate Distance(C) = Distance(A) + weight(A→C) = 0 + 2 = 2
+• B and C turn pink to show their distances were updated
+• A turns blue to show it's been visited
+• Current distances:
+  - Distance(A) = 0
+  - Distance(B) = 4
+  - Distance(C) = 2
+  - Distance(D) = ∞
+  - Distance(E) = ∞
+  - Distance(F) = ∞
+  - Distance(G) = ∞
+• Node C has smallest distance (2) among unvisited nodes, so it will be processed next`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: false, distance: 4 },
-        { id: "C", visited: true, distance: 2 },
-        { id: "D", visited: false, distance: Infinity },
-        { id: "E", visited: false, distance: Infinity },
-        { id: "F", visited: false, distance: 7 },
-        { id: "G", visited: false, distance: Infinity },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: false, distance: 4, recentlyUpdated: false },
+        { id: "C", visited: true, distance: 2, recentlyUpdated: false },
+        { id: "D", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "E", visited: false, distance: Infinity, recentlyUpdated: false },
+        { id: "F", visited: false, distance: 7, recentlyUpdated: true },
+        { id: "G", visited: false, distance: Infinity, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -78,19 +98,31 @@ const dijkstraSteps = [
       ],
       currentNode: "C",
     },
-    explanation:
-      "Visit node C (shortest unvisited). Update distance to F (2 + 5 = 7).",
+    explanation: `Visit node C (smallest unvisited distance = 2):
+    • Identify neighbors of C: F
+    • Calculate Distance(F) = Distance(C) + weight(C→F) = 2 + 5 = 7
+    • F turns pink to show its distance was updated
+    • C turns blue to show it's been visited
+    • Current distances:
+      - Distance(A) = 0
+      - Distance(B) = 4
+      - Distance(C) = 2
+      - Distance(D) = ∞
+      - Distance(E) = ∞
+      - Distance(F) = 7
+      - Distance(G) = ∞
+    • Node B has smallest distance (4) among unvisited nodes, so it will be processed next`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: true, distance: 4 },
-        { id: "C", visited: true, distance: 2 },
-        { id: "D", visited: false, distance: 7 },
-        { id: "E", visited: false, distance: 5 },
-        { id: "F", visited: false, distance: 7 },
-        { id: "G", visited: false, distance: Infinity },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: true, distance: 4, recentlyUpdated: false },
+        { id: "C", visited: true, distance: 2, recentlyUpdated: false },
+        { id: "D", visited: false, distance: 7, recentlyUpdated: true },
+        { id: "E", visited: false, distance: 5, recentlyUpdated: true },
+        { id: "F", visited: false, distance: 7, recentlyUpdated: false },
+        { id: "G", visited: false, distance: Infinity, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -104,19 +136,32 @@ const dijkstraSteps = [
       ],
       currentNode: "B",
     },
-    explanation:
-      "Visit node B. Update distances to D (4 + 3 = 7) and E (4 + 1 = 5).",
+    explanation: `Visit node B (smallest unvisited distance = 4):
+• Identify neighbors of B: D and E
+• Calculate Distance(D) = Distance(B) + weight(B→D) = 4 + 3 = 7
+• Calculate Distance(E) = Distance(B) + weight(B→E) = 4 + 1 = 5
+• D and E turn pink to show their distances were updated
+• B turns blue to show it's been visited
+• Current distances:
+  - Distance(A) = 0
+  - Distance(B) = 4
+  - Distance(C) = 2
+  - Distance(D) = 7
+  - Distance(E) = 5
+  - Distance(F) = 7
+  - Distance(G) = ∞
+• Node E has smallest distance (5) among unvisited nodes, so it will be processed next`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: true, distance: 4 },
-        { id: "C", visited: true, distance: 2 },
-        { id: "D", visited: false, distance: 7 },
-        { id: "E", visited: true, distance: 5 },
-        { id: "F", visited: false, distance: 7 },
-        { id: "G", visited: false, distance: 8 },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: true, distance: 4, recentlyUpdated: false },
+        { id: "C", visited: true, distance: 2, recentlyUpdated: false },
+        { id: "D", visited: false, distance: 7, recentlyUpdated: false },
+        { id: "E", visited: true, distance: 5, recentlyUpdated: false },
+        { id: "F", visited: false, distance: 7, recentlyUpdated: false },
+        { id: "G", visited: false, distance: 8, recentlyUpdated: true },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -130,18 +175,31 @@ const dijkstraSteps = [
       ],
       currentNode: "E",
     },
-    explanation: "Visit node E. Update distance to G (5 + 3 = 8).",
+    explanation: `Visit node E (smallest unvisited distance = 5):
+    • Identify neighbors of E: G
+    • Calculate Distance(G) = Distance(E) + weight(E→G) = 5 + 3 = 8
+    • G turns pink to show its distance was updated
+    • E turns blue to show it's been visited
+    • Current distances:
+      - Distance(A) = 0
+      - Distance(B) = 4
+      - Distance(C) = 2
+      - Distance(D) = 7
+      - Distance(E) = 5
+      - Distance(F) = 7
+      - Distance(G) = 8
+    • Nodes D and F are tied for smallest distance (7) among unvisited nodes, we'll process F next`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: true, distance: 4 },
-        { id: "C", visited: true, distance: 2 },
-        { id: "D", visited: false, distance: 7 },
-        { id: "E", visited: true, distance: 5 },
-        { id: "F", visited: true, distance: 7 },
-        { id: "G", visited: false, distance: 8 },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: true, distance: 4, recentlyUpdated: false },
+        { id: "C", visited: true, distance: 2, recentlyUpdated: false },
+        { id: "D", visited: false, distance: 7, recentlyUpdated: false },
+        { id: "E", visited: true, distance: 5, recentlyUpdated: false },
+        { id: "F", visited: true, distance: 7, recentlyUpdated: false },
+        { id: "G", visited: false, distance: 8, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -155,19 +213,31 @@ const dijkstraSteps = [
       ],
       currentNode: "F",
     },
-    explanation:
-      "Visit node F. Update distance to G (7 + 1 = 8, no change as it's not shorter).",
+    explanation: `Visit node F (one of two smallest unvisited distances = 7):
+• Identify neighbors of F: G
+• Calculate Distance(G) = Distance(F) + weight(F→G) = 7 + 1 = 8
+• No update to G as new distance (8) is not shorter than current distance (8)
+• F turns blue to show it's been visited
+• Current distances:
+  - Distance(A) = 0
+  - Distance(B) = 4
+  - Distance(C) = 2
+  - Distance(D) = 7
+  - Distance(E) = 5
+  - Distance(F) = 7
+  - Distance(G) = 8
+• Node D has smallest distance (7) among unvisited nodes, so it will be processed next`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: true, distance: 4 },
-        { id: "C", visited: true, distance: 2 },
-        { id: "D", visited: true, distance: 7 },
-        { id: "E", visited: true, distance: 5 },
-        { id: "F", visited: true, distance: 7 },
-        { id: "G", visited: false, distance: 8 },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: true, distance: 4, recentlyUpdated: false },
+        { id: "C", visited: true, distance: 2, recentlyUpdated: false },
+        { id: "D", visited: true, distance: 7, recentlyUpdated: false },
+        { id: "E", visited: true, distance: 5, recentlyUpdated: false },
+        { id: "F", visited: true, distance: 7, recentlyUpdated: false },
+        { id: "G", visited: false, distance: 8, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -181,19 +251,31 @@ const dijkstraSteps = [
       ],
       currentNode: "D",
     },
-    explanation:
-      "Visit node D. Cannot update G as current path (9) is longer than existing (8).",
+    explanation: `Visit node D (smallest unvisited distance = 7):
+    • Identify neighbors of D: G
+    • Calculate Distance(G) = Distance(D) + weight(D→G) = 7 + 2 = 9
+    • No update to G as new distance (9) is longer than current distance (8)
+    • D turns blue to show it's been visited
+    • Current distances:
+      - Distance(A) = 0
+      - Distance(B) = 4
+      - Distance(C) = 2
+      - Distance(D) = 7
+      - Distance(E) = 5
+      - Distance(F) = 7
+      - Distance(G) = 8
+    • Only G remains unvisited, so it will be processed last`,
   },
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, distance: 0 },
-        { id: "B", visited: true, distance: 4 },
-        { id: "C", visited: true, distance: 2 },
-        { id: "D", visited: true, distance: 7 },
-        { id: "E", visited: true, distance: 5 },
-        { id: "F", visited: true, distance: 7 },
-        { id: "G", visited: true, distance: 8 },
+        { id: "A", visited: true, distance: 0, recentlyUpdated: false },
+        { id: "B", visited: true, distance: 4, recentlyUpdated: false },
+        { id: "C", visited: true, distance: 2, recentlyUpdated: false },
+        { id: "D", visited: true, distance: 7, recentlyUpdated: false },
+        { id: "E", visited: true, distance: 5, recentlyUpdated: false },
+        { id: "F", visited: true, distance: 7, recentlyUpdated: false },
+        { id: "G", visited: true, distance: 8, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -207,19 +289,38 @@ const dijkstraSteps = [
       ],
       currentNode: "G",
     },
-    explanation:
-      "Visit node G. All nodes visited. Dijkstra's algorithm is complete.",
+    explanation: `Algorithm Complete!
+
+    Final distances from starting node A to all other nodes:
+    • Distance(A) = 0
+    • Distance(B) = 4
+    • Distance(C) = 2
+    • Distance(D) = 7
+    • Distance(E) = 5
+    • Distance(F) = 7
+    • Distance(G) = 8
+    
+    All nodes have been visited (shown in blue).
+    These distances represent the shortest possible paths from node A to each node in the graph.`,
   },
 ];
 
 const dijkstraConceptText = {
-  introduction: `Dijkstra's algorithm finds the shortest path from a starting node to all other nodes in a weighted graph. It works by maintaining a set of distances to each node and continuously updating them as shorter paths are found. The algorithm guarantees the shortest path in graphs where all edge weights are non-negative.`,
+  introduction: `Dijkstra's algorithm finds the shortest path from a starting node to all other nodes in a weighted graph. The algorithm works by maintaining distances to each node and always processing the unvisited node with the smallest current distance.
+
+The visualization uses the following color coding:
+• Green: Currently being processed node
+• Blue: Already visited/processed node
+• Pink: Node whose distance was just updated
+• White: Unvisited node
+• Numbers inside nodes: Current shortest distance from start node
+• Numbers on edges: Edge weights`,
   keyCharacteristics: [
-    "Always selects the unvisited node with the smallest current distance (NOT first-in-first-out)",
-    "Updates neighbor distances only if a shorter path is found through the current node",
-    "Guarantees shortest path in graphs with non-negative weights",
+    "Maintains a running total of shortest distances from the start node to each node",
+    "Always selects the unvisited node with the smallest current distance",
+    "Updates neighbor distances only if a new shorter path is found through the current node",
+    "Guarantees shortest paths in graphs with non-negative weights",
     "Processes each node exactly once",
-    "Maintains a running tally of the total distance to each node",
   ],
   applications: [
     "GPS and navigation systems for finding optimal routes",

@@ -6,13 +6,55 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: false, f: 7, g: 0, h: 7 },
-        { id: "B", visited: false, f: Infinity, g: Infinity, h: 9 },
-        { id: "C", visited: false, f: Infinity, g: Infinity, h: 9 },
-        { id: "D", visited: false, f: Infinity, g: Infinity, h: 11 },
-        { id: "E", visited: false, f: Infinity, g: Infinity, h: 9 },
-        { id: "F", visited: false, f: Infinity, g: Infinity, h: 7 },
-        { id: "G", visited: false, f: Infinity, g: Infinity, h: 0 },
+        { id: "A", visited: false, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        {
+          id: "B",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 9,
+          recentlyUpdated: false,
+        },
+        {
+          id: "C",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 9,
+          recentlyUpdated: false,
+        },
+        {
+          id: "D",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 11,
+          recentlyUpdated: false,
+        },
+        {
+          id: "E",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 9,
+          recentlyUpdated: false,
+        },
+        {
+          id: "F",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 7,
+          recentlyUpdated: false,
+        },
+        {
+          id: "G",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 0,
+          recentlyUpdated: false,
+        },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -32,13 +74,41 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, f: 7, g: 0, h: 7 },
-        { id: "B", visited: false, f: 13, g: 4, h: 9 },
-        { id: "C", visited: false, f: 12, g: 3, h: 9 },
-        { id: "D", visited: false, f: Infinity, g: Infinity, h: 11 },
-        { id: "E", visited: false, f: Infinity, g: Infinity, h: 9 },
-        { id: "F", visited: false, f: Infinity, g: Infinity, h: 7 },
-        { id: "G", visited: false, f: Infinity, g: Infinity, h: 0 },
+        { id: "A", visited: true, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        { id: "B", visited: false, f: 13, g: 4, h: 9, recentlyUpdated: true },
+        { id: "C", visited: false, f: 12, g: 3, h: 9, recentlyUpdated: true },
+        {
+          id: "D",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 11,
+          recentlyUpdated: false,
+        },
+        {
+          id: "E",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 9,
+          recentlyUpdated: false,
+        },
+        {
+          id: "F",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 7,
+          recentlyUpdated: false,
+        },
+        {
+          id: "G",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 0,
+          recentlyUpdated: false,
+        },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -58,13 +128,34 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, f: 7, g: 0, h: 7 },
-        { id: "B", visited: false, f: 13, g: 4, h: 9 },
-        { id: "C", visited: true, f: 12, g: 3, h: 9 },
-        { id: "D", visited: false, f: Infinity, g: Infinity, h: 11 },
-        { id: "E", visited: false, f: Infinity, g: Infinity, h: 9 },
-        { id: "F", visited: false, f: 14, g: 7, h: 7 },
-        { id: "G", visited: false, f: Infinity, g: Infinity, h: 0 },
+        { id: "A", visited: true, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        { id: "B", visited: false, f: 13, g: 4, h: 9, recentlyUpdated: false },
+        { id: "C", visited: true, f: 12, g: 3, h: 9, recentlyUpdated: false },
+        {
+          id: "D",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 11,
+          recentlyUpdated: false,
+        },
+        {
+          id: "E",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 9,
+          recentlyUpdated: false,
+        },
+        { id: "F", visited: false, f: 14, g: 7, h: 7, recentlyUpdated: true },
+        {
+          id: "G",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 0,
+          recentlyUpdated: false,
+        },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -84,13 +175,20 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, f: 7, g: 0, h: 7 },
-        { id: "B", visited: true, f: 13, g: 4, h: 9 },
-        { id: "C", visited: true, f: 12, g: 3, h: 9 },
-        { id: "D", visited: false, f: 20, g: 9, h: 11 },
-        { id: "E", visited: false, f: 15, g: 6, h: 9 },
-        { id: "F", visited: false, f: 14, g: 7, h: 7 },
-        { id: "G", visited: false, f: Infinity, g: Infinity, h: 0 },
+        { id: "A", visited: true, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        { id: "B", visited: true, f: 13, g: 4, h: 9, recentlyUpdated: false },
+        { id: "C", visited: true, f: 12, g: 3, h: 9, recentlyUpdated: false },
+        { id: "D", visited: false, f: 20, g: 9, h: 11, recentlyUpdated: true },
+        { id: "E", visited: false, f: 15, g: 6, h: 9, recentlyUpdated: true },
+        { id: "F", visited: false, f: 14, g: 7, h: 7, recentlyUpdated: false },
+        {
+          id: "G",
+          visited: false,
+          f: Infinity,
+          g: Infinity,
+          h: 0,
+          recentlyUpdated: false,
+        },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -110,13 +208,13 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, f: 7, g: 0, h: 7 },
-        { id: "B", visited: true, f: 13, g: 4, h: 9 },
-        { id: "C", visited: true, f: 12, g: 3, h: 9 },
-        { id: "D", visited: false, f: 20, g: 9, h: 11 },
-        { id: "E", visited: false, f: 15, g: 6, h: 9 },
-        { id: "F", visited: true, f: 14, g: 7, h: 7 },
-        { id: "G", visited: false, f: 16, g: 9, h: 0 },
+        { id: "A", visited: true, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        { id: "B", visited: true, f: 13, g: 4, h: 9, recentlyUpdated: false },
+        { id: "C", visited: true, f: 12, g: 3, h: 9, recentlyUpdated: false },
+        { id: "D", visited: false, f: 20, g: 9, h: 11, recentlyUpdated: false },
+        { id: "E", visited: false, f: 15, g: 6, h: 9, recentlyUpdated: false },
+        { id: "F", visited: true, f: 14, g: 7, h: 7, recentlyUpdated: false },
+        { id: "G", visited: false, f: 16, g: 9, h: 0, recentlyUpdated: true },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -136,13 +234,13 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, f: 7, g: 0, h: 7 },
-        { id: "B", visited: true, f: 13, g: 4, h: 9 },
-        { id: "C", visited: true, f: 12, g: 3, h: 9 },
-        { id: "D", visited: false, f: 20, g: 9, h: 11 },
-        { id: "E", visited: true, f: 15, g: 6, h: 9 },
-        { id: "F", visited: true, f: 14, g: 7, h: 7 },
-        { id: "G", visited: false, f: 16, g: 9, h: 0 },
+        { id: "A", visited: true, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        { id: "B", visited: true, f: 13, g: 4, h: 9, recentlyUpdated: false },
+        { id: "C", visited: true, f: 12, g: 3, h: 9, recentlyUpdated: false },
+        { id: "D", visited: false, f: 20, g: 9, h: 11, recentlyUpdated: false },
+        { id: "E", visited: true, f: 15, g: 6, h: 9, recentlyUpdated: false },
+        { id: "F", visited: true, f: 14, g: 7, h: 7, recentlyUpdated: false },
+        { id: "G", visited: false, f: 16, g: 9, h: 0, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },
@@ -162,13 +260,13 @@ const astarSteps = [
   {
     graphState: {
       nodes: [
-        { id: "A", visited: true, f: 7, g: 0, h: 7 },
-        { id: "B", visited: true, f: 13, g: 4, h: 9 },
-        { id: "C", visited: true, f: 12, g: 3, h: 9 },
-        { id: "D", visited: false, f: 20, g: 9, h: 11 },
-        { id: "E", visited: true, f: 15, g: 6, h: 9 },
-        { id: "F", visited: true, f: 14, g: 7, h: 7 },
-        { id: "G", visited: true, f: 16, g: 9, h: 0 },
+        { id: "A", visited: true, f: 7, g: 0, h: 7, recentlyUpdated: false },
+        { id: "B", visited: true, f: 13, g: 4, h: 9, recentlyUpdated: false },
+        { id: "C", visited: true, f: 12, g: 3, h: 9, recentlyUpdated: false },
+        { id: "D", visited: false, f: 20, g: 9, h: 11, recentlyUpdated: false },
+        { id: "E", visited: true, f: 15, g: 6, h: 9, recentlyUpdated: false },
+        { id: "F", visited: true, f: 14, g: 7, h: 7, recentlyUpdated: false },
+        { id: "G", visited: true, f: 16, g: 9, h: 0, recentlyUpdated: false },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },

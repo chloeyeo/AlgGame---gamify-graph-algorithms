@@ -360,13 +360,13 @@ const primStepsGraphB = [
   {
     graphState: {
       nodes: [
-        { id: "A" },
-        { id: "B" },
-        { id: "C" },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-        { id: "G" },
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
       ],
       edges: [
         { source: "A", target: "B", weight: 4 },

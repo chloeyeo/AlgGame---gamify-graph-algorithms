@@ -96,7 +96,7 @@ const dfsSteps = [
       currentNode: "D",
     },
     explanation:
-      "Visit the first unvisited adjacent node of B, which is D. Push D onto the stack and mark it as visited.",
+      "Visit node D (first unvisited neighbor of B). Push D onto the stack and mark it as visited.",
   },
   {
     graphState: {
@@ -120,7 +120,53 @@ const dfsSteps = [
       currentNode: "G",
     },
     explanation:
-      "Visit the only unvisited adjacent node of D, which is G. Push G onto the stack and mark it as visited.",
+      "Visit node G (only unvisited neighbor of D). Push G onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true },
+        { id: "E", visited: false },
+        { id: "F", visited: false },
+        { id: "G", visited: true, backtracked: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "D",
+    },
+    explanation: "G has no unvisited neighbors. Backtrack to D.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: false },
+        { id: "F", visited: false },
+        { id: "G", visited: true, backtracked: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "B",
+    },
+    explanation: "D has no more unvisited neighbors. Backtrack to B.",
   },
   {
     graphState: {
@@ -144,7 +190,53 @@ const dfsSteps = [
       currentNode: "E",
     },
     explanation:
-      "Backtrack to B and visit its unvisited adjacent node E. Push E onto the stack and mark it as visited.",
+      "Visit node E (remaining unvisited neighbor of B). Push E onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
+        { id: "F", visited: false },
+        { id: "G", visited: true, backtracked: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "B",
+    },
+    explanation: "E has no unvisited neighbors. Backtrack to B.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true, backtracked: true },
+        { id: "C", visited: false },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
+        { id: "F", visited: false },
+        { id: "G", visited: true, backtracked: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "A",
+    },
+    explanation: "B has no more unvisited neighbors. Backtrack to A.",
   },
   {
     graphState: {
@@ -168,7 +260,7 @@ const dfsSteps = [
       currentNode: "C",
     },
     explanation:
-      "Backtrack to A and visit its unvisited adjacent node C. Push C onto the stack and mark it as visited.",
+      "Visit node C (remaining unvisited neighbor of A). Push C onto the stack and mark it as visited.",
   },
   {
     graphState: {
@@ -192,7 +284,53 @@ const dfsSteps = [
       currentNode: "F",
     },
     explanation:
-      "Visit the only unvisited adjacent node of C, which is F. Push F onto the stack and mark it as visited.",
+      "Visit node F (only unvisited neighbor of C). Push F onto the stack and mark it as visited.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true, backtracked: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
+        { id: "F", visited: true, backtracked: true },
+        { id: "G", visited: true, backtracked: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "C",
+    },
+    explanation: "F has no unvisited neighbors. Backtrack to C.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true, backtracked: true },
+        { id: "C", visited: true, backtracked: true },
+        { id: "D", visited: true, backtracked: true },
+        { id: "E", visited: true, backtracked: true },
+        { id: "F", visited: true, backtracked: true },
+        { id: "G", visited: true, backtracked: true },
+      ],
+      edges: [
+        { source: "A", target: "B" },
+        { source: "A", target: "C" },
+        { source: "B", target: "D" },
+        { source: "B", target: "E" },
+        { source: "C", target: "F" },
+        { source: "D", target: "G" },
+      ],
+      currentNode: "A",
+    },
+    explanation: "C has no more unvisited neighbors. Backtrack to A.",
   },
   {
     graphState: {
@@ -215,7 +353,8 @@ const dfsSteps = [
       ],
       currentNode: null,
     },
-    explanation: "All nodes have been visited. DFS traversal is complete.",
+    explanation:
+      "A has no more unvisited neighbors. DFS traversal is complete. All nodes have been visited and backtracked.",
   },
 ];
 

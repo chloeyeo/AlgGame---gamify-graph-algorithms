@@ -13,16 +13,19 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const isAStarPage = pathname.includes("astar");
   const isKruskalsPage = pathname.includes("kruskals");
   const isPrimsPage = pathname.includes("prims");
+  const isDFSPage = pathname.includes("dfs");
 
   // Color constants
   const COLORS = {
     CURRENT_NODE: "#2ecc71",
     VISITED_NODE: "#3498db",
     UPDATED_NODE: "#ff69b4",
+    BACKTRACKED_NODE: "#e67e22",
     UNVISITED_NODE: "#ffffff",
     UNVISITED_BORDER: "#e74c3c",
     EDGE_NORMAL: "#95a5a6",
     EDGE_MST: "#e74c3c",
+    EDGE_PATH: "#f1c40f",
     EDGE_WEIGHT: "#2980b9",
     NODE_TEXT_VISITED: "#ffffff",
     NODE_TEXT_UNVISITED: "#2c3e50",
@@ -35,11 +38,104 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
+    // viewbox adjusted for floating edges list for Kruskal's
+    const viewBoxWidth = isKruskalsPage ? 800 : 600;
+
     svg
-      .attr("viewBox", "0 -20 600 600")
+      .attr("viewBox", `0 -20 ${viewBoxWidth} 600`)
+      // .attr("viewBox", "0 -20 600 600")
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
       .attr("height", "100%");
+
+    const legend = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", "translate(20, 20)");
+
+    const getLegendItems = () => {
+      const commonItems = [
+        { color: COLORS.CURRENT_NODE, text: "Current Node" },
+        { color: COLORS.VISITED_NODE, text: "Visited Node" },
+        { color: COLORS.UNVISITED_NODE, text: "Unvisited Node" },
+      ];
+
+      if (isDFSPage) {
+        commonItems.push({
+          color: COLORS.BACKTRACKED_NODE,
+          text: "Backtracked Node",
+        });
+      }
+
+      if (isDijkstraPage || isAStarPage) {
+        commonItems.push({
+          color: COLORS.UPDATED_NODE,
+          text: "Recently Updated Node",
+        });
+      }
+
+      if (isKruskalsPage || isPrimsPage) {
+        commonItems.push({ color: COLORS.EDGE_MST, text: "MST Edge" });
+      }
+
+      if (isDijkstraPage || isAStarPage || isKruskalsPage || isPrimsPage) {
+        commonItems.push({
+          isText: true,
+          text: "Edge numbers represent weights",
+        });
+      }
+
+      if (isDijkstraPage) {
+        commonItems.push({
+          isText: true,
+          text: "Node values show shortest distance from start",
+        });
+      }
+
+      if (isAStarPage) {
+        commonItems.push({
+          isText: true,
+          text: "Node values show f, g, and h costs",
+        });
+      }
+
+      return commonItems;
+    };
+
+    const legendItems = getLegendItems();
+
+    legendItems.forEach((item, i) => {
+      const legendItem = legend
+        .append("g")
+        .attr("transform", `translate(0, ${i * 25})`);
+
+      if (item.isText) {
+        legendItem
+          .append("text")
+          .attr("x", 0)
+          .attr("y", 15)
+          .text(item.text)
+          .attr("fill", "#000")
+          .attr("font-size", "12px")
+          .attr("font-style", "italic");
+      } else {
+        legendItem
+          .append("rect")
+          .attr("width", 20)
+          .attr("height", 20)
+          .attr("fill", item.color)
+          .attr("stroke", "#000")
+          .attr("stroke-width", 1);
+
+        legendItem
+          .append("text")
+          .attr("x", 30)
+          .attr("y", 15)
+          .text(item.text)
+          .attr("fill", "#000")
+          .attr("font-size", "12px");
+      }
+    });
 
     const allNodes = [
       { id: "A", x: 300, y: 50 },
@@ -122,6 +218,74 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       }
     });
 
+    // if (isDijkstraPage) {
+    //   const legend = svg
+    //     .append("g")
+    //     .attr("class", "legend")
+    //     .attr("transform", "translate(20, 20)");
+
+    //   const legendItems = [
+    //     { color: COLORS.CURRENT_NODE, text: "Current Node" },
+    //     { color: COLORS.VISITED_NODE, text: "Visited Node" },
+    //     { color: COLORS.UPDATED_NODE, text: "Recently Updated Node" },
+    //     { color: COLORS.UNVISITED_NODE, text: "Unvisited Node" },
+    //   ];
+
+    //   legendItems.forEach((item, i) => {
+    //     const legendItem = legend
+    //       .append("g")
+    //       .attr("transform", `translate(0, ${i * 25})`);
+
+    //     legendItem
+    //       .append("rect")
+    //       .attr("width", 20)
+    //       .attr("height", 20)
+    //       .attr("fill", item.color)
+    //       .attr("stroke", "#000")
+    //       .attr("stroke-width", 1);
+
+    //     legendItem
+    //       .append("text")
+    //       .attr("x", 30)
+    //       .attr("y", 15)
+    //       .text(item.text)
+    //       .attr("fill", "#000")
+    //       .attr("font-size", "12px");
+    //   });
+    // }
+
+    // Enhanced distance labels for Dijkstra's algorithm
+    if (isDijkstraPage) {
+      const distanceDisplay = svg
+        .append("g")
+        .attr("class", "distance-display")
+        .attr("transform", "translate(550, 20)");
+
+      distanceDisplay
+        .append("text")
+        .attr("y", 0)
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .text("Current Distances:");
+
+      graphState.nodes.forEach((node, i) => {
+        const textElement = distanceDisplay
+          .append("text")
+          .attr("y", (i + 1) * 25)
+          .attr("font-size", "14px")
+          .text(`Distance(${node.id}) = `);
+
+        textElement
+          .append("tspan")
+          .attr("font-weight", "bold")
+          .attr("fill", "red")
+          .attr("stroke", "black")
+          .attr("stroke-width", "0.3px")
+          .attr("stroke-linejoin", "round")
+          .text(node.distance === Infinity ? "∞" : node.distance);
+      });
+    }
+
     // Add edge weight labels
     if (isDijkstraPage || isAStarPage || isKruskalsPage || isPrimsPage) {
       edgeGroups
@@ -165,6 +329,79 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         .attr("paint-order", "stroke");
     }
 
+    // Add floating edges list for Kruskal's algorithm
+    if (isKruskalsPage) {
+      const edgesList = svg
+        .append("g")
+        .attr("class", "floating-edges")
+        .attr("transform", "translate(620, 100)");
+
+      // Add title for the floating edges
+      edgesList
+        .append("text")
+        .attr("x", 0)
+        .attr("y", -20)
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .text("Sorted Edges");
+
+      // Get all edges sorted by weight
+      const sortedEdges = [...graphState.edges].sort(
+        (a, b) => a.weight - b.weight
+      );
+
+      // Create edge items
+      sortedEdges.forEach((edge, index) => {
+        const isUsed = graphState.mstEdges.some(
+          (e) =>
+            (e.source === edge.source && e.target === edge.target) ||
+            (e.source === edge.target && e.target === edge.source)
+        );
+
+        const edgeGroup = edgesList
+          .append("g")
+          .attr("transform", `translate(0, ${index * 40})`);
+
+        // Edge representation
+        edgeGroup
+          .append("line")
+          .attr("x1", 0)
+          .attr("y1", 0)
+          .attr("x2", 50)
+          .attr("y2", 0)
+          .attr("stroke", isUsed ? "#ccc" : COLORS.EDGE_NORMAL)
+          .attr("stroke-width", 3)
+          .attr("opacity", isUsed ? 0.3 : 1);
+
+        // Edge label
+        const edgeLabel = edgeGroup
+          .append("text")
+          .attr("x", 60)
+          .attr("y", 5)
+          .attr("font-size", "14px")
+          .attr("opacity", isUsed ? 0.3 : 1);
+
+        // Edge vertices
+        edgeLabel.append("tspan").text(`${edge.source}-${edge.target}`);
+
+        // Edge weight
+        edgeLabel.append("tspan").attr("x", 110).text(`(${edge.weight})`);
+
+        // Strike-through line for used edges
+        if (isUsed) {
+          const textWidth = 80; // Approximate width of the text
+          edgeGroup
+            .append("line")
+            .attr("x1", 0)
+            .attr("y1", 0)
+            .attr("x2", textWidth + 60)
+            .attr("y2", 0)
+            .attr("stroke", "#e74c3c")
+            .attr("stroke-width", 2);
+        }
+      });
+    }
+
     // Draw nodes
     const nodeGroups = svg
       .selectAll(".node")
@@ -186,6 +423,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
+        if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
         if (node && node.recentlyUpdated) return COLORS.UPDATED_NODE;
         return COLORS.UNVISITED_NODE;
@@ -193,6 +431,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("stroke", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
+        if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
         return COLORS.UNVISITED_BORDER;
       })
@@ -268,7 +507,12 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     }
   }, [graphState, isGraphA, selectedAlgorithm, onNodeClick]);
 
-  return <svg ref={svgRef}></svg>;
+  // return <svg ref={svgRef}></svg>;
+  return (
+    <div className="w-full h-full overflow-x-auto no-scrollbar">
+      <svg ref={svgRef} className="min-w-[600px]"></svg>
+    </div>
+  );
 };
 
 export default GraphVisualisation;
