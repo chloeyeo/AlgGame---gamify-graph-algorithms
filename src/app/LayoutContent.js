@@ -1,48 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setSelectedMode,
-  setSelectedAlgorithm,
-} from "@/store/slices/algorithmSlice";
+import { setSelectedAlgorithm } from "@/store/slices/algorithmSlice";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import Modal from "@/components/Modal";
+import ModeToggle from "@/components/ModeToggle";
 import NotFoundPage from "@/components/NotFoundPage";
 import ChatBot from "@/components/ChatBot";
 
 export default function LayoutContent({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [missingSelection, setMissingSelection] = useState("");
-
   const router = useRouter();
   const pathname = usePathname();
+  const dispatch = useDispatch();
 
   const validPaths = [
     "/",
     "/about",
-    "/education",
-    "/game",
     "/education/traversal/dfs",
     "/game/traversal/dfs",
     "/education/traversal/bfs",
     "/game/traversal/bfs",
     "/education/shortest-path/dijkstras",
+    "/game/shortest-path/dijkstras",
     "/education/shortest-path/astar",
+    "/game/shortest-path/astar",
     "/education/minimum-spanning-tree/kruskals",
+    "/game/minimum-spanning-tree/kruskals",
     "/education/minimum-spanning-tree/prims",
-    // "/education/network-flow/edmonds-karp",
-    // "/education/network-flow/fold-fulkerson",
-    // "/education/matching/hungarian",
+    "/game/minimum-spanning-tree/prims",
   ];
 
   const pageExists = validPaths.includes(pathname);
 
-  const dispatch = useDispatch();
-  const selectedMode = useSelector((state) => state.algorithm.selectedMode);
   const selectedAlgorithm = useSelector(
     (state) => state.algorithm.selectedAlgorithm
   );
@@ -51,42 +43,40 @@ export default function LayoutContent({ children }) {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleModeSelect = (mode) => {
-    dispatch(setSelectedMode(mode));
-    if (selectedAlgorithm && mode === "Education") {
-      router.push("/education");
-    } else if (selectedAlgorithm && mode === "Game") {
-      router.push("/game");
-    }
-
-    if (selectedAlgorithm) {
-      setIsSidebarOpen(false);
-    }
-  };
-
   const handleAlgorithmSelect = (algorithm) => {
     dispatch(setSelectedAlgorithm(algorithm));
-    if (selectedMode && selectedMode === "Education") {
-      router.push("/education");
-    } else if (selectedMode && selectedMode === "Game") {
-      router.push("/game");
-    }
-    if (selectedMode) {
-      setIsSidebarOpen(false);
-    }
+    setIsSidebarOpen(false);
   };
 
   const handleSidebarClose = () => {
     setIsSidebarOpen(false);
-    if (!selectedMode && !selectedAlgorithm) {
-      return;
+  };
+
+  const renderContent = () => {
+    if (!pageExists) {
+      return <NotFoundPage />;
     }
-    setTimeout(() => {
-      if (!selectedMode || !selectedAlgorithm) {
-        setMissingSelection(selectedMode ? "mode" : "algorithm");
-        setIsModalOpen(true);
-      }
-    }, 300);
+    return children;
+  };
+
+  const handleModeToggle = () => {
+    const currentPath = pathname;
+    const isEducationMode = currentPath.includes("/education/");
+    const isGameMode = currentPath.includes("/game/");
+
+    let newPath;
+    if (isEducationMode) {
+      newPath = currentPath.replace("/education/", "/game/");
+    } else if (isGameMode) {
+      newPath = currentPath.replace("/game/", "/education/");
+    }
+
+    if (validPaths.includes(newPath)) {
+      router.push(newPath);
+    } else {
+      // Redirect to the NotFoundPage route
+      router.push("/not-found");
+    }
   };
 
   return (
@@ -100,12 +90,12 @@ export default function LayoutContent({ children }) {
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose}
-          onModeSelect={handleModeSelect}
           onAlgorithmSelect={handleAlgorithmSelect}
-          selectedMode={selectedMode}
           selectedAlgorithm={selectedAlgorithm}
         />
-        {pageExists ? children : <NotFoundPage />}
+        <ModeToggle onToggle={handleModeToggle} validPaths={validPaths} />
+        {/* {pageExists ? children : <NotFoundPage />} */}
+        {renderContent()}
       </div>
       <ChatBot />
       {isSidebarOpen && (
@@ -113,12 +103,6 @@ export default function LayoutContent({ children }) {
           className="absolute inset-0 bg-black bg-opacity-50 z-20"
           onClick={handleSidebarClose}
         ></div>
-      )}
-      {isModalOpen && (
-        <Modal
-          onClose={() => setIsModalOpen(false)}
-          missingSelection={missingSelection}
-        />
       )}
     </>
   );

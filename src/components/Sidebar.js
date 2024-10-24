@@ -1,18 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+import { useRouter, usePathname } from "next/navigation";
 
-const Sidebar = ({
-  isOpen,
-  onClose,
-  onModeSelect,
-  onAlgorithmSelect,
-  selectedMode,
-  selectedAlgorithm,
-}) => {
+const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
   const router = useRouter();
-  const [selectedMainAlgorithm, setSelectedMainAlgorithm] = useState(null);
+  const pathname = usePathname();
+  const [selectedMainAlgorithm, setSelectedMainAlgorithm] =
+    React.useState(null);
 
-  const modes = ["Education", "Game"];
   const algorithms = {
     Traversal: ["Depth-First Search (DFS)", "Breadth-First Search (BFS)"],
     "Shortest Path": ["Dijkstra's", "A*"],
@@ -21,7 +15,7 @@ const Sidebar = ({
     Matching: ["Hungarian (Kuhn-Munkres)"],
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (selectedAlgorithm) {
       const mainAlgo = Object.entries(algorithms).find(([, subAlgos]) =>
         subAlgos.includes(selectedAlgorithm)
@@ -40,23 +34,11 @@ const Sidebar = ({
 
   const handleSubAlgorithmClick = (subAlgorithm) => {
     onAlgorithmSelect(subAlgorithm);
-    attemptNavigation(selectedMode, subAlgorithm);
+    navigateToPage(subAlgorithm);
   };
 
-  const handleModeSelect = (mode) => {
-    onModeSelect(mode);
-    attemptNavigation(mode, selectedAlgorithm);
-  };
-
-  const attemptNavigation = (mode, algorithm) => {
-    if (mode && algorithm) {
-      navigateToPage(mode, algorithm);
-    }
-    // If both aren't selected, the modal will handle it
-  };
-
-  const navigateToPage = (mode, algorithm) => {
-    let path = `/${mode.toLowerCase()}`;
+  const navigateToPage = (algorithm) => {
+    let path = "/education"; // Default to education mode
 
     if (algorithm.includes("Depth-First Search")) {
       path += "/traversal/dfs";
@@ -71,13 +53,6 @@ const Sidebar = ({
     } else if (algorithm.includes("Prim's")) {
       path += "/minimum-spanning-tree/prims";
     }
-    // else if (algorithm.includes("Edmonds-Karp")) {
-    //   path += "/network-flow/edmonds-karp";
-    // } else if (algorithm.includes("Ford-Fulkerson")) {
-    //   path += "/network-flow/fold-fulkerson";
-    // } else if (algorithm.includes("Hungarian (Kuhn-Munkres)")) {
-    //   path += "/matching/hungarian";
-    // }
 
     router.push(path);
   };
@@ -109,25 +84,8 @@ const Sidebar = ({
             />
           </svg>
         </button>
-        <h2 className="text-xl font-semibold mb-4">Settings</h2>
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2">Mode:</h3>
-          {modes.map((mode) => (
-            <button
-              key={mode}
-              onClick={() => handleModeSelect(mode)}
-              className={`block w-full text-left px-4 py-2 rounded ${
-                selectedMode === mode
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              {mode}
-            </button>
-          ))}
-        </div>
+        <h2 className="text-xl font-semibold mb-4">Algorithms</h2>
         <div>
-          <h3 className="text-lg font-medium mb-2">Algorithm:</h3>
           {Object.entries(algorithms).map(([mainAlgorithm, subAlgorithms]) => (
             <div key={mainAlgorithm} className="mb-2">
               <button

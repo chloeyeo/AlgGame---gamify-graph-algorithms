@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
-// import { useSelector } from "react-redux";
 import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
-  initialGraphState = null, // Default to null if not provided
-  isValidMove = () => {}, // Default to an empty function
-  getNodeStatus = () => {}, // Default to an empty function
-  getScore = () => 0, // Default to return 0
-  getMessage = () => "No moves made yet.", // Default message
-  isGameComplete = () => false, // Default to return false
+  initialGraphState = null,
+  isValidMove = () => {},
+  getNodeStatus = () => {},
+  getScore = () => 0,
+  getMessage = () => "No moves made yet.",
+  isGameComplete = () => false,
 }) {
   const [graphState, setGraphState] = useState(initialGraphState);
   const [score, setScore] = useState(0);
@@ -19,14 +18,13 @@ export default function GamePageStructure({
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
-  // const algorithm = useSelector((state) => state.algorithm.selectedAlgorithm);
 
   if (!initialGraphState) {
     return (
       <p className="text-center mt-[50%]">
         No content available at the moment.
       </p>
-    ); // Fallback content if no initialGraphState
+    );
   }
 
   const handleNodeClick = (nodeId) => {
@@ -51,12 +49,27 @@ export default function GamePageStructure({
     setTimeout(() => setShowOverlay(false), 1000);
   };
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        window.speechSynthesis.cancel();
+        setIsSpeakingFeedback(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   const toggleSpeech = (text) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel(); // Stop the speech if it's currently speaking
         setIsSpeakingFeedback(false); // Reset the state to not speaking
       } else {
+        window.speechSynthesis.cancel();
         // Start reading the message aloud
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "en-US";
@@ -102,19 +115,17 @@ export default function GamePageStructure({
         </div>
 
         <div className="mb-6">
-          <h2 className="text-xl mb-2 font-semibold flex items-center">
-            <Image
-              src="/images/person-speaking.png"
-              alt="person speaking icon"
-              width={40}
-              height={40}
-              className={`${
-                isSpeakingFeedback ? "animate-icon" : ""
-              } w-12 h-12 mr-2`}
+          <div className="flex items-center mb-2">
+            <h2 className="text-xl font-semibold">Feedback</h2>
+            <button
               onClick={() => toggleSpeech(message)}
-            />
-            <span className="ml-2">Feedback</span>
-          </h2>
+              className={`ml-2 p-2 rounded-full hover:bg-gray-100 ${
+                isSpeakingFeedback ? "bg-gray-200" : ""
+              }`}
+            >
+              🔊
+            </button>
+          </div>
           <div className="bg-white border border-gray-300 rounded-lg p-4 text-center">
             <p>{message}</p>
           </div>
