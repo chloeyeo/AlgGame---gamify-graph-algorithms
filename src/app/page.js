@@ -154,15 +154,20 @@ export default function Home() {
           <li className="animate-fade-in-1 flex items-start space-x-2">
             <span className="text-blue-600 font-bold">1.</span>
             <span>
-              Choose <strong className="text-purple-600">education</strong> or{" "}
-              <strong className="text-purple-600">game</strong> mode
+              Select an <strong className="text-purple-600">algorithm</strong>{" "}
+              to visit the algorithm page! Once you visit
+              <strong className="text-purple-400">...</strong>
             </span>
           </li>
           <li className="animate-fade-in-2 flex items-start space-x-2">
             <span className="text-blue-600 font-bold">2.</span>
             <span>
-              Select an <strong className="text-purple-600">algorithm</strong>{" "}
-              to get started!
+              The default mode is{" "}
+              <strong className="text-purple-600">education</strong>. Click
+              toggle on top-right of the algorithm page to switch to{" "}
+              <strong className="text-purple-600">game</strong> mode, and click
+              again to switch back to{" "}
+              <strong className="text-purple-600">education</strong> mode!
             </span>
           </li>
         </ol>
