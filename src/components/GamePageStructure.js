@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
 export default function GamePageStructure({
@@ -19,13 +18,19 @@ export default function GamePageStructure({
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
 
-  if (!initialGraphState) {
-    return (
-      <p className="text-center mt-[50%]">
-        No content available at the moment.
-      </p>
-    );
-  }
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        window.speechSynthesis.cancel();
+        setIsSpeakingFeedback(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   const handleNodeClick = (nodeId) => {
     if (isGameComplete(graphState)) return;
@@ -49,36 +54,29 @@ export default function GamePageStructure({
     setTimeout(() => setShowOverlay(false), 1000);
   };
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        window.speechSynthesis.cancel();
-        setIsSpeakingFeedback(false);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
   const toggleSpeech = (text) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel(); // Stop the speech if it's currently speaking
-        setIsSpeakingFeedback(false); // Reset the state to not speaking
+        window.speechSynthesis.cancel();
+        setIsSpeakingFeedback(false);
       } else {
         window.speechSynthesis.cancel();
-        // Start reading the message aloud
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "en-US";
-        utterance.onstart = () => setIsSpeakingFeedback(true); // Set speaking state to true
-        utterance.onend = () => setIsSpeakingFeedback(false); // Reset when done speaking
-        window.speechSynthesis.speak(utterance); // Start speaking
+        utterance.onstart = () => setIsSpeakingFeedback(true);
+        utterance.onend = () => setIsSpeakingFeedback(false);
+        window.speechSynthesis.speak(utterance);
       }
     }
   };
+
+  if (!initialGraphState) {
+    return (
+      <p className="text-center mt-[50%]">
+        No content available at the moment.
+      </p>
+    );
+  }
 
   return (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">

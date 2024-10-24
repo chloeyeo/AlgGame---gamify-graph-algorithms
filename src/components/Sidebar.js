@@ -1,19 +1,21 @@
-import React from "react";
-import { useRouter, usePathname } from "next/navigation";
+import React, { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
   const router = useRouter();
-  const pathname = usePathname();
   const [selectedMainAlgorithm, setSelectedMainAlgorithm] =
     React.useState(null);
 
-  const algorithms = {
-    Traversal: ["Depth-First Search (DFS)", "Breadth-First Search (BFS)"],
-    "Shortest Path": ["Dijkstra's", "A*"],
-    "Minimum Spanning Tree": ["Kruskal's", "Prim's"],
-    "Network Flow": ["Ford-Fulkerson", "Edmonds-Karp"],
-    Matching: ["Hungarian (Kuhn-Munkres)"],
-  };
+  const algorithms = useMemo(
+    () => ({
+      Traversal: ["Depth-First Search (DFS)", "Breadth-First Search (BFS)"],
+      "Shortest Path": ["Dijkstra's", "A*"],
+      "Minimum Spanning Tree": ["Kruskal's", "Prim's"],
+      "Network Flow": ["Ford-Fulkerson", "Edmonds-Karp"],
+      Matching: ["Hungarian (Kuhn-Munkres)"],
+    }),
+    []
+  );
 
   React.useEffect(() => {
     if (selectedAlgorithm) {
@@ -24,7 +26,7 @@ const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
         setSelectedMainAlgorithm(mainAlgo[0]);
       }
     }
-  }, [selectedAlgorithm]);
+  }, [selectedAlgorithm, algorithms]);
 
   const handleMainAlgorithmClick = (algorithm) => {
     setSelectedMainAlgorithm(

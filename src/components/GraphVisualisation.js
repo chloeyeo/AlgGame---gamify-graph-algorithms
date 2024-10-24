@@ -218,43 +218,6 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       }
     });
 
-    // if (isDijkstraPage) {
-    //   const legend = svg
-    //     .append("g")
-    //     .attr("class", "legend")
-    //     .attr("transform", "translate(20, 20)");
-
-    //   const legendItems = [
-    //     { color: COLORS.CURRENT_NODE, text: "Current Node" },
-    //     { color: COLORS.VISITED_NODE, text: "Visited Node" },
-    //     { color: COLORS.UPDATED_NODE, text: "Recently Updated Node" },
-    //     { color: COLORS.UNVISITED_NODE, text: "Unvisited Node" },
-    //   ];
-
-    //   legendItems.forEach((item, i) => {
-    //     const legendItem = legend
-    //       .append("g")
-    //       .attr("transform", `translate(0, ${i * 25})`);
-
-    //     legendItem
-    //       .append("rect")
-    //       .attr("width", 20)
-    //       .attr("height", 20)
-    //       .attr("fill", item.color)
-    //       .attr("stroke", "#000")
-    //       .attr("stroke-width", 1);
-
-    //     legendItem
-    //       .append("text")
-    //       .attr("x", 30)
-    //       .attr("y", 15)
-    //       .text(item.text)
-    //       .attr("fill", "#000")
-    //       .attr("font-size", "12px");
-    //   });
-    // }
-
-    // Enhanced distance labels for Dijkstra's algorithm
     if (isDijkstraPage) {
       const distanceDisplay = svg
         .append("g")
@@ -505,7 +468,29 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         }
       });
     }
-  }, [graphState, isGraphA, selectedAlgorithm, onNodeClick]);
+  }, [
+    graphState,
+    isGraphA,
+    selectedAlgorithm,
+    onNodeClick,
+    COLORS.BACKTRACKED_NODE,
+    COLORS.CURRENT_NODE,
+    COLORS.DISTANCE_LABEL,
+    COLORS.EDGE_MST,
+    COLORS.EDGE_NORMAL,
+    COLORS.EDGE_WEIGHT,
+    COLORS.NODE_TEXT_UNVISITED,
+    COLORS.NODE_TEXT_VISITED,
+    COLORS.UNVISITED_BORDER,
+    COLORS.UNVISITED_NODE,
+    COLORS.UPDATED_NODE,
+    COLORS.VISITED_NODE,
+    isAStarPage,
+    isDFSPage,
+    isDijkstraPage,
+    isKruskalsPage,
+    isPrimsPage,
+  ]);
 
   // return <svg ref={svgRef}></svg>;
   return (

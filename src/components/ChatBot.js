@@ -22,7 +22,7 @@ const ChatBot = () => {
       ]);
       setShowOptions(true);
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length]);
 
   const handleQuestionClick = (question) => {
     setShowOptions(false);

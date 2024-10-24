@@ -61,7 +61,7 @@ const CodingAnimation = () => {
     }, 30);
 
     return () => clearInterval(typingInterval);
-  }, []);
+  }, [fullText]);
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg text-green-400 font-mono overflow-x-auto">
@@ -69,68 +69,6 @@ const CodingAnimation = () => {
     </div>
   );
 };
-
-// const CodingAnimation = () => {
-//   const [text, setText] = useState("");
-//   const fullText = `const aboutChloe = {
-//     passion: "coding",
-//     origin: "South Korea",
-//     pets: ["Malaysian Street Cat Chunsa", "Korean Street Cat Toto"]
-//   };
-//   const technologyStack = {
-//     databases: ["MongoDB", "MySQL"],
-//     librariesAndFrameworks: [
-//       "React JS",
-//       "Node JS",
-//       "Express JS",
-//       "Next JS",
-//       "React Native",
-//       "Django",
-//       "Spring Boot",
-//     ],
-//     languages: ["TypeScript", "JavaScript", "Java", "Python", "Haskell"],
-//     tools: [
-//       "Mongoose",
-//       "Docker",
-//       "CSS",
-//       "SCSS",
-//       "HTML",
-//       "Git",
-//       "Jenkins",
-//       "Github Actions",
-//     ],
-//     cloud: ["AWS"],
-//     otherTechnologies: [
-//       "Redux",
-//       "Redux Toolkit",
-//       "JPA",
-//       "Querydsl",
-//       "MiniZinc",
-//       "Promela",
-//       "SPIN"
-//   ];
-// }`;
-
-//   useEffect(() => {
-//     let i = 0;
-//     const typingInterval = setInterval(() => {
-//       if (i < fullText.length) {
-//         setText((prev) => prev + fullText.charAt(i));
-//         i++;
-//       } else {
-//         clearInterval(typingInterval);
-//       }
-//     }, 50);
-
-//     return () => clearInterval(typingInterval);
-//   }, []);
-
-//   return (
-//     <div className="bg-gray-800 p-4 rounded-lg text-green-400 font-mono overflow-x-auto">
-//       <pre className="whitespace-pre-wrap break-words">{text}</pre>
-//     </div>
-//   );
-// };
 
 export default function AboutPage() {
   return (
