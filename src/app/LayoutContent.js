@@ -31,6 +31,7 @@ export default function LayoutContent({ children }) {
     "/game/minimum-spanning-tree/kruskals",
     "/education/minimum-spanning-tree/prims",
     "/game/minimum-spanning-tree/prims",
+    "/education/network-flow/ford-fulkerson",
   ];
 
   const pageExists = validPaths.includes(pathname);
@@ -94,7 +95,6 @@ export default function LayoutContent({ children }) {
           selectedAlgorithm={selectedAlgorithm}
         />
         <ModeToggle onToggle={handleModeToggle} validPaths={validPaths} />
-        {/* {pageExists ? children : <NotFoundPage />} */}
         {renderContent()}
       </div>
       <ChatBot />

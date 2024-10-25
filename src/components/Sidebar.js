@@ -54,6 +54,8 @@ const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
       path += "/minimum-spanning-tree/kruskals";
     } else if (algorithm.includes("Prim's")) {
       path += "/minimum-spanning-tree/prims";
+    } else if (algorithm.includes("Ford-Fulkerson")) {
+      path += "/network-flow/ford-fulkerson";
     }
 
     router.push(path);

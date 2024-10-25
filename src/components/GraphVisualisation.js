@@ -14,6 +14,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const isKruskalsPage = pathname.includes("kruskals");
   const isPrimsPage = pathname.includes("prims");
   const isDFSPage = pathname.includes("dfs");
+  const isFordFulkersonPage = pathname.includes("ford-fulkerson");
 
   // Color constants
   const COLORS = {
@@ -30,6 +31,11 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     NODE_TEXT_VISITED: "#ffffff",
     NODE_TEXT_UNVISITED: "#2c3e50",
     DISTANCE_LABEL: "#e74c3c",
+    FLOW_PATH: "#2563eb",
+    FLOW_EDGE: "#94a3b8",
+    RESIDUAL_EDGE: "#dc2626",
+    SOURCE_NODE: "#bbf7d0",
+    SINK_NODE: "#fecaca",
   };
 
   useEffect(() => {
@@ -38,12 +44,11 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    // viewbox adjusted for floating edges list for Kruskal's
-    const viewBoxWidth = isKruskalsPage ? 800 : 600;
+    const viewBoxWidth = isFordFulkersonPage ? 800 : isKruskalsPage ? 800 : 600;
+    const viewBoxHeight = isFordFulkersonPage ? 500 : 600;
 
     svg
-      .attr("viewBox", `0 -20 ${viewBoxWidth} 600`)
-      // .attr("viewBox", "0 -20 600 600")
+      .attr("viewBox", `0 -20 ${viewBoxWidth} ${viewBoxHeight}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
       .attr("height", "100%");
@@ -54,11 +59,20 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("transform", "translate(20, 20)");
 
     const getLegendItems = () => {
-      const commonItems = [
+      let commonItems = [
         { color: COLORS.CURRENT_NODE, text: "Current Node" },
         { color: COLORS.VISITED_NODE, text: "Visited Node" },
         { color: COLORS.UNVISITED_NODE, text: "Unvisited Node" },
       ];
+
+      if (isFordFulkersonPage) {
+        commonItems = [
+          { color: COLORS.SOURCE_NODE, text: "Source Node" },
+          { color: COLORS.SINK_NODE, text: "Sink Node" },
+          { color: COLORS.FLOW_PATH, text: "Current Flow Path" },
+          { isText: true, text: "Edge numbers show flow/capacity" },
+        ];
+      }
 
       if (isDFSPage) {
         commonItems.push({
@@ -119,6 +133,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("font-size", "12px")
           .attr("font-style", "italic");
       } else {
+        // Add colored rectangle
         legendItem
           .append("rect")
           .attr("width", 20)
@@ -127,6 +142,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("stroke", "#000")
           .attr("stroke-width", 1);
 
+        // Add text next to rectangle
         legendItem
           .append("text")
           .attr("x", 30)
@@ -147,9 +163,29 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       { id: "G", x: 80, y: 500 },
     ];
 
+    const getFordFulkersonNodePositions = () => {
+      if (isFordFulkersonPage) {
+        return {
+          S: { x: 100, y: 250 },
+          A: { x: 300, y: 100 },
+          B: { x: 500, y: 100 },
+          C: { x: 300, y: 400 },
+          D: { x: 500, y: 400 },
+          T: { x: 700, y: 250 },
+        };
+      }
+    };
+
+    const fordFulkersonNodePositions = getFordFulkersonNodePositions();
+
     const nodes =
       (isPrimsPage || isKruskalsPage) && isGraphA
         ? allNodes.filter((node) => node.id !== "G")
+        : isFordFulkersonPage
+        ? graphState.nodes.map((n) => ({
+            ...n,
+            ...fordFulkersonNodePositions[n.id],
+          }))
         : allNodes;
 
     const links = graphState.edges;
@@ -391,13 +427,20 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", 35)
+      .attr("r", isFordFulkersonPage ? 25 : 35)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
         if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
         if (node && node.recentlyUpdated) return COLORS.UPDATED_NODE;
+        if (isFordFulkersonPage) {
+          return d.id === "S"
+            ? COLORS.SOURCE_NODE
+            : d.id === "T"
+            ? COLORS.SINK_NODE
+            : COLORS.UNVISITED_NODE;
+        }
         return COLORS.UNVISITED_NODE;
       })
       .attr("stroke", (d) => {
@@ -405,6 +448,11 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
         if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
+        if (isFordFulkersonPage) {
+          return graphState.currentPath?.includes(d.id)
+            ? COLORS.FLOW_PATH
+            : "#64748b";
+        }
         return COLORS.UNVISITED_BORDER;
       })
       .attr("stroke-width", 3)
@@ -427,6 +475,10 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           ? COLORS.NODE_TEXT_VISITED
           : COLORS.NODE_TEXT_UNVISITED;
       });
+
+    if (isFordFulkersonPage) {
+      nodeGroups.attr("fill", "#000").text((d) => d.id);
+    }
 
     // Enhanced distance labels for Dijkstra's algorithm
     if (isDijkstraPage) {
@@ -477,23 +529,131 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         }
       });
     }
+
+    if (isFordFulkersonPage) {
+      // Define arrow markers
+      svg
+        .append("defs")
+        .selectAll("marker")
+        .data(["forward", "backward"])
+        .enter()
+        .append("marker")
+        .attr("id", (d) => `arrow-${d}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", (d) => (d === "forward" ? 25 : -15))
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", (d) =>
+          d === "forward" ? "M0,-5L10,0L0,5" : "M10,-5L0,0L10,5"
+        )
+        .attr("fill", "#64748b");
+
+      edgeGroups.each(function (d) {
+        const elem = d3.select(this);
+        const sourceNode = fordFulkersonNodePositions[d.source];
+        const targetNode = fordFulkersonNodePositions[d.target];
+
+        // Calculate control points for smoother curves
+        const dx = targetNode.x - sourceNode.x;
+        const dy = targetNode.y - sourceNode.y;
+        const controlPoint = {
+          x: (sourceNode.x + targetNode.x) / 2,
+          y:
+            (sourceNode.y + targetNode.y) / 2 +
+            (Math.abs(dx) > Math.abs(dy) ? -30 : 0),
+        };
+
+        // Forward edge with arrow
+        elem
+          .append("path")
+          .attr(
+            "d",
+            `M ${sourceNode.x} ${sourceNode.y} Q ${controlPoint.x} ${controlPoint.y} ${targetNode.x} ${targetNode.y}`
+          )
+          .attr("fill", "none")
+          .attr(
+            "stroke",
+            // Fix the highlighting logic here
+            graphState.currentPath?.length > 0 &&
+              graphState.currentPath?.includes(d.source) &&
+              graphState.currentPath?.includes(d.target) &&
+              graphState.currentPath[
+                graphState.currentPath.indexOf(d.source) + 1
+              ] === d.target
+              ? COLORS.FLOW_PATH
+              : COLORS.FLOW_EDGE
+          )
+          .attr(
+            "stroke-width",
+            graphState.currentPath?.length > 0 &&
+              graphState.currentPath?.includes(d.source) &&
+              graphState.currentPath?.includes(d.target) &&
+              graphState.currentPath[
+                graphState.currentPath.indexOf(d.source) + 1
+              ] === d.target
+              ? "3"
+              : "2"
+          )
+          .attr("marker-end", "url(#arrow-forward)");
+
+        // Flow/capacity label
+        elem
+          .append("text")
+          .attr("x", controlPoint.x)
+          .attr("y", controlPoint.y - 10)
+          .attr("text-anchor", "middle")
+          .attr("class", "text-sm font-medium")
+          .attr(
+            "fill",
+            graphState.currentPath?.length > 0 &&
+              graphState.currentPath?.includes(d.source) &&
+              graphState.currentPath?.includes(d.target) &&
+              graphState.currentPath[
+                graphState.currentPath.indexOf(d.source) + 1
+              ] === d.target
+              ? COLORS.FLOW_PATH
+              : "#64748b"
+          )
+          .text(`${d.flow}/${d.capacity}`);
+      });
+
+      nodeGroups
+        .append("circle")
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
+        .attr("r", 25)
+        .attr("fill", (d) => {
+          if (d.id === "S") return COLORS.SOURCE_NODE;
+          if (d.id === "T") return COLORS.SINK_NODE;
+          return graphState.currentPath?.includes(d.id)
+            ? COLORS.FLOW_PATH
+            : COLORS.UNVISITED_NODE;
+        })
+        .attr("stroke", (d) =>
+          graphState.currentPath?.includes(d.id) ? COLORS.FLOW_PATH : "#64748b"
+        )
+        .attr("stroke-width", 2);
+
+      // Add text labels for nodes
+      nodeGroups
+        .append("text")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", "middle")
+        .attr("fill", "#000")
+        .attr("class", "text-sm font-medium")
+        .text((d) => d.id);
+    }
   }, [
     graphState,
     isGraphA,
     selectedAlgorithm,
     onNodeClick,
-    COLORS.BACKTRACKED_NODE,
-    COLORS.CURRENT_NODE,
-    COLORS.DISTANCE_LABEL,
-    COLORS.EDGE_MST,
-    COLORS.EDGE_NORMAL,
-    COLORS.EDGE_WEIGHT,
-    COLORS.NODE_TEXT_UNVISITED,
-    COLORS.NODE_TEXT_VISITED,
-    COLORS.UNVISITED_BORDER,
-    COLORS.UNVISITED_NODE,
-    COLORS.UPDATED_NODE,
-    COLORS.VISITED_NODE,
+    COLORS,
     isAStarPage,
     isDFSPage,
     isDijkstraPage,
