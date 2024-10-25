@@ -174,12 +174,21 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       return false;
     };
 
-    edgeGroups.each(function (d) {
+    edgeGroups.each(function (d, i) {
       const elem = d3.select(this);
       const sourceNode = nodes.find((n) => n.id === d.source);
       const targetNode = nodes.find((n) => n.id === d.target);
 
       if (!sourceNode || !targetNode) return;
+
+      // For Kruskal's algorithm, make edges clickable
+      if (isKruskalsPage) {
+        elem.style("cursor", "pointer").on("click", (event) => {
+          if (onNodeClick) {
+            onNodeClick(i); // Pass the edge index instead of node id
+          }
+        });
+      }
 
       if (
         (isPrimsPage || isKruskalsPage) &&

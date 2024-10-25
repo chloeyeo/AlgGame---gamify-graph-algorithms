@@ -1,24 +1,46 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
   initialGraphState = null,
+  secondaryGraphState = null, // New prop for second graph state
   isValidMove = () => {},
   getNodeStatus = () => {},
   getScore = () => 0,
   getMessage = () => "No moves made yet.",
   isGameComplete = () => false,
 }) {
-  const [graphState, setGraphState] = useState(initialGraphState);
+  const [activeTab, setActiveTab] = useState("graph1");
+  const [graphStateA, setGraphStateA] = useState(initialGraphState);
+  const [graphStateB, setGraphStateB] = useState(secondaryGraphState);
   const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
   const [message, setMessage] = useState("");
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
+
+  const isMultiGraphGame = title.includes("Kruskal") || title.includes("Prim");
+
+  // Get current graph state based on active tab
+  const getCurrentGraphState = () => {
+    if (!isMultiGraphGame) return graphStateA;
+    return activeTab === "graph1" ? graphStateA : graphStateB;
+  };
+
+  // Set current graph state based on active tab
+  const setCurrentGraphState = (newState) => {
+    if (!isMultiGraphGame) {
+      setGraphStateA(newState);
+      return;
+    }
+    if (activeTab === "graph1") {
+      setGraphStateA(newState);
+    } else {
+      setGraphStateB(newState);
+    }
+  };
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -35,22 +57,21 @@ export default function GamePageStructure({
   }, []);
 
   const handleNodeClick = (nodeId) => {
-    if (isGameComplete(graphState)) return;
+    if (isGameComplete(getCurrentGraphState())) return;
 
     const {
       newState,
       validMove,
       nodeStatus,
       message: customMessage,
-    } = isValidMove(graphState, nodeId);
+    } = isValidMove(getCurrentGraphState(), nodeId);
 
     if (validMove) {
       const newScore = getScore(nodeStatus);
       setScore((s) => s + newScore);
-      // Use the custom message from isValidMove if provided, otherwise fall back to getMessage
       setMessage(customMessage || getMessage(nodeStatus, nodeId));
       setOverlayContent({ type: "correct", text: "Correct!" });
-      setGraphState(newState);
+      setCurrentGraphState(newState);
     } else {
       setScore((s) => s - 5);
       setMessage(customMessage || `Invalid move to Node ${nodeId}!`);
@@ -98,25 +119,48 @@ export default function GamePageStructure({
 
         <div className="mb-6 relative">
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
-          <div className="bg-white border border-gray-300 rounded-lg flex items-center justify-center h-[27rem] overflow-hidden relative">
-            <GraphVisualisation
-              graphState={graphState}
-              onNodeClick={handleNodeClick}
-              mode="game"
-            />
-            {showOverlay && (
-              <div
-                className={`absolute inset-0 flex items-center justify-center ${
-                  overlayContent.type === "correct"
-                    ? "bg-green-500"
-                    : "bg-red-500"
-                } bg-opacity-75`}
-              >
-                <p className="text-white text-2xl font-bold">
-                  {overlayContent.text}
-                </p>
+          <div className="bg-white border border-gray-300 rounded-lg">
+            {isMultiGraphGame && (
+              <div className="flex mb-2 border-b">
+                <button
+                  onClick={() => setActiveTab("graph1")}
+                  className={`px-4 py-2 border-b-2 border-transparent hover:border-blue-500 focus:outline-none ${
+                    activeTab === "graph1" ? "border-blue-500 font-bold" : ""
+                  }`}
+                >
+                  Graph A
+                </button>
+                <button
+                  onClick={() => setActiveTab("graph2")}
+                  className={`px-4 py-2 border-b-2 border-transparent hover:border-blue-500 focus:outline-none ${
+                    activeTab === "graph2" ? "border-blue-500 font-bold" : ""
+                  }`}
+                >
+                  Graph B
+                </button>
               </div>
             )}
+            <div className="flex items-center justify-center h-[27rem] overflow-hidden relative">
+              <GraphVisualisation
+                graphState={getCurrentGraphState()}
+                onNodeClick={handleNodeClick}
+                mode="game"
+                isGraphA={activeTab === "graph1"}
+              />
+              {showOverlay && (
+                <div
+                  className={`absolute inset-0 flex items-center justify-center ${
+                    overlayContent.type === "correct"
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  } bg-opacity-75`}
+                >
+                  <p className="text-white text-2xl font-bold">
+                    {overlayContent.text}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -137,11 +181,12 @@ export default function GamePageStructure({
           </div>
         </div>
 
-        {!isGameComplete(graphState) && graphState.currentNode === null && (
-          <p className="text-red-800 text-center text-sm font-bold">
-            ! Please click on a node to visit it
-          </p>
-        )}
+        {!isGameComplete(getCurrentGraphState()) &&
+          getCurrentGraphState().currentNode === null && (
+            <p className="text-red-800 text-center text-sm font-bold">
+              ! Please click on a node to visit it
+            </p>
+          )}
       </div>
     </main>
   );
