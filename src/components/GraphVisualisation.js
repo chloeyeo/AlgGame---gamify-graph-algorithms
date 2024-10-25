@@ -181,8 +181,8 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
 
       if (!sourceNode || !targetNode) return;
 
-      // For Kruskal's algorithm, make edges clickable
-      if (isKruskalsPage) {
+      // For Kruskal's and Prim's make edges clickable
+      if (isKruskalsPage || isPrimsPage) {
         elem.style("cursor", "pointer").on("click", (event) => {
           if (onNodeClick) {
             onNodeClick(i); // Pass the edge index instead of node id
