@@ -58,6 +58,8 @@ const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
       path += "/network-flow/ford-fulkerson";
     } else if (algorithm.includes("Edmonds-Karp")) {
       path += "/network-flow/edmonds-karp";
+    } else if (algorithm.includes("Hungarian (Kuhn-Munkres)")) {
+      path += "/matching/hungarian-kuhn-munkres";
     }
 
     router.push(path);

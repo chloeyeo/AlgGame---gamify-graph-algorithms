@@ -35,6 +35,8 @@ export default function LayoutContent({ children }) {
     "/game/network-flow/ford-fulkerson",
     "/education/network-flow/edmonds-karp",
     "/game/network-flow/edmonds-karp",
+    "/education/matching/hungarian-kuhn-munkres",
+    "/game/matching/hungarian-kuhn-munkres",
   ];
 
   const pageExists = validPaths.includes(pathname);
