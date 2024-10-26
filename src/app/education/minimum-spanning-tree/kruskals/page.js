@@ -383,7 +383,7 @@ const kruskalPseudocode = `function Kruskal(G):
             Union(u, v)
     return A`;
 
-export default function KruskalEducationPage() {
+export default function KruskalsEducationPage() {
   return (
     <EducationPageStructure
       title="Kruskal's Algorithm"

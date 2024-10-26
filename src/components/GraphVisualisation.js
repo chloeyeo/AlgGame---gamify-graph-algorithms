@@ -15,6 +15,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const isPrimsPage = pathname.includes("prims");
   const isDFSPage = pathname.includes("dfs");
   const isFordFulkersonPage = pathname.includes("ford-fulkerson");
+  const isEdmondsKarpPage = pathname.includes("edmonds-karp");
 
   // Color constants
   const COLORS = {
@@ -44,8 +45,13 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const viewBoxWidth = isFordFulkersonPage ? 800 : isKruskalsPage ? 800 : 600;
-    const viewBoxHeight = isFordFulkersonPage ? 500 : 600;
+    const viewBoxWidth =
+      isEdmondsKarpPage || isFordFulkersonPage
+        ? 800
+        : isKruskalsPage
+        ? 800
+        : 600;
+    const viewBoxHeight = isEdmondsKarpPage || isFordFulkersonPage ? 500 : 600;
 
     svg
       .attr("viewBox", `0 -20 ${viewBoxWidth} ${viewBoxHeight}`)
@@ -65,7 +71,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         { color: COLORS.UNVISITED_NODE, text: "Unvisited Node" },
       ];
 
-      if (isFordFulkersonPage) {
+      if (isFordFulkersonPage || isEdmondsKarpPage) {
         commonItems = [
           { color: COLORS.SOURCE_NODE, text: "Source Node" },
           { color: COLORS.SINK_NODE, text: "Sink Node" },
@@ -163,8 +169,8 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       { id: "G", x: 80, y: 500 },
     ];
 
-    const getFordFulkersonNodePositions = () => {
-      if (isFordFulkersonPage) {
+    const getNetworkFlowNodePositions = () => {
+      if (isFordFulkersonPage || isEdmondsKarpPage) {
         return {
           S: { x: 100, y: 250 },
           A: { x: 300, y: 100 },
@@ -176,15 +182,15 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       }
     };
 
-    const fordFulkersonNodePositions = getFordFulkersonNodePositions();
+    const networkFlowNodePositions = getNetworkFlowNodePositions();
 
     const nodes =
       (isPrimsPage || isKruskalsPage) && isGraphA
         ? allNodes.filter((node) => node.id !== "G")
-        : isFordFulkersonPage
+        : isFordFulkersonPage || isEdmondsKarpPage
         ? graphState.nodes.map((n) => ({
             ...n,
-            ...fordFulkersonNodePositions[n.id],
+            ...networkFlowNodePositions[n.id],
           }))
         : allNodes;
 
@@ -255,7 +261,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("y1", sourceNode.y)
           .attr("x2", targetNode.x)
           .attr("y2", targetNode.y);
-        if (!isFordFulkersonPage) {
+        if (!isFordFulkersonPage && !isEdmondsKarpPage) {
           elem
             .attr("stroke", (d) =>
               isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
@@ -430,14 +436,14 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", isFordFulkersonPage ? 25 : 35)
+      .attr("r", isFordFulkersonPage || isEdmondsKarpPage ? 25 : 35)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
         if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
         if (node && node.recentlyUpdated) return COLORS.UPDATED_NODE;
-        if (isFordFulkersonPage) {
+        if (isFordFulkersonPage || isEdmondsKarpPage) {
           return d.id === "S"
             ? COLORS.SOURCE_NODE
             : d.id === "T"
@@ -451,7 +457,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
         if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
-        if (isFordFulkersonPage) {
+        if (isFordFulkersonPage || isEdmondsKarpPage) {
           return graphState.currentPath?.includes(d.id)
             ? COLORS.FLOW_PATH
             : "#64748b";
@@ -479,7 +485,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           : COLORS.NODE_TEXT_UNVISITED;
       });
 
-    if (isFordFulkersonPage) {
+    if (isFordFulkersonPage || isEdmondsKarpPage) {
       nodeGroups.attr("fill", "#000").text((d) => d.id);
     }
 
@@ -533,7 +539,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       });
     }
 
-    if (isFordFulkersonPage) {
+    if (isFordFulkersonPage || isEdmondsKarpPage) {
       // Define arrow markers
       svg
         .append("defs")
@@ -543,7 +549,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         .append("marker")
         .attr("id", (d) => `arrow-${d}`)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 30) // 24 for highlighted edge in path, 30 for others
+        .attr("refX", 30)
         .attr("refY", 0)
         .attr("markerWidth", 6)
         .attr("markerHeight", 6)
@@ -556,8 +562,8 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
 
       edgeGroups.each(function (d) {
         const elem = d3.select(this);
-        const sourceNode = fordFulkersonNodePositions[d.source];
-        const targetNode = fordFulkersonNodePositions[d.target];
+        const sourceNode = networkFlowNodePositions[d.source];
+        const targetNode = networkFlowNodePositions[d.target];
 
         // Calculate control points for smoother curves
         const dx = targetNode.x - sourceNode.x;

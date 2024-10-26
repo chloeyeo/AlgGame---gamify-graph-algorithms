@@ -422,7 +422,7 @@ const primPseudocode = `function prim(graph):
 
     return mst`;
 
-export default function PrimsAlgorithmEducationPage() {
+export default function PrimsEducationPage() {
   return (
     <EducationPageStructure
       title="Prim's Algorithm"

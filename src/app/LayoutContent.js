@@ -33,6 +33,7 @@ export default function LayoutContent({ children }) {
     "/game/minimum-spanning-tree/prims",
     "/education/network-flow/ford-fulkerson",
     "/game/network-flow/ford-fulkerson",
+    "/education/network-flow/edmonds-karp",
   ];
 
   const pageExists = validPaths.includes(pathname);

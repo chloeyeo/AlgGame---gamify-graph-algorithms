@@ -3,7 +3,7 @@
 import React from "react";
 import EducationPageStructure from "@/components/EducationPageStructure";
 
-const FordFulkersonPage = () => {
+const FordFulkersonEducationPage = () => {
   const conceptText = {
     introduction: `Ford-Fulkerson is a method for computing the maximum flow in a flow network. A flow network is simply a graph whose edges have a capacity for flow. Maximum flow is the maximum amount of anything that you can move from a starting node (source) to an ending node (sink).`,
     keyCharacteristics: [
@@ -307,4 +307,4 @@ Note: Different path choices are valid as long as they result in the same maximu
   );
 };
 
-export default FordFulkersonPage;
+export default FordFulkersonEducationPage;
