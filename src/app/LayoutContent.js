@@ -34,6 +34,7 @@ export default function LayoutContent({ children }) {
     "/education/network-flow/ford-fulkerson",
     "/game/network-flow/ford-fulkerson",
     "/education/network-flow/edmonds-karp",
+    "/game/network-flow/edmonds-karp",
   ];
 
   const pageExists = validPaths.includes(pathname);

@@ -195,7 +195,7 @@ const getScore = (nodeStatus) => {
   }
 };
 
-const PrimsGame = () => {
+const PrimsGamePage = () => {
   return (
     <GamePageStructure
       title="Prim's Algorithm Game"
@@ -210,4 +210,4 @@ const PrimsGame = () => {
   );
 };
 
-export default PrimsGame;
+export default PrimsGamePage;

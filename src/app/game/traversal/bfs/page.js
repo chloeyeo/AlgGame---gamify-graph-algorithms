@@ -238,7 +238,7 @@ const getScore = (nodeStatus) => {
   }
 };
 
-const BFSGame = () => {
+const BFSGamePage = () => {
   return (
     <GamePageStructure
       title="BFS Graph Traversal Game"
@@ -252,4 +252,4 @@ const BFSGame = () => {
   );
 };
 
-export default BFSGame;
+export default BFSGamePage;

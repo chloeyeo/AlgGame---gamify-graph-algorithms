@@ -160,7 +160,7 @@ const getScore = (nodeStatus) => {
   }
 };
 
-const DFSGame = () => {
+const DFSGamePage = () => {
   return (
     <GamePageStructure
       title="DFS Graph Game"
@@ -174,4 +174,4 @@ const DFSGame = () => {
   );
 };
 
-export default DFSGame;
+export default DFSGamePage;

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
-const FordFulkersonGamePage = () => {
+const EdmondsKarpGamePage = () => {
   const initialGraphState = {
     nodes: [
       { id: "S" },
@@ -26,12 +26,24 @@ const FordFulkersonGamePage = () => {
     ],
     currentPath: [],
     maxFlow: 0,
-    gamePhase: "SHOW_PATH",
+    gamePhase: "SELECT_PATH",
+    // All possible paths sorted by length
     possiblePaths: [
-      ["S", "A", "B", "T"],
+      // Length 3 paths
       ["S", "A", "D", "T"],
       ["S", "C", "D", "T"],
+      ["S", "A", "B", "T"],
+      // Length 4 path
       ["S", "C", "D", "B", "T"],
+      // Length 5 path
+      ["S", "C", "D", "A", "B", "T"],
+    ],
+    pathOptions: [
+      ["S", "A", "D", "T"],
+      ["S", "C", "D", "T"],
+      ["S", "A", "B", "T"],
+      ["S", "C", "D", "B", "T"],
+      ["S", "C", "D", "A", "B", "T"],
     ],
     currentPathIndex: 0,
     flowOptions: [],
@@ -59,6 +71,16 @@ const FordFulkersonGamePage = () => {
       return edge.capacity - edge.flow;
     }
     return edge.flow;
+  };
+
+  const getPathLength = (path) => path.length - 1;
+
+  const findShortestPath = (paths) => {
+    return paths.reduce((shortest, current) => {
+      return getPathLength(current) < getPathLength(shortest)
+        ? current
+        : shortest;
+    });
   };
 
   const generateFlowOptions = (path) => {
@@ -99,14 +121,17 @@ const FordFulkersonGamePage = () => {
     return { options, bottleneck };
   };
 
-  const handleNodeClick = () => {
-    if (graphState.gamePhase === "SHOW_PATH") {
-      const currentPath = graphState.possiblePaths[graphState.currentPathIndex];
-      const { options, bottleneck } = generateFlowOptions(currentPath);
+  const handlePathSelection = (selectedPath) => {
+    const shortestPath = findShortestPath(graphState.pathOptions);
+    const isCorrectChoice =
+      getPathLength(selectedPath) === getPathLength(shortestPath);
+
+    if (isCorrectChoice) {
+      const { options, bottleneck } = generateFlowOptions(selectedPath);
 
       setGraphState({
         ...graphState,
-        currentPath,
+        currentPath: selectedPath,
         gamePhase: "SELECT_FLOWS",
         currentEdgeIndex: 0,
         flowOptions: options,
@@ -114,12 +139,32 @@ const FordFulkersonGamePage = () => {
         correctAnswers: Object.fromEntries(
           Object.entries(options).map(([key, value]) => [key, value.correct])
         ),
+        feedback: {
+          type: "success",
+          message:
+            "Correct! This is the shortest available augmenting path. Now update the flows.",
+        },
+        pathOptions: graphState.pathOptions.filter(
+          (path) => !arraysEqual(path, selectedPath)
+        ),
       });
+      setScore((s) => s + 15);
+    } else {
+      setGraphState({
+        ...graphState,
+        feedback: {
+          type: "error",
+          message: `Incorrect. Find a path with fewer edges (current selection: ${getPathLength(
+            selectedPath
+          )} edges).`,
+        },
+      });
+      setScore((s) => s - 10);
     }
+    setMoves((m) => m + 1);
   };
 
   const handleFlowSelection = (edge, selectedFlow) => {
-    const [source, target] = edge.split("-");
     const correctFlow = graphState.correctAnswers[edge];
 
     if (selectedFlow === correctFlow) {
@@ -127,7 +172,7 @@ const FordFulkersonGamePage = () => {
       newState.userAnswers[edge] = selectedFlow;
       newState.feedback = {
         type: "success",
-        message: "Correct! Move to the next edge.",
+        message: "Correct flow value! Move to the next edge.",
       };
       newState.currentEdgeIndex++;
 
@@ -147,7 +192,7 @@ const FordFulkersonGamePage = () => {
 
         newState.maxFlow += newState.pathFlow;
         newState.currentPathIndex++;
-        newState.gamePhase = "SHOW_PATH";
+        newState.gamePhase = "SELECT_PATH";
         newState.currentPath = [];
         newState.userAnswers = {};
         newState.flowOptions = [];
@@ -166,7 +211,7 @@ const FordFulkersonGamePage = () => {
         ...graphState,
         feedback: {
           type: "error",
-          message: "Incorrect. Try again!",
+          message: "Incorrect flow value. Try again!",
         },
       });
       setScore((s) => s - 5);
@@ -174,8 +219,55 @@ const FordFulkersonGamePage = () => {
     setMoves((m) => m + 1);
   };
 
+  const arraysEqual = (a, b) => {
+    if (a.length !== b.length) return false;
+    return a.every((val, index) => val === b[index]);
+  };
+
   const isGameComplete = () => {
-    return graphState.currentPathIndex >= graphState.possiblePaths.length;
+    return graphState.pathOptions.length === 0;
+  };
+
+  const renderPathSelector = () => {
+    if (graphState.gamePhase !== "SELECT_PATH") return null;
+
+    return (
+      <div className="mt-4 p-4 bg-white rounded-lg shadow">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">
+            Select the Shortest Augmenting Path:
+          </h3>
+          <p className="text-gray-900 mb-2">
+            Choose the path with the fewest edges that can still carry
+            additional flow.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {graphState.pathOptions.map((path, index) => (
+            <button
+              key={index}
+              onClick={() => handlePathSelection(path)}
+              className="px-4 py-2 text-left border rounded-lg hover:bg-blue-50 focus:outline-none"
+            >
+              {path.join(" → ")} ({getPathLength(path)} edges)
+            </button>
+          ))}
+        </div>
+
+        {graphState.feedback && (
+          <div
+            className={`mt-4 p-3 rounded ${
+              graphState.feedback.type === "success"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {graphState.feedback.message}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderFlowSelector = () => {
@@ -189,7 +281,7 @@ const FordFulkersonGamePage = () => {
     return (
       <div className="mt-4 p-4 bg-white rounded-lg shadow">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Select Flow Value:</h3>
+          <h3 className="text-lg font-semibold mb-2">Update Flow Value:</h3>
           <p className="text-gray-900">
             Edge {source} → {target}
           </p>
@@ -200,7 +292,7 @@ const FordFulkersonGamePage = () => {
             <button
               key={index}
               onClick={() => handleFlowSelection(edge, flow)}
-              className="px-4 py-2 border rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border rounded-lg hover:bg-blue-50 focus:outline-none"
             >
               {flow}
             </button>
@@ -236,7 +328,7 @@ const FordFulkersonGamePage = () => {
   return (
     <main className="flex flex-col p-6 items-center justify-center min-h-screen">
       <h1 className="text-2xl md:text-3xl font-bold mb-6">
-        Ford-Fulkerson Maximum Flow Game
+        Edmonds-Karp Maximum Flow Game
       </h1>
 
       <div className="w-full max-w-4xl">
@@ -248,26 +340,20 @@ const FordFulkersonGamePage = () => {
         <div className="mb-6">
           <div className="bg-white border border-gray-300 rounded-lg shadow-sm">
             <div className="flex items-center justify-center h-[27rem] relative">
-              <GraphVisualisation
-                graphState={graphState}
-                onNodeClick={handleNodeClick}
-                mode="game"
-              />
+              <GraphVisualisation graphState={graphState} mode="game" />
             </div>
           </div>
         </div>
 
+        {renderPathSelector()}
         {renderFlowSelector()}
-
-        {!isGameComplete() && graphState.gamePhase === "SHOW_PATH" && (
-          <div className="text-center mt-4 text-blue-600 font-medium">
-            Click any node on the graph to view the next augmenting path
-          </div>
-        )}
 
         {isGameComplete() && (
           <div className="text-center mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
-            Game complete! Maximum flow achieved: {graphState.maxFlow}
+            <p className="font-semibold">Game Complete!</p>
+            <p>Maximum flow achieved: {graphState.maxFlow}</p>
+            <p>Final score: {score}</p>
+            <p>Total moves: {moves}</p>
           </div>
         )}
       </div>
@@ -275,4 +361,4 @@ const FordFulkersonGamePage = () => {
   );
 };
 
-export default FordFulkersonGamePage;
+export default EdmondsKarpGamePage;

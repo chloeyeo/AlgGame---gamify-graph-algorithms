@@ -221,7 +221,7 @@ const getScore = (nodeStatus) => {
   }
 };
 
-const KruskalsGame = () => {
+const KruskalsGamePage = () => {
   return (
     <GamePageStructure
       title="Kruskal's Algorithm Game"
@@ -236,4 +236,4 @@ const KruskalsGame = () => {
   );
 };
 
-export default KruskalsGame;
+export default KruskalsGamePage;
