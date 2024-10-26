@@ -7,7 +7,7 @@ const FordFulkersonPage = () => {
   const conceptText = {
     introduction: `Ford-Fulkerson is a method for computing the maximum flow in a flow network. A flow network is simply a graph whose edges have a capacity for flow. Maximum flow is the maximum amount of anything that you can move from a starting node (source) to an ending node (sink).`,
     keyCharacteristics: [
-      "Flow Conservation: At each node (except source and sink), inflow must equal outflow",
+      "Flow Equilibrium: At each node (except source and sink), inflow must equal outflow",
       "Augmenting Paths: Can use either non-full forward edges or non-empty backward edges",
       "Bottleneck Capacity: Determined by the edge with smallest remaining capacity in path",
       "Residual Graph: Shows remaining capacity and possible flow reversals",
@@ -73,8 +73,8 @@ const FordFulkersonPage = () => {
       },
       explanation: `Initial state of the network:
 • All edges show current flow/capacity (0/capacity for all edges)
-• Flow conservation must be maintained at each node
-• Looking for first augmenting path from S to T`,
+• Flow equilibrium must be maintained at each node
+• Look for first augmenting path from S to T`,
     },
     // Step 2: First Path (S→A→D→T)
     {
@@ -185,7 +185,7 @@ const FordFulkersonPage = () => {
 • Bottleneck capacity = 2 from remaining capacities
 • Updated flows match diagram values
 • Current maximum flow: 14 units
-• Flow conservation maintained at all nodes`,
+• Flow equilibrium maintained at all nodes`,
     },
     // Step 5: Fourth Path (S→A→D→B→T)
     {

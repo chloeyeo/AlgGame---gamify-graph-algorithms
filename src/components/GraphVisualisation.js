@@ -254,12 +254,15 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("x1", sourceNode.x)
           .attr("y1", sourceNode.y)
           .attr("x2", targetNode.x)
-          .attr("y2", targetNode.y)
-          .attr("stroke", (d) =>
-            isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
-          )
-          .attr("stroke-width", (d) => (isActiveEdge(d) ? 6 : 3))
-          .attr("opacity", (d) => (isActiveEdge(d) ? 1 : 0.4));
+          .attr("y2", targetNode.y);
+        if (!isFordFulkersonPage) {
+          elem
+            .attr("stroke", (d) =>
+              isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
+            )
+            .attr("stroke-width", (d) => (isActiveEdge(d) ? 6.5 : 4))
+            .attr("opacity", (d) => (isActiveEdge(d) ? 1 : 0.7));
+        }
       }
     });
 
@@ -540,7 +543,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
         .append("marker")
         .attr("id", (d) => `arrow-${d}`)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", (d) => (d === "forward" ? 25 : -15))
+        .attr("refX", 30) // 24 for highlighted edge in path, 30 for others
         .attr("refY", 0)
         .attr("markerWidth", 6)
         .attr("markerHeight", 6)
@@ -566,6 +569,14 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
             (Math.abs(dx) > Math.abs(dy) ? -30 : 0),
         };
 
+        // Check if this is a backward flow in the current path
+        const isBackwardFlow =
+          graphState.currentPath?.includes(d.source) &&
+          graphState.currentPath?.includes(d.target) &&
+          graphState.currentPath[
+            graphState.currentPath.indexOf(d.target) + 1
+          ] === d.source;
+
         // Forward edge with arrow
         elem
           .append("path")
@@ -576,13 +587,14 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("fill", "none")
           .attr(
             "stroke",
-            // Fix the highlighting logic here
-            graphState.currentPath?.length > 0 &&
-              graphState.currentPath?.includes(d.source) &&
-              graphState.currentPath?.includes(d.target) &&
-              graphState.currentPath[
-                graphState.currentPath.indexOf(d.source) + 1
-              ] === d.target
+            isBackwardFlow
+              ? "#64748b"
+              : graphState.currentPath?.length > 0 &&
+                graphState.currentPath?.includes(d.source) &&
+                graphState.currentPath?.includes(d.target) &&
+                graphState.currentPath[
+                  graphState.currentPath.indexOf(d.source) + 1
+                ] === d.target
               ? COLORS.FLOW_PATH
               : COLORS.FLOW_EDGE
           )
@@ -599,13 +611,45 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           )
           .attr("marker-end", "url(#arrow-forward)");
 
+        // Draw backward flow path
+        if (isBackwardFlow) {
+          // Calculate offset control point for backward flow
+          // This creates the bend effect by moving the control point perpendicular to the edge
+          const dx = targetNode.x - sourceNode.x;
+          const dy = targetNode.y - sourceNode.y;
+          const length = Math.sqrt(dx * dx + dy * dy);
+
+          // Calculate perpendicular offset for the control point
+          // Adjust these numbers to control the curve's bend amount
+          const offsetX = (-dy / length) * 50; // Controls how far the curve bends out
+          const offsetY = (dx / length) * 50; // Controls how far the curve bends out
+
+          const backwardControlPoint = {
+            x: (sourceNode.x + targetNode.x) / 2 + offsetX,
+            y: (sourceNode.y + targetNode.y) / 2 + offsetY,
+          };
+
+          elem
+            .append("path")
+            .attr(
+              "d",
+              `M ${targetNode.x} ${targetNode.y} ` +
+                `Q ${backwardControlPoint.x} ${backwardControlPoint.y} ` +
+                `${sourceNode.x} ${sourceNode.y}`
+            )
+            .attr("fill", "none")
+            .attr("stroke", COLORS.FLOW_PATH)
+            .attr("stroke-width", "3")
+            .attr("marker-end", "url(#arrow-forward)");
+        }
+
         // Flow/capacity label
         elem
           .append("text")
           .attr("x", controlPoint.x)
-          .attr("y", controlPoint.y - 10)
+          .attr("y", controlPoint.y)
           .attr("text-anchor", "middle")
-          .attr("class", "text-sm font-medium")
+          .attr("class", "text-md font-bold")
           .attr(
             "fill",
             graphState.currentPath?.length > 0 &&
@@ -661,7 +705,6 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     isPrimsPage,
   ]);
 
-  // return <svg ref={svgRef}></svg>;
   return (
     <div className="w-full h-full overflow-x-auto no-scrollbar">
       <svg ref={svgRef} className="min-w-[600px]"></svg>
