@@ -32,6 +32,7 @@ export default function LayoutContent({ children }) {
     "/education/minimum-spanning-tree/prims",
     "/game/minimum-spanning-tree/prims",
     "/education/network-flow/ford-fulkerson",
+    "/game/network-flow/ford-fulkerson",
   ];
 
   const pageExists = validPaths.includes(pathname);
