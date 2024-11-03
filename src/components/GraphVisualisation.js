@@ -68,7 +68,10 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       let commonItems = [
         { color: COLORS.CURRENT_NODE, text: "Current Node" },
         { color: COLORS.VISITED_NODE, text: "Visited Node" },
-        { color: COLORS.UNVISITED_NODE, text: "Unvisited Node" },
+        {
+          isUnvisited: true,
+          text: "Unvisited Node",
+        },
       ];
 
       if (isFordFulkersonPage || isEdmondsKarpPage) {
@@ -138,6 +141,35 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
           .attr("fill", "#000")
           .attr("font-size", "12px")
           .attr("font-style", "italic");
+      } else if (item.isUnvisited) {
+        // outer black box
+        legendItem
+          .append("rect")
+          .attr("width", 20)
+          .attr("height", 20)
+          .attr("fill", "none")
+          .attr("stroke", "#000")
+          .attr("stroke-width", 1);
+
+        // Add inner white rectangle with red border
+        legendItem
+          .append("rect")
+          .attr("x", 2)
+          .attr("y", 2)
+          .attr("width", 16)
+          .attr("height", 16)
+          .attr("fill", COLORS.UNVISITED_NODE)
+          .attr("stroke", COLORS.UNVISITED_BORDER)
+          .attr("stroke-width", 2);
+
+        // Add text next to rectangle
+        legendItem
+          .append("text")
+          .attr("x", 30)
+          .attr("y", 15)
+          .text(item.text)
+          .attr("fill", "#000")
+          .attr("font-size", "12px");
       } else {
         // Add colored rectangle
         legendItem
