@@ -199,8 +199,7 @@ const PrimsGamePage = () => {
   return (
     <GamePageStructure
       title="Prim's Algorithm Game"
-      initialGraphState={graphAState}
-      secondaryGraphState={graphBState}
+      graphStates={[graphAState, graphBState]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       isGameComplete={isGameComplete}

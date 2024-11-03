@@ -164,7 +164,7 @@ const DFSGamePage = () => {
   return (
     <GamePageStructure
       title="DFS Graph Game"
-      initialGraphState={initialGraphState}
+      graphStates={[initialGraphState]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       isGameComplete={isGameComplete}

@@ -225,8 +225,7 @@ const KruskalsGamePage = () => {
   return (
     <GamePageStructure
       title="Kruskal's Algorithm Game"
-      initialGraphState={graphAState}
-      secondaryGraphState={graphBState}
+      graphStates={[graphAState, graphBState]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       isGameComplete={isGameComplete}

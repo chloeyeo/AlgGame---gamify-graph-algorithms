@@ -242,7 +242,7 @@ const BFSGamePage = () => {
   return (
     <GamePageStructure
       title="BFS Graph Traversal Game"
-      initialGraphState={initialGraphState}
+      graphStates={[initialGraphState]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       isGameComplete={isGameComplete}

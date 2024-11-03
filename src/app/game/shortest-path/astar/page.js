@@ -361,7 +361,7 @@ export default function AStarGamePage() {
   return (
     <GamePageStructure
       title="A* Algorithm Game"
-      initialGraphState={initialGraphState}
+      graphStates={[initialGraphState]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       getScore={getScore}

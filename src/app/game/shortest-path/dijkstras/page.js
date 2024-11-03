@@ -280,7 +280,7 @@ export default function DijkstraGamePage() {
   return (
     <GamePageStructure
       title="Dijkstra's Algorithm Game"
-      initialGraphState={initialGraphState}
+      graphStates={[initialGraphState]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       getScore={getScore}
