@@ -352,7 +352,40 @@ const kruskalStepsGraphB = [
       ],
     },
     explanation:
-      "Add edge A-B (weight 4) to the MST. It's the next lowest weight edge that doesn't form a cycle. The MST is now complete with 6 edges connecting all 7 vertices.",
+      "Add edge A-B (weight 4) to the MST. It's the next lowest weight edge that doesn't form a cycle.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "B", target: "E", weight: 2 },
+        { source: "F", target: "G", weight: 2 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "A", target: "B", weight: 4 },
+        { source: "C", target: "F", weight: 4 },
+      ],
+    },
+    explanation:
+      "Add edge C-F (weight 4) to the MST. This edge completes the MST by connecting the remaining subgraphs without forming any cycles. The MST is now complete with 6 edges connecting all 7 vertices.",
   },
 ];
 
