@@ -65,14 +65,21 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("transform", "translate(20, 20)");
 
     const getLegendItems = () => {
-      let commonItems = [
-        { color: COLORS.CURRENT_NODE, text: "Current Node" },
+      let commonItems = [];
+
+      // Only add Current Node for non-Kruskal's and non-Prim's algorithms
+      if (!isKruskalsPage && !isPrimsPage) {
+        commonItems.push({ color: COLORS.CURRENT_NODE, text: "Current Node" });
+      }
+
+      // Add other common items
+      commonItems.push(
         { color: COLORS.VISITED_NODE, text: "Visited Node" },
         {
           isUnvisited: true,
           text: "Unvisited Node",
-        },
-      ];
+        }
+      );
 
       if (isFordFulkersonPage || isEdmondsKarpPage) {
         commonItems = [
