@@ -12,7 +12,7 @@ export default function GamePageStructure({
   isGameComplete = () => false,
   renderCustomUI = null,
 }) {
-  const [activeTab, setActiveTab] = useState(0); // Use numeric index instead of string
+  const [activeTab, setActiveTab] = useState(0);
   const [currentGraphStates, setCurrentGraphStates] = useState(graphStates);
   const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
@@ -35,6 +35,14 @@ export default function GamePageStructure({
       newStates[activeTab] = newState;
       return newStates;
     });
+  };
+
+  const resetGame = () => {
+    setCurrentGraphStates(graphStates);
+    setScore(0);
+    setMoves(0);
+    setMessage("Game reset. Click on a node to begin!");
+    setShowOverlay(false);
   };
 
   useEffect(() => {
@@ -124,9 +132,17 @@ export default function GamePageStructure({
       <h1 className="text-2xl md:text-3xl font-bold mb-6">{title}</h1>
 
       <div className="w-full max-w-4xl">
-        <div className="mb-4 flex justify-between">
-          <div>Score: {score}</div>
-          <div>Moves: {moves}</div>
+        <div className="mb-4 flex justify-between items-center">
+          <div className="flex gap-4">
+            <div>Score: {score}</div>
+            <div>Moves: {moves}</div>
+          </div>
+          <button
+            onClick={resetGame}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors"
+          >
+            Reset Game
+          </button>
         </div>
 
         <div className="mb-6 relative">
