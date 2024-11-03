@@ -4,9 +4,7 @@ import GraphVisualisation from "./GraphVisualisation";
 import CodeEditorPseudocode from "./CodeEditorPseudocode";
 
 const ExplanationSection = ({ explanation }) => {
-  // Helper function to format explanation text
   const formatExplanation = (text) => {
-    // Split by bullet points if they exist
     if (text.includes("•")) {
       const [mainText, ...bullets] = text.split("•").map((t) => t.trim());
       return (
@@ -66,7 +64,6 @@ export default function EducationPageStructure({
   const [isLoadingGraphA, setIsLoadingGraphA] = useState(false);
   const [isLoadingGraphB, setIsLoadingGraphB] = useState(false);
 
-  // Handle loading states
   useEffect(() => {
     const timer = setTimeout(() => {
       if (activeTab === "graph1") {
@@ -328,10 +325,7 @@ export default function EducationPageStructure({
               🔊
             </button>
           </div>
-          {/* <p>
-            {getCurrentSteps()[getCurrentStep()]?.explanation ||
-              "No explanation available"}
-          </p> */}
+
           <ExplanationSection
             explanation={
               getCurrentSteps()[getCurrentStep()]?.explanation ||
@@ -369,14 +363,15 @@ export default function EducationPageStructure({
 
   // Desktop content
   const desktopContent = (
-    <div className="hidden px-4 lg:flex flex-row h-screen">
-      <div className="w-1/2 p-4 border-r border-gray-300">
-        <h1 className="text-2xl font-bold mb-4 text-center">Learn {title}</h1>
-        {renderGraphSection(true)}
-      </div>
-
+    <div className="hidden lg:flex flex-row h-screen">
       <div className="w-1/2 p-4 overflow-y-auto no-scrollbar">
-        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 mb-4">
+        <h1 className="text-2xl font-bold mb-4 text-center">Learn {title}</h1>
+
+        {/* Graph Section */}
+        <div className="mb-6">{renderGraphSection(true)}</div>
+
+        {/* Explanation Section - Moved below graph */}
+        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
           <div className="flex items-center mb-2">
             <h2 className="text-xl font-bold">Explanation</h2>
             <button
@@ -391,10 +386,6 @@ export default function EducationPageStructure({
               🔊
             </button>
           </div>
-          {/* <p>
-            {getCurrentSteps()[getCurrentStep()]?.explanation ||
-              "No explanation available"}
-          </p> */}
           <ExplanationSection
             explanation={
               getCurrentSteps()[getCurrentStep()]?.explanation ||
@@ -402,7 +393,9 @@ export default function EducationPageStructure({
             }
           />
         </div>
+      </div>
 
+      <div className="w-1/2 p-4 overflow-y-auto no-scrollbar border-l border-gray-300">
         <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 mb-4">
           <div className="flex items-center mb-2">
             <h2 className="text-xl font-bold">{title} Concept</h2>
