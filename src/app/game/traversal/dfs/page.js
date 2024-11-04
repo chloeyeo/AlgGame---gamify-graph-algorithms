@@ -16,7 +16,7 @@ const createGraphState = (nodes, edges) => ({
 });
 
 const graphStates = [
-  // Graph A - Basic
+  // Graph A - Basic (Tree)
   createGraphState(
     ["A", "B", "C", "D", "E", "F", "G"],
     [

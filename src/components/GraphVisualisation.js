@@ -75,6 +75,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       isAStarPage,
       isFordFulkersonPage,
       isEdmondsKarpPage,
+      isDFSPage,
       COLORS,
       onNodeClick,
     });
@@ -84,6 +85,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       isEdmondsKarpPage,
       isDijkstraPage,
       isAStarPage,
+      isDFSPage,
       COLORS,
       onNodeClick,
     });

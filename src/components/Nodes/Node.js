@@ -10,6 +10,7 @@ const Nodes = {
       isEdmondsKarpPage,
       isDijkstraPage,
       isAStarPage,
+      isDFSPage,
       COLORS,
       onNodeClick,
     }

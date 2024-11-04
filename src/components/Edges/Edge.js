@@ -13,6 +13,7 @@ const Edges = {
       isAStarPage,
       isFordFulkersonPage,
       isEdmondsKarpPage,
+      isDFSPage,
       COLORS,
       onNodeClick,
     }
