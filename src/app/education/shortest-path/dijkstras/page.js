@@ -28,13 +28,7 @@ const dijkstraSteps = [
     },
     explanation: `Initial state:
 • All nodes are white (unvisited)
-• Distance(A) = 0 (starting node)
-• Distance(B) = ∞
-• Distance(C) = ∞
-• Distance(D) = ∞
-• Distance(E) = ∞
-• Distance(F) = ∞
-• Distance(G) = ∞`,
+• Node A is the starting node`,
   },
   {
     graphState: {
@@ -61,18 +55,10 @@ const dijkstraSteps = [
     },
     explanation: `Visit node A (shown in green):
 • Identify neighbors of A: B and C
-• Calculate Distance(B) = Distance(A) + weight(A→B) = 0 + 4 = 4
-• Calculate Distance(C) = Distance(A) + weight(A→C) = 0 + 2 = 2
+• Distance(B) = Distance(A) + weight(A→B) = 0 + 4 = 4
+• Distance(C) = Distance(A) + weight(A→C) = 0 + 2 = 2
 • B and C turn pink to show their distances were updated
 • A turns blue to show it's been visited
-• Current distances:
-  - Distance(A) = 0
-  - Distance(B) = 4
-  - Distance(C) = 2
-  - Distance(D) = ∞
-  - Distance(E) = ∞
-  - Distance(F) = ∞
-  - Distance(G) = ∞
 • Node C has smallest distance (2) among unvisited nodes, so it will be processed next`,
   },
   {
@@ -100,17 +86,9 @@ const dijkstraSteps = [
     },
     explanation: `Visit node C (smallest unvisited distance = 2):
     • Identify neighbors of C: F
-    • Calculate Distance(F) = Distance(C) + weight(C→F) = 2 + 5 = 7
+    • Distance(F) = Distance(C) + weight(C→F) = 2 + 5 = 7
     • F turns pink to show its distance was updated
     • C turns blue to show it's been visited
-    • Current distances:
-      - Distance(A) = 0
-      - Distance(B) = 4
-      - Distance(C) = 2
-      - Distance(D) = ∞
-      - Distance(E) = ∞
-      - Distance(F) = 7
-      - Distance(G) = ∞
     • Node B has smallest distance (4) among unvisited nodes, so it will be processed next`,
   },
   {
@@ -138,18 +116,10 @@ const dijkstraSteps = [
     },
     explanation: `Visit node B (smallest unvisited distance = 4):
 • Identify neighbors of B: D and E
-• Calculate Distance(D) = Distance(B) + weight(B→D) = 4 + 3 = 7
-• Calculate Distance(E) = Distance(B) + weight(B→E) = 4 + 1 = 5
+• Distance(D) = Distance(B) + weight(B→D) = 4 + 3 = 7
+• Distance(E) = Distance(B) + weight(B→E) = 4 + 1 = 5
 • D and E turn pink to show their distances were updated
 • B turns blue to show it's been visited
-• Current distances:
-  - Distance(A) = 0
-  - Distance(B) = 4
-  - Distance(C) = 2
-  - Distance(D) = 7
-  - Distance(E) = 5
-  - Distance(F) = 7
-  - Distance(G) = ∞
 • Node E has smallest distance (5) among unvisited nodes, so it will be processed next`,
   },
   {
@@ -177,17 +147,9 @@ const dijkstraSteps = [
     },
     explanation: `Visit node E (smallest unvisited distance = 5):
     • Identify neighbors of E: G
-    • Calculate Distance(G) = Distance(E) + weight(E→G) = 5 + 3 = 8
+    • Distance(G) = Distance(E) + weight(E→G) = 5 + 3 = 8
     • G turns pink to show its distance was updated
     • E turns blue to show it's been visited
-    • Current distances:
-      - Distance(A) = 0
-      - Distance(B) = 4
-      - Distance(C) = 2
-      - Distance(D) = 7
-      - Distance(E) = 5
-      - Distance(F) = 7
-      - Distance(G) = 8
     • Nodes D and F are tied for smallest distance (7) among unvisited nodes, we'll process F next`,
   },
   {
@@ -215,17 +177,9 @@ const dijkstraSteps = [
     },
     explanation: `Visit node F (one of two smallest unvisited distances = 7):
 • Identify neighbors of F: G
-• Calculate Distance(G) = Distance(F) + weight(F→G) = 7 + 1 = 8
+• Distance(G) = Distance(F) + weight(F→G) = 7 + 1 = 8
 • No update to G as new distance (8) is not shorter than current distance (8)
 • F turns blue to show it's been visited
-• Current distances:
-  - Distance(A) = 0
-  - Distance(B) = 4
-  - Distance(C) = 2
-  - Distance(D) = 7
-  - Distance(E) = 5
-  - Distance(F) = 7
-  - Distance(G) = 8
 • Node D has smallest distance (7) among unvisited nodes, so it will be processed next`,
   },
   {
@@ -253,17 +207,9 @@ const dijkstraSteps = [
     },
     explanation: `Visit node D (smallest unvisited distance = 7):
     • Identify neighbors of D: G
-    • Calculate Distance(G) = Distance(D) + weight(D→G) = 7 + 2 = 9
+    • Distance(G) = Distance(D) + weight(D→G) = 7 + 2 = 9
     • No update to G as new distance (9) is longer than current distance (8)
     • D turns blue to show it's been visited
-    • Current distances:
-      - Distance(A) = 0
-      - Distance(B) = 4
-      - Distance(C) = 2
-      - Distance(D) = 7
-      - Distance(E) = 5
-      - Distance(F) = 7
-      - Distance(G) = 8
     • Only G remains unvisited, so it will be processed last`,
   },
   {
@@ -291,17 +237,9 @@ const dijkstraSteps = [
     },
     explanation: `Algorithm Complete!
 
-    Final distances from starting node A to all other nodes:
-    • Distance(A) = 0
-    • Distance(B) = 4
-    • Distance(C) = 2
-    • Distance(D) = 7
-    • Distance(E) = 5
-    • Distance(F) = 7
-    • Distance(G) = 8
-    
-    All nodes have been visited (shown in blue).
-    These distances represent the shortest possible paths from node A to each node in the graph.`,
+    • Final distances are from starting node A to all other nodes
+    • These distances represent the shortest possible paths from node A to each node in the graph
+    • All nodes have been visited (shown in blue)`,
   },
 ];
 
