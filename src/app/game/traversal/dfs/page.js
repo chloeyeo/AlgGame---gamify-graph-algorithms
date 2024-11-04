@@ -3,26 +3,110 @@
 import React from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 
-const initialGraphState = {
-  nodes: [
-    { id: "A", visited: false, backtracked: false, current: false },
-    { id: "B", visited: false, backtracked: false, current: false },
-    { id: "C", visited: false, backtracked: false, current: false },
-    { id: "D", visited: false, backtracked: false, current: false },
-    { id: "E", visited: false, backtracked: false, current: false },
-    { id: "F", visited: false, backtracked: false, current: false },
-    { id: "G", visited: false, backtracked: false, current: false },
-  ],
-  edges: [
-    { source: "A", target: "B" },
-    { source: "A", target: "C" },
-    { source: "B", target: "D" },
-    { source: "B", target: "E" },
-    { source: "C", target: "F" },
-    { source: "D", target: "G" },
-  ],
+const createGraphState = (nodes, edges) => ({
+  nodes: nodes.map((id) => ({
+    id,
+    visited: false,
+    backtracked: false,
+    current: false,
+  })),
+  edges,
   currentNode: null,
   stack: [],
+});
+
+const graphStates = [
+  // Graph A - Basic
+  createGraphState(
+    ["A", "B", "C", "D", "E", "F", "G"],
+    [
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "B", target: "D" },
+      { source: "B", target: "E" },
+      { source: "C", target: "F" },
+      { source: "D", target: "G" },
+    ]
+  ),
+
+  // Graph B - Caterpillar
+  createGraphState(
+    ["A", "B", "C", "D", "E", "F", "G", "H"],
+    [
+      { source: "A", target: "B" },
+      { source: "B", target: "C" },
+      { source: "C", target: "D" },
+      { source: "D", target: "E" },
+      { source: "B", target: "F" },
+      { source: "C", target: "G" },
+      { source: "D", target: "H" },
+    ]
+  ),
+
+  // Graph C - Star
+  createGraphState(
+    ["A", "B", "C", "D", "E", "F"],
+    [
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "A", target: "D" },
+      { source: "A", target: "E" },
+      { source: "A", target: "F" },
+    ]
+  ),
+
+  // Graph D - Binary Tree
+  createGraphState(
+    ["A", "B", "C", "D", "E", "F", "G"],
+    [
+      { source: "A", target: "B" },
+      { source: "A", target: "C" },
+      { source: "B", target: "D" },
+      { source: "B", target: "E" },
+      { source: "C", target: "F" },
+      { source: "C", target: "G" },
+    ]
+  ),
+
+  // Graph E - Cycle
+  createGraphState(
+    ["A", "B", "C", "D", "E", "F"],
+    [
+      { source: "A", target: "B" },
+      { source: "B", target: "C" },
+      { source: "C", target: "D" },
+      { source: "D", target: "E" },
+      { source: "E", target: "F" },
+      { source: "F", target: "A" },
+    ]
+  ),
+
+  // Graph F - Disconnected
+  createGraphState(
+    ["A", "B", "C", "D", "E", "F"],
+    [
+      { source: "A", target: "B" },
+      { source: "B", target: "C" },
+      { source: "D", target: "E" },
+      { source: "E", target: "F" },
+    ]
+  ),
+];
+
+const DFSGamePage = () => {
+  return (
+    <div className="w-full max-w-7xl mx-auto p-4">
+      <GamePageStructure
+        title="DFS Graph Game"
+        graphStates={graphStates}
+        isValidMove={isValidMove}
+        getNodeStatus={getNodeStatus}
+        isGameComplete={isGameComplete}
+        getMessage={getMessage}
+        getScore={getScore}
+      />
+    </div>
+  );
 };
 
 const isValidMove = (graphState, nodeId) => {
@@ -158,20 +242,6 @@ const getScore = (nodeStatus) => {
     default:
       return 0;
   }
-};
-
-const DFSGamePage = () => {
-  return (
-    <GamePageStructure
-      title="DFS Graph Game"
-      graphStates={[initialGraphState]}
-      isValidMove={isValidMove}
-      getNodeStatus={getNodeStatus}
-      isGameComplete={isGameComplete}
-      getMessage={getMessage}
-      getScore={getScore}
-    />
-  );
 };
 
 export default DFSGamePage;

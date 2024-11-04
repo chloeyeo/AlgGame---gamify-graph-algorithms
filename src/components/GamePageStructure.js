@@ -22,6 +22,10 @@ export default function GamePageStructure({
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    setCurrentGraphStates(graphStates);
+  }, [graphStates]);
+
   const isFordFulkersonPage = pathname.includes("ford-fulkerson");
   const isMultiGraphGame = graphStates.length > 1;
 
