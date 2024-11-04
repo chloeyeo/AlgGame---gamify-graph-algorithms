@@ -4,7 +4,11 @@ import { useSelector } from "react-redux";
 import { useAlgorithmType } from "@/hooks/useAlgorithmType";
 import { COLORS } from "@/constants/colors";
 import { useGraphDimensions } from "@/hooks/useGraphDimensions";
-import Legend from "./Legend/Legend";
+import Legend from "@components/Legend/Legend";
+import {
+  getDefaultNodes,
+  getNetworkFlowNodePositions,
+} from "@/utils/graphUtils";
 
 const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const selectedAlgorithm = useSelector(
@@ -39,30 +43,10 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("width", "100%")
       .attr("height", "100%");
 
-    const allNodes = [
-      { id: "A", x: 300, y: 50 },
-      { id: "B", x: 200, y: 200 },
-      { id: "C", x: 400, y: 200 },
-      { id: "D", x: 130, y: 350 },
-      { id: "E", x: 270, y: 350 },
-      { id: "F", x: 470, y: 350 },
-      { id: "G", x: 80, y: 500 },
-    ];
-
-    const getNetworkFlowNodePositions = () => {
-      if (isFordFulkersonPage || isEdmondsKarpPage) {
-        return {
-          S: { x: 100, y: 250 },
-          A: { x: 300, y: 100 },
-          B: { x: 500, y: 100 },
-          C: { x: 300, y: 400 },
-          D: { x: 500, y: 400 },
-          T: { x: 700, y: 250 },
-        };
-      }
-    };
-
-    const networkFlowNodePositions = getNetworkFlowNodePositions();
+    const allNodes = getDefaultNodes();
+    const networkFlowNodePositions =
+      (isFordFulkersonPage || isEdmondsKarpPage) &&
+      getNetworkFlowNodePositions();
 
     const nodes =
       (isPrimsPage || isKruskalsPage) && isGraphA
