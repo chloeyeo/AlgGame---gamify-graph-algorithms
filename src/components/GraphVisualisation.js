@@ -4,17 +4,19 @@ import { useSelector } from "react-redux";
 import { useAlgorithmType } from "@/hooks/useAlgorithmType";
 import { COLORS } from "@/constants/colors";
 import { useGraphDimensions } from "@/hooks/useGraphDimensions";
-import Legend from "@components/Legend/Legend";
+import Legend from "@/components/Legend/Legend";
 import {
   getDefaultNodes,
   getNetworkFlowNodePositions,
 } from "@/utils/graphUtils";
+import { usePathname } from "next/navigation";
 
 const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const selectedAlgorithm = useSelector(
     (state) => state.algorithm.selectedAlgorithm
   );
   const svgRef = useRef(null);
+  const pathname = usePathname();
   const {
     isAStarPage,
     isDFSPage,
@@ -23,7 +25,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     isFordFulkersonPage,
     isKruskalsPage,
     isPrimsPage,
-  } = useAlgorithmType();
+  } = useAlgorithmType(pathname);
 
   useEffect(() => {
     if (!graphState) return;
@@ -579,7 +581,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     <div className="w-full h-full overflow-x-auto no-scrollbar">
       <svg ref={svgRef} className="min-w-[600px]">
         <Legend
-          svg={svgRef.current ? d3.select(svgRef.current) : null}
+          svg={d3.select(svgRef.current)}
           isAStarPage={isAStarPage}
           isDFSPage={isDFSPage}
           isDijkstraPage={isDijkstraPage}
