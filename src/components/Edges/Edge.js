@@ -239,40 +239,32 @@ const Edges = {
         }
       });
     }
-  },
 
-  drawNetworkFlowEdges: (svg, links, graphState, COLORS) => {
-    // Define arrow markers
-    svg
-      .append("defs")
-      .selectAll("marker")
-      .data(["forward", "backward"])
-      .enter()
-      .append("marker")
-      .attr("id", (d) => `arrow-${d}`)
-      .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 30)
-      .attr("refY", 0)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
-      .append("path")
-      .attr("d", (d) =>
-        d === "forward" ? "M0,-5L10,0L0,5" : "M10,-5L0,0L10,5"
-      )
-      .attr("fill", "#64748b");
+    if (isFordFulkersonPage || isEdmondsKarpPage) {
+      // Define arrow markers
+      svg
+        .append("defs")
+        .selectAll("marker")
+        .data(["forward", "backward"])
+        .enter()
+        .append("marker")
+        .attr("id", (d) => `arrow-${d}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 30)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", (d) =>
+          d === "forward" ? "M0,-5L10,0L0,5" : "M10,-5L0,0L10,5"
+        )
+        .attr("fill", "#64748b");
 
-    // Draw network flow edges
-    svg
-      .selectAll(".network-flow-edge")
-      .data(links)
-      .enter()
-      .append("g")
-      .attr("class", "network-flow-edge")
-      .each(function (d) {
+      edgeGroups.each(function (d) {
         const elem = d3.select(this);
-        const sourceNode = graphState.nodes.find((n) => n.id === d.source);
-        const targetNode = graphState.nodes.find((n) => n.id === d.target);
+        const sourceNode = networkFlowNodePositions[d.source];
+        const targetNode = networkFlowNodePositions[d.target];
 
         // Calculate control points for smoother curves
         const dx = targetNode.x - sourceNode.x;
@@ -378,6 +370,7 @@ const Edges = {
           )
           .text(`${d.flow}/${d.capacity}`);
       });
+    }
   },
 };
 
