@@ -7,13 +7,19 @@ import { useGraphDimensions } from "@/hooks/useGraphDimensions";
 import Legend from "@/components/Legend/Legend";
 import {
   getDefaultNodes,
+  getDFSGameNodes,
   getNetworkFlowNodePositions,
 } from "@/utils/graphUtils";
 import { usePathname } from "next/navigation";
 import Edges from "@/components/Edges/Edge";
 import Nodes from "@/components/Nodes/Node";
 
-const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
+const GraphVisualisation = ({
+  graphState,
+  onNodeClick,
+  isGraphA,
+  graphIndex = 0,
+}) => {
   const [render, setRender] = useState(0);
   const selectedAlgorithm = useSelector(
     (state) => state.algorithm.selectedAlgorithm
@@ -51,20 +57,42 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       .attr("width", "100%")
       .attr("height", "100%");
 
-    const allNodes = getDefaultNodes();
-    const networkFlowNodePositions =
-      (isFordFulkersonPage || isEdmondsKarpPage) &&
-      getNetworkFlowNodePositions();
+    // const allNodes = getDefaultNodes();
+    // const networkFlowNodePositions =
+    //   (isFordFulkersonPage || isEdmondsKarpPage) &&
+    //   getNetworkFlowNodePositions();
 
-    const nodes =
-      (isPrimsPage || isKruskalsPage) && isGraphA
-        ? allNodes.filter((node) => node.id !== "G")
-        : isFordFulkersonPage || isEdmondsKarpPage
-        ? graphState.nodes.map((n) => ({
-            ...n,
-            ...networkFlowNodePositions[n.id],
-          }))
-        : allNodes;
+    // const nodes =
+    //   (isPrimsPage || isKruskalsPage) && isGraphA
+    //     ? allNodes.filter((node) => node.id !== "G")
+    //     : isFordFulkersonPage || isEdmondsKarpPage
+    //     ? graphState.nodes.map((n) => ({
+    //         ...n,
+    //         ...networkFlowNodePositions[n.id],
+    //       }))
+    //     : allNodes;
+
+    let nodes;
+    if (isDFSPage) {
+      // Apply predefined layout for DFS graphs
+      const layout = getDFSGameNodes[graphIndex];
+      console.log("graphIndex", graphIndex, "layout:", layout);
+      nodes = graphState.nodes.map((node) => ({
+        ...node,
+        ...(layout?.[node.id] || {}),
+      }));
+    } else if (isFordFulkersonPage || isEdmondsKarpPage) {
+      const networkFlowNodePositions = getNetworkFlowNodePositions();
+      nodes = graphState.nodes.map((n) => ({
+        ...n,
+        ...networkFlowNodePositions[n.id],
+      }));
+    } else if (isPrimsPage || isKruskalsPage) {
+      const allNodes = getDefaultNodes();
+      nodes = isGraphA ? allNodes.filter((node) => node.id !== "G") : allNodes;
+    } else {
+      nodes = getDefaultNodes();
+    }
 
     const links = graphState.edges;
 
@@ -78,6 +106,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       isDFSPage,
       COLORS,
       onNodeClick,
+      graphIndex,
     });
 
     Nodes.draw(svg, nodes, graphState, {
@@ -88,6 +117,7 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
       isDFSPage,
       COLORS,
       onNodeClick,
+      graphIndex,
     });
   }, [
     graphState,

@@ -159,6 +159,7 @@ export default function GamePageStructure({
                 onNodeClick={handleNodeClick}
                 mode="game"
                 isGraphA={activeTab === 0}
+                graphIndex={activeTab}
               />
               {showOverlay && (
                 <div
