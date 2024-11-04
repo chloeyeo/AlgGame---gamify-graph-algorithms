@@ -1,43 +1,25 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { useSelector } from "react-redux";
-import { usePathname } from "next/navigation";
+import { useAlgorithmType } from "@/hooks/useAlgorithmType";
+import { COLORS } from "@/constants/colors";
+import { useGraphDimensions } from "@/hooks/useGraphDimensions";
+import Legend from "./Legend/Legend";
 
 const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
   const selectedAlgorithm = useSelector(
     (state) => state.algorithm.selectedAlgorithm
   );
-  const pathname = usePathname();
   const svgRef = useRef(null);
-  const isDijkstraPage = pathname.includes("dijkstras");
-  const isAStarPage = pathname.includes("astar");
-  const isKruskalsPage = pathname.includes("kruskals");
-  const isPrimsPage = pathname.includes("prims");
-  const isDFSPage = pathname.includes("dfs");
-  const isFordFulkersonPage = pathname.includes("ford-fulkerson");
-  const isEdmondsKarpPage = pathname.includes("edmonds-karp");
-
-  // Color constants
-  const COLORS = {
-    CURRENT_NODE: "#2ecc71",
-    VISITED_NODE: "#3498db",
-    UPDATED_NODE: "#ff69b4",
-    BACKTRACKED_NODE: "#e67e22",
-    UNVISITED_NODE: "#ffffff",
-    UNVISITED_BORDER: "#e74c3c",
-    EDGE_NORMAL: "#95a5a6",
-    EDGE_MST: "#e74c3c",
-    EDGE_PATH: "#f1c40f",
-    EDGE_WEIGHT: "#2980b9",
-    NODE_TEXT_VISITED: "#ffffff",
-    NODE_TEXT_UNVISITED: "#2c3e50",
-    DISTANCE_LABEL: "#e74c3c",
-    FLOW_PATH: "#2563eb",
-    FLOW_EDGE: "#94a3b8",
-    RESIDUAL_EDGE: "#dc2626",
-    SOURCE_NODE: "#bbf7d0",
-    SINK_NODE: "#fecaca",
-  };
+  const {
+    isAStarPage,
+    isDFSPage,
+    isDijkstraPage,
+    isEdmondsKarpPage,
+    isFordFulkersonPage,
+    isKruskalsPage,
+    isPrimsPage,
+  } = useAlgorithmType();
 
   useEffect(() => {
     if (!graphState) return;
@@ -45,19 +27,28 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const viewBoxWidth =
-      isEdmondsKarpPage || isFordFulkersonPage
-        ? 800
-        : isKruskalsPage
-        ? 800
-        : 600;
-    const viewBoxHeight = isEdmondsKarpPage || isFordFulkersonPage ? 500 : 600;
+    const { viewBoxWidth, viewBoxHeight } = useGraphDimensions(
+      isEdmondsKarpPage,
+      isFordFulkersonPage,
+      isKruskalsPage
+    );
 
     svg
       .attr("viewBox", `0 -20 ${viewBoxWidth} ${viewBoxHeight}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
       .attr("height", "100%");
+
+    Legend({
+      svg,
+      isAStarPage,
+      isDFSPage,
+      isDijkstraPage,
+      isEdmondsKarpPage,
+      isFordFulkersonPage,
+      isKruskalsPage,
+      isPrimsPage,
+    });
 
     const legend = svg
       .append("g")
@@ -752,7 +743,18 @@ const GraphVisualisation = ({ graphState, onNodeClick, isGraphA }) => {
 
   return (
     <div className="w-full h-full overflow-x-auto no-scrollbar">
-      <svg ref={svgRef} className="min-w-[600px]"></svg>
+      <svg ref={svgRef} className="min-w-[600px]">
+        {/* <Legend
+          svg={svgRef.current ? d3.select(svgRef.current) : null}
+          isAStarPage={isAStarPage}
+          isDFSPage={isDFSPage}
+          isDijkstraPage={isDijkstraPage}
+          isEdmondsKarpPage={isEdmondsKarpPage}
+          isFordFulkersonPage={isFordFulkersonPage}
+          isKruskalsPage={isKruskalsPage}
+          isPrimsPage={isPrimsPage}
+        /> */}
+      </svg>
     </div>
   );
 };
