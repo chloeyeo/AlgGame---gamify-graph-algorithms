@@ -11,76 +11,83 @@ const Legend = ({
   isKruskalsPage,
   isPrimsPage,
 }) => {
-  const getLegendItems = () => {
-    let items = [];
+  const legend = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", "translate(20, 20)");
 
-    if (!isKruskalsPage && !isPrimsPage) {
-      items.push({ color: COLORS.CURRENT_NODE, text: "Current Node" });
-    }
+    const getLegendItems = () => {
+      let commonItems = [];
 
-    items.push(
-      { color: COLORS.VISITED_NODE, text: "Visited Node" },
-      { isUnvisited: true, text: "Unvisited Node" }
-    );
+      // Only add Current Node for non-Kruskal's and non-Prim's algorithms
+      if (!isKruskalsPage && !isPrimsPage) {
+        commonItems.push({ color: COLORS.CURRENT_NODE, text: "Current Node" });
+      }
 
-    if (isFordFulkersonPage || isEdmondsKarpPage) {
-      items = [
-        { color: COLORS.SOURCE_NODE, text: "Source Node" },
-        { color: COLORS.SINK_NODE, text: "Sink Node" },
-        { color: COLORS.FLOW_PATH, text: "Current Flow Path" },
-        { isText: true, text: "Edge numbers show flow/capacity" },
-      ];
-    }
+      // Add other common items
+      commonItems.push(
+        { color: COLORS.VISITED_NODE, text: "Visited Node" },
+        {
+          isUnvisited: true,
+          text: "Unvisited Node",
+        }
+      );
 
-    if (isDFSPage) {
-      items.push({
-        color: COLORS.BACKTRACKED_NODE,
-        text: "Backtracked Node",
-      });
-    }
+      if (isFordFulkersonPage || isEdmondsKarpPage) {
+        commonItems = [
+          { color: COLORS.SOURCE_NODE, text: "Source Node" },
+          { color: COLORS.SINK_NODE, text: "Sink Node" },
+          { color: COLORS.FLOW_PATH, text: "Current Flow Path" },
+          { isText: true, text: "Edge numbers show flow/capacity" },
+        ];
+      }
 
-    if (isDijkstraPage || isAStarPage) {
-      items.push({
-        color: COLORS.UPDATED_NODE,
-        text: "Recently Updated Node",
-      });
-    }
+      if (isDFSPage) {
+        commonItems.push({
+          color: COLORS.BACKTRACKED_NODE,
+          text: "Backtracked Node",
+        });
+      }
 
-    if (isKruskalsPage || isPrimsPage) {
-      items.push({ color: COLORS.EDGE_MST, text: "MST Edge" });
-    }
+      if (isDijkstraPage || isAStarPage) {
+        commonItems.push({
+          color: COLORS.UPDATED_NODE,
+          text: "Recently Updated Node",
+        });
+      }
 
-    if (isDijkstraPage || isAStarPage || isKruskalsPage || isPrimsPage) {
-      items.push({
-        isText: true,
-        text: "Edge numbers represent weights",
-      });
-    }
+      if (isKruskalsPage || isPrimsPage) {
+        commonItems.push({ color: COLORS.EDGE_MST, text: "MST Edge" });
+      }
 
-    if (isDijkstraPage) {
-      items.push({
-        isText: true,
-        text: "Node values show shortest distance from start",
-      });
-    }
+      if (isDijkstraPage || isAStarPage || isKruskalsPage || isPrimsPage) {
+        commonItems.push({
+          isText: true,
+          text: "Edge numbers represent weights",
+        });
+      }
 
-    if (isAStarPage) {
-      items.push({
-        isText: true,
-        text: "Node values show f, g, and h costs",
-      });
-    }
+      if (isDijkstraPage) {
+        commonItems.push({
+          isText: true,
+          text: "Node values show shortest distance from start",
+        });
+      }
 
-    return items;
-  };
+      if (isAStarPage) {
+        commonItems.push({
+          isText: true,
+          text: "Node values show f, g, and h costs",
+        });
+      }
 
-  useEffect(() => {
-    if (!svg) return;
+      return commonItems;
+    };
 
-    const items = getLegendItems();
+    const legendItems = getLegendItems();
 
-    items.forEach((item, i) => {
-      const legendItem = svg
+    legendItems.forEach((item, i) => {
+      const legendItem = legend
         .append("g")
         .attr("transform", `translate(0, ${i * 25})`);
 
@@ -94,7 +101,7 @@ const Legend = ({
           .attr("font-size", "12px")
           .attr("font-style", "italic");
       } else if (item.isUnvisited) {
-        // Outer black box
+        // outer black box
         legendItem
           .append("rect")
           .attr("width", 20)
@@ -103,7 +110,7 @@ const Legend = ({
           .attr("stroke", "#000")
           .attr("stroke-width", 1);
 
-        // Inner white rectangle with red border
+        // Add inner white rectangle with red border
         legendItem
           .append("rect")
           .attr("x", 2)
@@ -114,7 +121,7 @@ const Legend = ({
           .attr("stroke", COLORS.UNVISITED_BORDER)
           .attr("stroke-width", 2);
 
-        // Text next to rectangle
+        // Add text next to rectangle
         legendItem
           .append("text")
           .attr("x", 30)
@@ -123,7 +130,7 @@ const Legend = ({
           .attr("fill", "#000")
           .attr("font-size", "12px");
       } else {
-        // Colored rectangle
+        // Add colored rectangle
         legendItem
           .append("rect")
           .attr("width", 20)
@@ -132,7 +139,7 @@ const Legend = ({
           .attr("stroke", "#000")
           .attr("stroke-width", 1);
 
-        // Text next to rectangle
+        // Add text next to rectangle
         legendItem
           .append("text")
           .attr("x", 30)
