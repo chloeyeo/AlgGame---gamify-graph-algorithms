@@ -49,7 +49,7 @@ export const getDFSGameNodes = [
     F: { x: 450, y: 300 },
   },
   {
-    // Binary Tree (Graph D)
+    // Diamond (Graph D)
     A: { x: 400, y: 100 },
     B: { x: 300, y: 200 },
     C: { x: 500, y: 200 },

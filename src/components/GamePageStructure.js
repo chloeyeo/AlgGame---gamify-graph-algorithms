@@ -116,7 +116,7 @@ export default function GamePageStructure({
 
   const renderGraphTabs = () =>
     isMultiGraphGame && (
-      <div className="flex mb-2 border-b">
+      <div className="flex mb-2 border-b overflow-clip overflow-x-auto no-scrollbar">
         {graphStates.map((_, index) => (
           <button
             key={index}
@@ -153,7 +153,7 @@ export default function GamePageStructure({
           <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
           <div className="bg-white border border-gray-300 rounded-lg">
             {renderGraphTabs()}
-            <div className="flex items-center justify-center h-[27rem] overflow-hidden relative">
+            <div className="flex items-center justify-center h-[27rem] relative">
               <GraphVisualisation
                 graphState={getCurrentGraphState()}
                 onNodeClick={handleNodeClick}

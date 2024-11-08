@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import * as d3 from "d3";
 import { useSelector } from "react-redux";
 import { useAlgorithmType } from "@/hooks/useAlgorithmType";
@@ -42,6 +42,16 @@ const GraphVisualisation = ({
     isKruskalsPage
   );
 
+  // // get width and height of svg
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    const svg = d3.select(svgRef.current);
+    setWidth(svg.node().getBoundingClientRect().width);
+    setHeight(svg.node().getBoundingClientRect().height);
+  }, [svgRef]);
+
   useEffect(() => {
     if (!graphState) return;
 
@@ -49,34 +59,24 @@ const GraphVisualisation = ({
 
     if (render !== 0) svg.selectAll("*").remove();
 
+    // // add zoom functionality
+    // const zoom = d3.zoom().on("zoom", (event) => {
+    //   svg.attr("transform", event.transform);
+    // });
+
+    // svg.call(zoom);
+
     setRender(render + 1);
 
     svg
       .attr("viewBox", `0 -20 ${viewBoxWidth} ${viewBoxHeight}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
-      .attr("height", "100%");
-
-    // const allNodes = getDefaultNodes();
-    // const networkFlowNodePositions =
-    //   (isFordFulkersonPage || isEdmondsKarpPage) &&
-    //   getNetworkFlowNodePositions();
-
-    // const nodes =
-    //   (isPrimsPage || isKruskalsPage) && isGraphA
-    //     ? allNodes.filter((node) => node.id !== "G")
-    //     : isFordFulkersonPage || isEdmondsKarpPage
-    //     ? graphState.nodes.map((n) => ({
-    //         ...n,
-    //         ...networkFlowNodePositions[n.id],
-    //       }))
-    //     : allNodes;
+      .attr("height", "100%")
 
     let nodes;
     if (isDFSPage) {
-      // Apply predefined layout for DFS graphs
       const layout = getDFSGameNodes[graphIndex];
-      console.log("graphIndex", graphIndex, "layout:", layout);
       nodes = graphState.nodes.map((node) => ({
         ...node,
         ...(layout?.[node.id] || {}),

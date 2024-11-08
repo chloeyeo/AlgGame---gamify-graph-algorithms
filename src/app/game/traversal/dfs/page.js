@@ -55,16 +55,14 @@ const graphStates = [
     ]
   ),
 
-  // Graph D - Binary Tree
+  // Graph D - Diamond
   createGraphState(
-    ["A", "B", "C", "D", "E", "F", "G"],
+    ["A", "B", "C", "D"],
     [
       { source: "A", target: "B" },
       { source: "A", target: "C" },
       { source: "B", target: "D" },
-      { source: "B", target: "E" },
-      { source: "C", target: "F" },
-      { source: "C", target: "G" },
+      { source: "C", target: "D" },
     ]
   ),
 
