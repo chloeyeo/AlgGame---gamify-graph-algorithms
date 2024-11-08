@@ -46,7 +46,7 @@ export const getDFSGameNodes = [
     C: { x: 500, y: 250 },
     D: { x: 400, y: 350 },
     E: { x: 300, y: 250 },
-    F: { x: 450, y: 300 },
+    F: { x: 500, y: 350 },
   },
   {
     // Diamond (Graph D)
