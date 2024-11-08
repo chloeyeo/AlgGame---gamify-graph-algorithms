@@ -3,7 +3,8 @@
 import React from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 
-const createGraphState = (nodes, edges) => ({
+const createGraphState = (graphId, nodes, edges) => ({
+  graphId,
   nodes: nodes.map((id) => ({
     id,
     visited: false,
@@ -18,6 +19,7 @@ const createGraphState = (nodes, edges) => ({
 const graphStates = [
   // Graph A - Basic (Tree)
   createGraphState(
+    "A",
     ["A", "B", "C", "D", "E", "F", "G"],
     [
       { source: "A", target: "B" },
@@ -31,6 +33,7 @@ const graphStates = [
 
   // Graph B - Caterpillar
   createGraphState(
+    "B",
     ["A", "B", "C", "D", "E", "F", "G", "H"],
     [
       { source: "A", target: "B" },
@@ -40,11 +43,13 @@ const graphStates = [
       { source: "B", target: "F" },
       { source: "C", target: "G" },
       { source: "D", target: "H" },
+      { source: "E", target: "A" },
     ]
   ),
 
   // Graph C - Star
   createGraphState(
+    "C",
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
@@ -57,6 +62,7 @@ const graphStates = [
 
   // Graph D - Diamond
   createGraphState(
+    "D",
     ["A", "B", "C", "D"],
     [
       { source: "A", target: "B" },
@@ -68,6 +74,7 @@ const graphStates = [
 
   // Graph E - Cycle
   createGraphState(
+    "E",
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
@@ -81,6 +88,7 @@ const graphStates = [
 
   // Graph F - Disconnected
   createGraphState(
+    "F",
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
@@ -113,13 +121,36 @@ const isValidMove = (graphState, nodeId) => {
 
   // Starting move validation
   if (!newState.currentNode) {
-    if (nodeId !== "A") {
-      return {
-        newState: graphState,
-        validMove: false,
-        message:
-          "DFS must start from node A! Let's begin our depth-first exploration from the root node, which is always node A in this graph.",
-      };
+    switch (graphState.graphId) {
+      case "A":
+        if (nodeId !== "A") {
+          return {
+            newState: graphState,
+            validMove: false,
+            message:
+              "DFS must start from node A! Let's begin our depth-first exploration from the root node, which is always node A in this graph.",
+          };
+        }
+        break;
+      case "B":
+        if (nodeId !== "A" && nodeId !== "B") {
+          return {
+            newState: graphState,
+            validMove: false,
+            message:
+              "DFS must start from node A or node B! Let's begin our depth-first exploration from the root node, which is always node A or B in this graph.",
+          };
+        }
+        break;
+      default:
+        if (nodeId !== "A") {
+          return {
+            newState: graphState,
+            validMove: false,
+            message:
+              "DFS must start from node A! Let's begin our depth-first exploration from the root node, which is always node A in this graph.",
+          };
+        }
     }
     clickedNode.visited = true;
     clickedNode.current = true;
@@ -176,15 +207,44 @@ const isValidMove = (graphState, nodeId) => {
     prevNode.backtracked = true;
     prevNode.current = false;
 
-    if (
-      nodeId === "A" &&
-      newState.nodes.every((n) => n.id === "A" || n.backtracked)
-    ) {
-      clickedNode.backtracked = true;
-      clickedNode.current = false;
-      newState.currentNode = null;
-      newState.stack.pop();
-      return { newState, validMove: true, nodeStatus: "final-move" };
+    switch (graphState.graphId) {
+      case "A":
+        if (
+          nodeId === "A" &&
+          newState.nodes.every((n) => n.id === "A" || n.backtracked)
+        ) {
+          clickedNode.backtracked = true;
+          clickedNode.current = false;
+          newState.currentNode = null;
+          newState.stack.pop();
+          return { newState, validMove: true, nodeStatus: "final-move" };
+        }
+        break;
+      case "B":
+        if (
+          (nodeId === "A" &&
+            newState.nodes.every((n) => n.id === "A" || n.backtracked)) ||
+          (nodeId === "B" &&
+            newState.nodes.every((n) => n.id === "B" || n.backtracked))
+        ) {
+          clickedNode.backtracked = true;
+          clickedNode.current = false;
+          newState.currentNode = null;
+          newState.stack.pop();
+          return { newState, validMove: true, nodeStatus: "final-move" };
+        }
+        break;
+      default:
+        if (
+          nodeId === "A" &&
+          newState.nodes.every((n) => n.id === "A" || n.backtracked)
+        ) {
+          clickedNode.backtracked = true;
+          clickedNode.current = false;
+          newState.currentNode = null;
+          newState.stack.pop();
+          return { newState, validMove: true, nodeStatus: "final-move" };
+        }
     }
 
     clickedNode.current = true;
