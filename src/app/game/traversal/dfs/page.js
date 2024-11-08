@@ -143,7 +143,7 @@ const isValidMove = (graphState, nodeId) => {
         }
         break;
       default:
-        if (nodeId !== "A") {
+        if (graphState.graphId !== "C" && nodeId !== "A") {
           return {
             newState: graphState,
             validMove: false,
@@ -227,6 +227,15 @@ const isValidMove = (graphState, nodeId) => {
           (nodeId === "B" &&
             newState.nodes.every((n) => n.id === "B" || n.backtracked))
         ) {
+          clickedNode.backtracked = true;
+          clickedNode.current = false;
+          newState.currentNode = null;
+          newState.stack.pop();
+          return { newState, validMove: true, nodeStatus: "final-move" };
+        }
+        break;
+      case "C":
+        if (newState.nodes.every((n) => n.id === nodeId || n.backtracked)) {
           clickedNode.backtracked = true;
           clickedNode.current = false;
           newState.currentNode = null;
