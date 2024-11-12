@@ -60,13 +60,14 @@ const graphStates = [
     ]
   ),
 
-  // Graph D - Diamond
+  // Graph D - Diamond graph - 4 vertices 5 edges
   createGraphState(
     "D",
     ["A", "B", "C", "D"],
     [
       { source: "A", target: "B" },
       { source: "A", target: "C" },
+      { source: "B", target: "C" },
       { source: "B", target: "D" },
       { source: "C", target: "D" },
     ]
@@ -142,13 +143,16 @@ const isValidMove = (graphState, nodeId) => {
           };
         }
         break;
+
+      case "F":
+        break;
+
       default:
-        if (graphState.graphId !== "C" && nodeId !== "A") {
+        if (graphState.graphId !== "C" && !nodeId) {
           return {
             newState: graphState,
             validMove: false,
-            message:
-              "DFS must start from node A! Let's begin our depth-first exploration from the root node, which is always node A in this graph.",
+            message: "Invalid move!",
           };
         }
     }
@@ -187,12 +191,29 @@ const isValidMove = (graphState, nodeId) => {
     };
   }
 
-  if (clickedNode.visited && !clickedNode.backtracked) {
+  if (
+    (clickedNode.visited &&
+      !clickedNode.backtracked &&
+      graphState.graphId !== "D" &&
+      graphState.graphId !== "E") ||
+    // (clickedNode.visited && graphState.graphId === "D")
+    (!clickedNode.visited &&
+      !clickedNode.backtracked &&
+      (graphState.graphId === "D" || graphState.graphId === "E"))
+  ) {
+    if (graphState.graphId === "F") {
+    }
     const currentChildren = newState.edges
       .filter((e) => e.source === newState.currentNode)
       .map((e) => newState.nodes.find((n) => n.id === e.target));
 
-    if (!currentChildren.every((child) => child.visited)) {
+    if (
+      (graphState.graphId !== "D" &&
+        graphState.graphId !== "E" &&
+        !currentChildren.every((child) => child.visited)) ||
+      ((graphState.graphId === "D" || graphState.graphId === "E") &&
+        clickedNode.visited)
+    ) {
       return {
         newState: graphState,
         validMove: false,
@@ -204,8 +225,11 @@ const isValidMove = (graphState, nodeId) => {
 
     // Valid backtracking
     const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
-    prevNode.backtracked = true;
+    prevNode.backtracked =
+      graphState.graphId !== "D" && graphState.graphId !== "E" ? true : false;
     prevNode.current = false;
+
+    // let allNodesVisited;
 
     switch (graphState.graphId) {
       case "A":
@@ -243,11 +267,27 @@ const isValidMove = (graphState, nodeId) => {
           return { newState, validMove: true, nodeStatus: "final-move" };
         }
         break;
+      case "D":
+      case "E":
+        clickedNode.visited = true;
+        // clickedNode.current = false;
+        let allNodesVisited = newState.nodes.every((node) => node.visited);
+        if (allNodesVisited) {
+          newState.nodes = newState.nodes.map((node) => ({
+            ...node,
+            backtracked: false,
+            current: false,
+            visited: true,
+          }));
+          // Clear current position and stack to prevent further moves
+          newState.currentNode = null;
+          newState.stack = [];
+          return { newState, validMove: true, nodeStatus: "final-move" };
+        }
+        break;
       default:
-        if (
-          nodeId === "A" &&
-          newState.nodes.every((n) => n.id === "A" || n.backtracked)
-        ) {
+        console.log("default case");
+        if (newState.nodes.every((n) => n.id === nodeId || n.backtracked)) {
           clickedNode.backtracked = true;
           clickedNode.current = false;
           newState.currentNode = null;
@@ -280,7 +320,9 @@ const getNodeStatus = (node) => {
 };
 
 const isGameComplete = (graphState) => {
-  return graphState.nodes.every((node) => node.backtracked);
+  return graphState.graphId === "D" || graphState.graphId === "E"
+    ? graphState.nodes.every((node) => node.visited)
+    : graphState.nodes.every((node) => node.backtracked);
 };
 
 const getMessage = (nodeStatus, nodeId) => {
