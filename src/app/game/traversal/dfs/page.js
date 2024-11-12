@@ -145,6 +145,19 @@ const isValidMove = (graphState, nodeId) => {
         break;
 
       case "F":
+        if (
+          nodeId !== "A" &&
+          nodeId !== "C" &&
+          nodeId !== "D" &&
+          nodeId !== "F"
+        ) {
+          return {
+            newState: graphState,
+            validMove: false,
+            message:
+              "DFS must start from node A,B,D or F! Let's begin our depth-first exploration from the root node, which is always node A or B or D or F in this graph.",
+          };
+        }
         break;
 
       default:
