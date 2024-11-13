@@ -301,101 +301,116 @@ const isValidMove = (graphState, nodeId) => {
           return { newState, validMove: true, nodeStatus: "final-move" };
         }
         break;
-      case "F":
-        // Define the two components
-        const component1 = ["A", "B", "C"];
-        const component2 = ["D", "E", "F"];
+        case "F":
+    // Define the two components
+    const component1 = ["A", "B", "C"];
+    const component2 = ["D", "E", "F"];
 
-        // Determine which component we're currently in
-        console.log("in F");
-        console.log("newState", newState);
-        const currentComponent = component1.includes(newState.currentNode)
-          ? component1
-          : component2;
+    // Determine which component we're currently in
+    console.log("in F");
+    console.log("newState", newState);
+    const currentComponent = component1.includes(newState.currentNode)
+      ? component1
+      : component2;
 
-        // Check if clicked node is in the same component
-        const isInSameComponent = currentComponent.includes(nodeId);
+    // Check if clicked node is in the same component
+    const isInSameComponent = currentComponent.includes(nodeId);
+    // Check if current component is fully visited
+    const isCurrentComponentFullyVisited = currentComponent.every(
+      (nodeId) => newState.nodes.find((n) => n.id === nodeId).visited
+    );
 
-        if (!isInSameComponent) {
-          // Check if current component is complete
-          const isCurrentComponentComplete = currentComponent.every(
-            (id) => newState.nodes.find((n) => n.id === id).visited
-          );
+    console.log(nodeId);
 
-          if (!isCurrentComponentComplete) {
-            return {
-              newState: graphState,
-              validMove: false,
-              message: `Complete the current component first before moving to the other component.`,
-            };
-          }
+    if (!isInSameComponent) {
+      // Check if current component is complete
+      const isCurrentComponentComplete = currentComponent.every(
+        (id) => newState.nodes.find((n) => n.id === id).visited
+      );
 
-          // If current component is complete, allow starting the new component
-          if (
-            !clickedNode.visited &&
-            (nodeId === "A" ||
-              nodeId === "B" ||
-              nodeId === "D" ||
-              nodeId === "F")
-          ) {
-            // Reset current node state but keep visited nodes
-            const prevNode = newState.nodes.find(
-              (n) => n.id === newState.currentNode
-            );
-            prevNode.current = false;
-            // Don't mark as backtracked, just keep as visited
+      if (!isCurrentComponentComplete) {
+        return {
+          newState: graphState,
+          validMove: false,
+          message: `Complete the current component first before moving to the other component.`,
+        };
+      }
 
-            clickedNode.visited = true;
-            clickedNode.current = true;
-            newState.currentNode = nodeId;
-            newState.stack = [nodeId];
-            return { newState, validMove: true, nodeStatus: "unvisited" };
-          }
-
-          return {
-            newState: graphState,
-            validMove: false,
-            message: `Invalid move. When starting a new component, you must start with node A or D.`,
-          };
-        }
-
-        if (!isConnected && isInSameComponent) {
-          return {
-            newState: graphState,
-            validMove: false,
-            message: `Node ${nodeId} is not connected to your current position (${newState.currentNode}).`,
-          };
-        }
-
-        // Handle normal DFS moves within the same component
-        if (!clickedNode.visited) {
-          const prevNode = newState.nodes.find(
-            (n) => n.id === newState.currentNode
-          );
-          prevNode.current = false;
-          clickedNode.visited = true;
-          clickedNode.current = true;
-          newState.currentNode = nodeId;
-          newState.stack.push(nodeId);
-          return { newState, validMove: true, nodeStatus: "unvisited" };
-        }
-
-        // Check if both components are complete
-        const isAllComplete = [...component1, ...component2].every(
-          (id) => newState.nodes.find((n) => n.id === id).visited
+      // If current component is complete, allow starting the new component
+      if (!clickedNode.visited && (nodeId === "A" || nodeId === "D")) {
+        // Reset current node state but keep visited nodes
+        const prevNode = newState.nodes.find(
+          (n) => n.id === newState.currentNode
         );
+        prevNode.current = false;
+        // Don't mark as backtracked, just keep as visited
 
-        if (isAllComplete) {
-          newState.nodes = newState.nodes.map((node) => ({
-            ...node,
-            current: false,
-            visited: true,
-          }));
-          newState.currentNode = null;
-          newState.stack = [];
-          return { newState, validMove: true, nodeStatus: "final-move" };
-        }
-        break;
+        clickedNode.visited = true;
+        clickedNode.current = true;
+        newState.currentNode = nodeId;
+        newState.stack = [nodeId];
+        return { newState, validMove: true, nodeStatus: "unvisited" };
+      }
+
+      return {
+        newState: graphState,
+        validMove: false,
+        message: `Invalid move. When starting a new component, you must start with node A or D.`,
+      };
+    }
+
+    if (!isConnected && isInSameComponent) {
+      return {
+        newState: graphState,
+        validMove: false,
+        message: `Node ${nodeId} is not connected to your current position (${newState.currentNode}).`,
+      };
+    }
+
+    // Handle normal DFS moves within the same component
+    if (!clickedNode.visited) {
+      const prevNode = newState.nodes.find(
+        (n) => n.id === newState.currentNode
+      );
+      prevNode.current = false;
+      // Ensure the previous node is marked as visited, not backtracked
+      prevNode.visited = true;
+      prevNode.backtracked = false;
+      
+      clickedNode.visited = true;
+      clickedNode.current = true;
+      newState.currentNode = nodeId;
+      newState.stack.push(nodeId);
+      
+      // Check if both components are complete after this move
+      const isAllComplete = [...component1, ...component2].every(
+        (id) => newState.nodes.find((n) => n.id === id).visited
+      );
+
+      if (isAllComplete) {
+        newState.nodes = newState.nodes.map((node) => ({
+          ...node,
+          current: false,
+          visited: true,
+          backtracked: false,
+        }));
+        newState.currentNode = null;
+        newState.stack = [];
+        return { newState, validMove: true, nodeStatus: "final-move" };
+      }
+
+      return { newState, validMove: true, nodeStatus: "unvisited" };
+    }
+
+    // If we reach here, it means we're trying to move to an already visited node
+    // You might want to handle this case (e.g., backtracking) or return an invalid move
+    return {
+      newState: graphState,
+      validMove: false,
+      message: `Node ${nodeId} has already been visited.`,
+    };
+
+    break;
       default:
         console.log("default case");
         if (newState.nodes.every((n) => n.id === nodeId || n.backtracked)) {
