@@ -142,12 +142,17 @@ const isValidMove = (graphState, nodeId) => {
         }
         break;
       case "F":
-        if (nodeId !== "A" && nodeId !== "D") {
+        if (
+          nodeId !== "A" &&
+          nodeId !== "D" &&
+          nodeId !== "C" &&
+          nodeId !== "F"
+        ) {
           return {
             newState: graphState,
             validMove: false,
             message:
-              "For disconnected graphs, BFS must start from node A or D!",
+              "For disconnected graphs, BFS must start from node A or C for left component, or start from D or F for right component!",
           };
         }
         break;
