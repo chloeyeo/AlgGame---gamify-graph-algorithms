@@ -11,6 +11,7 @@ const Nodes = {
       isDijkstraPage,
       isAStarPage,
       isDFSPage,
+      isBFSPage,
       COLORS,
       onNodeClick,
     }

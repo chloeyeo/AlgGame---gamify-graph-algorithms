@@ -29,6 +29,7 @@ const GraphVisualisation = ({
   const {
     isAStarPage,
     isDFSPage,
+    isBFSPage,
     isDijkstraPage,
     isEdmondsKarpPage,
     isFordFulkersonPage,
@@ -72,10 +73,10 @@ const GraphVisualisation = ({
       .attr("viewBox", `0 -20 ${viewBoxWidth} ${viewBoxHeight}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
-      .attr("height", "100%")
+      .attr("height", "100%");
 
     let nodes;
-    if (isDFSPage) {
+    if (isDFSPage || isBFSPage) {
       const layout = getDFSGameNodes[graphIndex];
       nodes = graphState.nodes.map((node) => ({
         ...node,
@@ -104,6 +105,7 @@ const GraphVisualisation = ({
       isFordFulkersonPage,
       isEdmondsKarpPage,
       isDFSPage,
+      isBFSPage,
       COLORS,
       onNodeClick,
       graphIndex,
@@ -115,6 +117,7 @@ const GraphVisualisation = ({
       isDijkstraPage,
       isAStarPage,
       isDFSPage,
+      isBFSPage,
       COLORS,
       onNodeClick,
       graphIndex,
@@ -127,6 +130,7 @@ const GraphVisualisation = ({
     COLORS,
     isAStarPage,
     isDFSPage,
+    isBFSPage,
     isDijkstraPage,
     isKruskalsPage,
     isPrimsPage,
@@ -139,6 +143,7 @@ const GraphVisualisation = ({
           svg={d3.select(svgRef.current)}
           isAStarPage={isAStarPage}
           isDFSPage={isDFSPage}
+          isBFSPage={isBFSPage}
           isDijkstraPage={isDijkstraPage}
           isEdmondsKarpPage={isEdmondsKarpPage}
           isFordFulkersonPage={isFordFulkersonPage}

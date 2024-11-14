@@ -6,6 +6,7 @@ export const useAlgorithmType = (pathname) => {
       isKruskalsPage: false,
       isPrimsPage: false,
       isDFSPage: false,
+      isBFSPage: false,
       isFordFulkersonPage: false,
       isEdmondsKarpPage: false,
     };
@@ -19,6 +20,7 @@ export const useAlgorithmType = (pathname) => {
     isKruskalsPage: path.includes("kruskals"),
     isPrimsPage: path.includes("prims"),
     isDFSPage: path.includes("dfs"),
+    isBFSPage: path.includes("bfs"),
     isFordFulkersonPage: path.includes("ford-fulkerson"),
     isEdmondsKarpPage: path.includes("edmonds-karp"),
   };

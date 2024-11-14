@@ -14,6 +14,7 @@ const Edges = {
       isFordFulkersonPage,
       isEdmondsKarpPage,
       isDFSPage,
+      isBFSPage,
       COLORS,
       onNodeClick,
     }
