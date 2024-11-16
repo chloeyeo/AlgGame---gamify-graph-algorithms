@@ -38,7 +38,10 @@ const graphStates = [
     "B",
     ["A", "B", "C", "D", "E", "F", "G", "H"],
     [
-      { source: "A", target: "B" },
+      { source: "A", target: "E" },
+      { source: "E", target: "D" },
+      { source: "D", target: "C" },
+      { source: "C", target: "B" },
       { source: "B", target: "C" },
       { source: "C", target: "D" },
       { source: "D", target: "E" },
