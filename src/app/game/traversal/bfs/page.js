@@ -76,10 +76,15 @@ const graphStates = [
     ["A", "B", "C", "D"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "A", target: "C" },
+      { source: "C", target: "A" },
       { source: "B", target: "C" },
+      { source: "C", target: "B" },
       { source: "B", target: "D" },
+      { source: "D", target: "B" },
       { source: "C", target: "D" },
+      { source: "D", target: "C" },
     ]
   ),
 
@@ -89,11 +94,17 @@ const graphStates = [
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "B", target: "C" },
+      { source: "C", target: "B" },
       { source: "C", target: "D" },
+      { source: "D", target: "C" },
       { source: "D", target: "E" },
+      { source: "E", target: "D" },
       { source: "E", target: "F" },
+      { source: "F", target: "E" },
       { source: "F", target: "A" },
+      { source: "A", target: "F" },
     ]
   ),
 
@@ -103,9 +114,13 @@ const graphStates = [
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "B", target: "C" },
+      { source: "C", target: "B" },
       { source: "D", target: "E" },
+      { source: "E", target: "D" },
       { source: "E", target: "F" },
+      { source: "F", target: "E" },
     ]
   ),
 ];
