@@ -284,11 +284,40 @@ const isValidMove = (graphState, nodeId) => {
         }
         break;
       case "D":
+        clickedNode.visited = true;
+        const currentNeighbours = newState.edges
+          .filter((e) => e.source === nodeId || e.target === nodeId)
+          .map((e) => (e.source === nodeId ? e.target : e.source));
+
+        // If all neighbors of current node are visited, mark it as backtracked
+        const allNeighborsVisited = currentNeighbours.every(
+          (neighborId) =>
+            newState.nodes.find((n) => n.id === neighborId).visited
+        );
+
+        if (
+          allNeighborsVisited &&
+          !newState.nodes.every((node) => node.visited)
+        ) {
+          clickedNode.backtracked = true;
+        }
+
+        if (newState.nodes.every((node) => node.visited)) {
+          newState.nodes = newState.nodes.map((node) => ({
+            ...node,
+            current: false,
+            visited: true,
+          }));
+          // Clear current position and stack to prevent further moves
+          newState.currentNode = null;
+          newState.stack = [];
+          return { newState, validMove: true, nodeStatus: "final-move" };
+        }
+        break;
       case "E":
         clickedNode.visited = true;
         // clickedNode.current = false;
-        let allNodesVisited = newState.nodes.every((node) => node.visited);
-        if (allNodesVisited) {
+        if (newState.nodes.every((node) => node.visited)) {
           newState.nodes = newState.nodes.map((node) => ({
             ...node,
             backtracked: false,
