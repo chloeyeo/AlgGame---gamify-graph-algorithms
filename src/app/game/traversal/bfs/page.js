@@ -142,6 +142,15 @@ const isValidMove = (graphState, nodeId) => {
   const newState = JSON.parse(JSON.stringify(graphState));
   const clickedNode = newState.nodes.find((n) => n.id === nodeId);
 
+  // Node already visited
+  if (clickedNode.visited) {
+    return {
+      newState: graphState,
+      validMove: false,
+      message: `Node ${nodeId} was already visited! In BFS, we never revisit nodes.`,
+    };
+  }
+
   // Initial move validation
   if (!newState.currentNode) {
     switch (graphState.graphId) {
@@ -164,21 +173,6 @@ const isValidMove = (graphState, nodeId) => {
           };
         }
         break;
-      case "F":
-        if (
-          nodeId !== "A" &&
-          nodeId !== "D" &&
-          nodeId !== "C" &&
-          nodeId !== "F"
-        ) {
-          return {
-            newState: graphState,
-            validMove: false,
-            message:
-              "For disconnected graphs, BFS must start from node A or C for left component, or start from D or F for right component!",
-          };
-        }
-        break;
     }
 
     clickedNode.visited = true;
@@ -197,15 +191,6 @@ const isValidMove = (graphState, nodeId) => {
     return { newState, validMove: true, nodeStatus: "unvisited" };
   }
 
-  // Node already visited
-  if (clickedNode.visited) {
-    return {
-      newState: graphState,
-      validMove: false,
-      message: `Node ${nodeId} was already visited! In BFS, we never revisit nodes.`,
-    };
-  }
-
   // Special handling for disconnected graph (Graph F)
   if (graphState.graphId === "F") {
     const component1 = ["A", "B", "C"];
@@ -214,6 +199,35 @@ const isValidMove = (graphState, nodeId) => {
       ? component1
       : component2;
     const isInSameComponent = currentComponent.includes(nodeId);
+
+    // Check if component 1 is fully visited and deny interaction with component 1 nodes
+    const isComponent1Complete = component1.every(
+      (id) => newState.nodes.find((n) => n.id === id).visited
+    );
+    // Check if component 2 is fully visited and deny interaction with component 2 nodes
+    const isComponent2Complete = component2.every(
+      (id) => newState.nodes.find((n) => n.id === id).visited
+    );
+
+    // If component 1 is complete, block interaction with its nodes
+    if (isComponent1Complete && component1.includes(nodeId)) {
+      return {
+        newState: graphState,
+        validMove: false,
+        message:
+          "You cannot interact with nodes in the completed subcomponent. Complete the other subcomponent first!",
+      };
+    }
+
+    // If component 2 is complete, block interaction with its nodes
+    if (isComponent2Complete && component2.includes(nodeId)) {
+      return {
+        newState: graphState,
+        validMove: false,
+        message:
+          "You cannot interact with nodes in the completed subcomponent. Complete the other subcomponent first!",
+      };
+    }
 
     if (!isInSameComponent) {
       const isCurrentComponentComplete = currentComponent.every(
@@ -229,10 +243,7 @@ const isValidMove = (graphState, nodeId) => {
         };
       }
 
-      if (
-        !clickedNode.visited &&
-        (nodeId === "A" || nodeId === "C" || nodeId === "D" || nodeId === "F")
-      ) {
+      if (!clickedNode.visited) {
         // Start new component
         const prevNode = newState.nodes.find(
           (n) => n.id === newState.currentNode

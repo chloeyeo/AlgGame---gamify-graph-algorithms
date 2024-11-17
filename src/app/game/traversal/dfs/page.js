@@ -146,19 +146,29 @@ const isValidMove = (graphState, nodeId) => {
         break;
 
       case "F":
+        const component1 = ["A", "B", "C"];
+        const component2 = ["D", "E", "F"];
+
+        const isComponent1Complete = component1.every(
+          (id) => graphState.nodes.find((n) => n.id === id).visited
+        );
+        const isComponent2Complete = component2.every(
+          (id) => graphState.nodes.find((n) => n.id === id).visited
+        );
+
+        // If clicked node is in a completed component, reject the move
         if (
-          nodeId !== "A" &&
-          nodeId !== "C" &&
-          nodeId !== "D" &&
-          nodeId !== "F"
+          (isComponent1Complete && component1.includes(nodeId)) ||
+          (isComponent2Complete && component2.includes(nodeId))
         ) {
           return {
             newState: graphState,
             validMove: false,
             message:
-              "DFS must start from node A,B,D or F! Let's begin our depth-first exploration from the root node, which is always node A or B (for component A-B-C) or D or F (for component D-E-F) in this graph.",
+              "This component is already completed. You cannot revisit its nodes.",
           };
         }
+
         break;
 
       default:
@@ -373,21 +383,16 @@ const isValidMove = (graphState, nodeId) => {
           }
 
           // If current component is complete, allow starting the new component
-          if (
-            !clickedNode.visited &&
-            (nodeId === "A" ||
-              nodeId === "C" ||
-              nodeId === "D" ||
-              nodeId === "F")
-          ) {
-            // Reset current node state but keep visited nodes
-            const prevNode = newState.nodes.find(
-              (n) => n.id === newState.currentNode
-            );
-            prevNode.current = false;
-            // Ensure previous node remains visited, not backtracked
-            prevNode.visited = true;
-            prevNode.backtracked = false;
+          if (!clickedNode.visited) {
+            if (newState.currentNode) {
+              const prevNode = newState.nodes.find(
+                (n) => n.id === newState.currentNode
+              );
+              prevNode.current = false;
+              // Ensure previous node remains visited, not backtracked
+              prevNode.visited = true;
+              prevNode.backtracked = false;
+            }
 
             clickedNode.visited = true;
             clickedNode.current = true;
@@ -432,13 +437,9 @@ const isValidMove = (graphState, nodeId) => {
           );
 
           if (isLastNodeInComponent) {
-            // Mark all nodes in the current component as visited
-            currentComponent.forEach((id) => {
-              const node = newState.nodes.find((n) => n.id === id);
-              node.visited = true;
-              node.backtracked = false;
-              node.current = id === nodeId;
-            });
+            clickedNode.current = false; // Ensure last node is not marked as current
+            clickedNode.visited = true;
+            newState.currentNode = null;
           }
 
           // Check if both components are complete after this move
@@ -451,7 +452,7 @@ const isValidMove = (graphState, nodeId) => {
               ...node,
               current: false,
               visited: true,
-              backtracked: false,
+              backtracked: node.backtracked,
             }));
             newState.currentNode = null;
             newState.stack = [];
@@ -461,11 +462,24 @@ const isValidMove = (graphState, nodeId) => {
           return { newState, validMove: true, nodeStatus: "unvisited" };
         }
 
-        // If we reach here, it means we're trying to move to an already visited node
+        // Allow backtracking within the same component
+        if (clickedNode.visited && isConnected) {
+          const prevNode = newState.nodes.find(
+            (n) => n.id === newState.currentNode
+          );
+          prevNode.current = false;
+          prevNode.visited = true;
+
+          clickedNode.current = true;
+          newState.currentNode = nodeId;
+          newState.stack.pop();
+          return { newState, validMove: true, nodeStatus: "visited" };
+        }
+
         return {
           newState: graphState,
           validMove: false,
-          message: `Node ${nodeId} has already been visited.`,
+          message: `Invalid move.`,
         };
 
         break;
