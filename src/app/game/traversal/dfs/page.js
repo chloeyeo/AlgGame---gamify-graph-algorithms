@@ -98,6 +98,26 @@ const graphStates = [
       { source: "E", target: "F" },
     ]
   ),
+
+  // Graph G - Complete graph - the only graph where only one move is needed to visit all adjacent vertices
+  createGraphState(
+    "G",
+    ["A", "B", "C", "D"],
+    [
+      { source: "A", target: "B" },
+      { source: "B", target: "A" },
+      { source: "A", target: "C" },
+      { source: "C", target: "A" },
+      { source: "B", target: "C" },
+      { source: "C", target: "B" },
+      { source: "B", target: "D" },
+      { source: "D", target: "B" },
+      { source: "C", target: "D" },
+      { source: "D", target: "C" },
+      { source: "A", target: "D" },
+      { source: "D", target: "A" },
+    ]
+  ),
 ];
 
 const DFSGamePage = () => {

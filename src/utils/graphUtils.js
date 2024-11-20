@@ -76,4 +76,14 @@ export const getDFSGameNodes = [
     E: { x: 700, y: 200 },
     F: { x: 800, y: 200 },
   },
+  {
+    // Complete graph (Graph G)
+    A: { x: 400, y: 100 },
+    B: { x: 300, y: 200 },
+    C: { x: 500, y: 200 },
+    D: { x: 400, y: 300 },
+    E: { x: 350, y: 300 },
+    F: { x: 450, y: 300 },
+    G: { x: 550, y: 300 },
+  },
 ];
