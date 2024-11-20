@@ -23,11 +23,17 @@ const graphStates = [
     ["A", "B", "C", "D", "E", "F", "G"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "A", target: "C" },
+      { source: "C", target: "A" },
       { source: "B", target: "D" },
+      { source: "D", target: "B" },
       { source: "B", target: "E" },
+      { source: "E", target: "B" },
       { source: "C", target: "F" },
+      { source: "F", target: "C" },
       { source: "D", target: "G" },
+      { source: "G", target: "D" },
     ]
   ),
 
@@ -36,14 +42,20 @@ const graphStates = [
     "B",
     ["A", "B", "C", "D", "E", "F", "G", "H"],
     [
-      { source: "A", target: "B" },
-      { source: "B", target: "C" },
-      { source: "C", target: "D" },
-      { source: "D", target: "E" },
-      { source: "B", target: "F" },
-      { source: "C", target: "G" },
-      { source: "D", target: "H" },
+      { source: "A", target: "E" },
       { source: "E", target: "A" },
+      { source: "B", target: "C" },
+      { source: "C", target: "B" },
+      { source: "C", target: "D" },
+      { source: "D", target: "C" },
+      { source: "D", target: "E" },
+      { source: "E", target: "D" },
+      { source: "B", target: "F" },
+      { source: "F", target: "B" },
+      { source: "C", target: "G" },
+      { source: "G", target: "C" },
+      { source: "D", target: "H" },
+      { source: "H", target: "D" },
     ]
   ),
 
@@ -53,10 +65,15 @@ const graphStates = [
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "A", target: "C" },
+      { source: "C", target: "A" },
       { source: "A", target: "D" },
+      { source: "D", target: "A" },
       { source: "A", target: "E" },
+      { source: "E", target: "A" },
       { source: "A", target: "F" },
+      { source: "F", target: "A" },
     ]
   ),
 
@@ -66,10 +83,15 @@ const graphStates = [
     ["A", "B", "C", "D"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "A", target: "C" },
+      { source: "C", target: "A" },
       { source: "B", target: "C" },
+      { source: "C", target: "B" },
       { source: "B", target: "D" },
+      { source: "D", target: "B" },
       { source: "C", target: "D" },
+      { source: "D", target: "C" },
     ]
   ),
 
@@ -79,11 +101,17 @@ const graphStates = [
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "B", target: "C" },
+      { source: "C", target: "B" },
       { source: "C", target: "D" },
+      { source: "D", target: "C" },
       { source: "D", target: "E" },
+      { source: "E", target: "D" },
       { source: "E", target: "F" },
+      { source: "F", target: "E" },
       { source: "F", target: "A" },
+      { source: "A", target: "F" },
     ]
   ),
 
@@ -93,9 +121,13 @@ const graphStates = [
     ["A", "B", "C", "D", "E", "F"],
     [
       { source: "A", target: "B" },
+      { source: "B", target: "A" },
       { source: "B", target: "C" },
+      { source: "C", target: "B" },
       { source: "D", target: "E" },
+      { source: "E", target: "D" },
       { source: "E", target: "F" },
+      { source: "F", target: "E" },
     ]
   ),
 
@@ -144,26 +176,26 @@ const isValidMove = (graphState, nodeId) => {
   // Starting move validation
   if (!newState.currentNode) {
     switch (graphState.graphId) {
-      case "A":
-        if (nodeId !== "A") {
-          return {
-            newState: graphState,
-            validMove: false,
-            message:
-              "DFS must start from node A! Let's begin our depth-first exploration from the root node, which is always node A in this graph.",
-          };
-        }
-        break;
-      case "B":
-        if (nodeId !== "A" && nodeId !== "B") {
-          return {
-            newState: graphState,
-            validMove: false,
-            message:
-              "DFS must start from node A or node B! Let's begin our depth-first exploration from the root node, which is always node A or B in this graph.",
-          };
-        }
-        break;
+      // case "A":
+      //   if (nodeId !== "A") {
+      //     return {
+      //       newState: graphState,
+      //       validMove: false,
+      //       message:
+      //         "DFS must start from node A! Let's begin our depth-first exploration from the root node, which is always node A in this graph.",
+      //     };
+      //   }
+      //   break;
+      // case "B":
+      //   if (nodeId !== "A" && nodeId !== "B") {
+      //     return {
+      //       newState: graphState,
+      //       validMove: false,
+      //       message:
+      //         "DFS must start from node A or node B! Let's begin our depth-first exploration from the root node, which is always node A or B in this graph.",
+      //     };
+      //   }
+      //   break;
 
       case "F":
         const component1 = ["A", "B", "C"];
@@ -192,7 +224,7 @@ const isValidMove = (graphState, nodeId) => {
         break;
 
       default:
-        if (graphState.graphId !== "C" && !nodeId) {
+        if (!nodeId) {
           return {
             newState: graphState,
             validMove: false,
@@ -279,31 +311,7 @@ const isValidMove = (graphState, nodeId) => {
 
     switch (graphState.graphId) {
       case "A":
-        if (
-          nodeId === "A" &&
-          newState.nodes.every((n) => n.id === "A" || n.backtracked)
-        ) {
-          clickedNode.backtracked = true;
-          clickedNode.current = false;
-          newState.currentNode = null;
-          newState.stack.pop();
-          return { newState, validMove: true, nodeStatus: "final-move" };
-        }
-        break;
       case "B":
-        if (
-          (nodeId === "A" &&
-            newState.nodes.every((n) => n.id === "A" || n.backtracked)) ||
-          (nodeId === "B" &&
-            newState.nodes.every((n) => n.id === "B" || n.backtracked))
-        ) {
-          clickedNode.backtracked = true;
-          clickedNode.current = false;
-          newState.currentNode = null;
-          newState.stack.pop();
-          return { newState, validMove: true, nodeStatus: "final-move" };
-        }
-        break;
       case "C":
         if (newState.nodes.every((n) => n.id === nodeId || n.backtracked)) {
           clickedNode.backtracked = true;
