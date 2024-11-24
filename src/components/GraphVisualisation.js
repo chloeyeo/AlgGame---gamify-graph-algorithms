@@ -53,6 +53,23 @@ const GraphVisualisation = ({
     setHeight(svg.node().getBoundingClientRect().height);
   }, [svgRef]);
 
+  const calculateViewBox = (nodes) => {
+    if (!nodes.length) return { xOffset: 0, yOffset: -20 };
+
+    // Calculate the bounds of the graph
+    const xValues = nodes.map((n) => n.x);
+    const yValues = nodes.map((n) => n.y);
+    const minX = Math.min(...xValues);
+    const maxX = Math.max(...xValues);
+    const graphWidth = maxX - minX;
+
+    // Calculate center offset
+    const centerX = (minX + maxX) / 2;
+    const xOffset = centerX - viewBoxWidth / 2;
+
+    return { xOffset: -xOffset, yOffset: -20 };
+  };
+
   useEffect(() => {
     if (!graphState) return;
 
