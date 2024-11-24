@@ -264,7 +264,7 @@ const EdmondsKarpEducationPage = () => {
   return (
     <EducationPageStructure
       title="Edmonds-Karp Algorithm"
-      steps={steps}
+      graphStates={[steps]}
       conceptText={conceptText}
       pseudocode={pseudocode}
     />

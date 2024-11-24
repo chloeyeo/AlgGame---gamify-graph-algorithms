@@ -227,7 +227,7 @@ export default function BFSEducationPage() {
   return (
     <EducationPageStructure
       title="Breadth-First Search (BFS)"
-      steps={bfsSteps}
+      graphStates={[bfsSteps]}
       conceptText={bfsConceptText}
       pseudocode={bfsPseudocode}
     />

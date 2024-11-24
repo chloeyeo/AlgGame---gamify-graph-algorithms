@@ -300,7 +300,7 @@ Note: Different path choices are valid as long as they result in the same maximu
   return (
     <EducationPageStructure
       title="Ford-Fulkerson Algorithm"
-      steps={steps}
+      graphStates={[steps]}
       conceptText={conceptText}
       pseudocode={pseudocode}
     />

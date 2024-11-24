@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { getNetworkFlowNodePositions } from "@/utils/graphUtils";
 
 const Edges = {
   draw: (
@@ -19,6 +20,12 @@ const Edges = {
       onNodeClick,
     }
   ) => {
+    // Get network flow positions if needed
+    const networkFlowNodePositions =
+      isFordFulkersonPage || isEdmondsKarpPage
+        ? getNetworkFlowNodePositions()
+        : null;
+
     // Draw edges
     const edgeGroups = svg
       .selectAll(".edge")

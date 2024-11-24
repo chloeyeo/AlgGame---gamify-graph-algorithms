@@ -228,7 +228,7 @@ const HungarianKhunMunkresEducationPage = () => {
   return (
     <EducationPageStructure
       title="Hungarian (Kuhn-Munkres) Algorithm"
-      steps={steps}
+      graphStates={[steps]}
       conceptText={conceptText}
       pseudocode={pseudocode}
       GraphVisualisationComponent={GraphVisualisation}

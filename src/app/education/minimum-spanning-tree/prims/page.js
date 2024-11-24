@@ -426,8 +426,7 @@ export default function PrimsEducationPage() {
   return (
     <EducationPageStructure
       title="Prim's Algorithm"
-      steps={primStepsGraphA}
-      comparisonSteps={primStepsGraphB}
+      graphStates={[primStepsGraphA, primStepsGraphB]}
       conceptText={primConceptText}
       pseudocode={primPseudocode}
     />

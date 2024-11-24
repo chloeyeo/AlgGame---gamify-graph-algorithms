@@ -389,6 +389,157 @@ const kruskalStepsGraphB = [
   },
 ];
 
+// Example C specifically shows cycle detection
+const kruskalStepsGraphC = [
+  {
+    graphState: {
+      nodes: [
+        { id: "A" },
+        { id: "B" },
+        { id: "C" },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 5 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [],
+    },
+    explanation:
+      "Initial state: Looking at the same graph structure as before, but we'll focus on cycle detection this time.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A" },
+        { id: "B", visited: true },
+        { id: "C" },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2, highlight: true },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [{ source: "B", target: "E", weight: 2 }],
+    },
+    explanation:
+      "First, we add B-E (weight 2). This is our first edge, so no cycle is possible yet.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A" },
+        { id: "B", visited: true },
+        { id: "C" },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2, highlight: true },
+      ],
+      mstEdges: [
+        { source: "B", target: "E", weight: 2 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+    },
+    explanation:
+      "Then add F-G (weight 2). Still no cycles possible as these edges aren't connected.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A" },
+        { id: "B", visited: true },
+        { id: "C" },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "A", target: "C", weight: 3 },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4, highlight: true },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "B", target: "E", weight: 2 },
+        { source: "F", target: "G", weight: 2 },
+        { source: "E", target: "G", weight: 4 },
+      ],
+      cycleEdges: ["B", "E", "G"], // Optional: Could be used to highlight cycle path
+    },
+    explanation:
+      "If we try to add edge E-G (weight 4), it would create a cycle B-E-G! Even though it has a low weight, we must skip it to maintain our tree structure.",
+  },
+  {
+    graphState: {
+      nodes: [
+        { id: "A" },
+        { id: "B", visited: true },
+        { id: "C" },
+        { id: "D" },
+        { id: "E", visited: true },
+        { id: "F", visited: true },
+        { id: "G", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 4 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "A", target: "C", weight: 3, highlight: true },
+        { source: "B", target: "D", weight: 5 },
+        { source: "B", target: "E", weight: 2 },
+        { source: "C", target: "F", weight: 4 },
+        { source: "D", target: "G", weight: 3 },
+        { source: "E", target: "G", weight: 4 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "B", target: "E", weight: 2 },
+        { source: "F", target: "G", weight: 2 },
+      ],
+    },
+    explanation:
+      "Instead of creating a cycle, we look for the next best edge that doesn't create a cycle. A-C (weight 3) is a good choice.",
+  },
+  // Continue with the rest of Graph B's steps...
+];
+
 const kruskalConceptText = {
   introduction:
     "Kruskal's algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a weighted, undirected graph. It works by sorting all edges by weight and then adding them to the MST one by one, as long as they don't create a cycle.",
@@ -406,22 +557,40 @@ const kruskalConceptText = {
   ],
 };
 
-const kruskalPseudocode = `function Kruskal(G):
-    A = ∅
-    foreach v ∈ G.V:
-        MakeSet(v)
-    foreach (u, v) in G.E ordered by weight(u, v), increasing:
-        if FindSet(u) ≠ FindSet(v):
-            A = A ∪ {(u, v)}
-            Union(u, v)
-    return A`;
+// Updated pseudocode that matches the educational steps better
+const kruskalPseudocode = `
+# Kruskal's Algorithm for Minimum Spanning Tree
+function KruskalMST(graph):
+    mst = empty set of edges
+
+    # Sort edges by weight (lowest first)
+    edges = sort edges in graph by weight
+
+    # Track connected components
+    components = DisjointSet(all vertices)
+
+    for each edge (u,v) in edges:
+        # Key step: Skip if adding edge would create cycle
+        if components.find(u) != components.find(v):
+            add edge (u,v) to mst
+            components.union(u, v)
+        else:
+            # Edge would create cycle, skip it
+            continue
+
+    return mst
+
+# Example:
+# - Pick lowest weight edge if no cycle forms
+# - Use disjoint sets to detect cycles
+# - Continue until all vertices connected
+`;
 
 export default function KruskalsEducationPage() {
   return (
     <EducationPageStructure
       title="Kruskal's Algorithm"
-      steps={kruskalStepsGraphA}
-      comparisonSteps={kruskalStepsGraphB}
+      graphStates={[kruskalStepsGraphA, kruskalStepsGraphB, kruskalStepsGraphC]}
       conceptText={kruskalConceptText}
       pseudocode={kruskalPseudocode}
     />

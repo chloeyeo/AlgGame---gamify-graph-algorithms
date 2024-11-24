@@ -392,7 +392,7 @@ export default function DFSEducationPage() {
   return (
     <EducationPageStructure
       title="Depth-First Search (DFS)"
-      steps={dfsSteps}
+      graphStates={[dfsSteps]}
       conceptText={dfsConceptText}
       pseudocode={dfsPseudocode}
     />

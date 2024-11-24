@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import GraphVisualisation from "./GraphVisualisation";
 import CodeEditorPseudocode from "./CodeEditorPseudocode";
 
@@ -21,7 +20,6 @@ const ExplanationSection = ({ explanation }) => {
       );
     }
 
-    // Split by numbers if they exist
     if (/^\d+\./.test(text)) {
       const parts = text.split(/(?=\d+\.)/).map((t) => t.trim());
       if (parts.length > 1) {
@@ -35,7 +33,6 @@ const ExplanationSection = ({ explanation }) => {
       }
     }
 
-    // Default to regular paragraph
     return <p>{text}</p>;
   };
 
@@ -48,65 +45,38 @@ const ExplanationSection = ({ explanation }) => {
 
 export default function EducationPageStructure({
   title = "Graph Algorithm",
-  steps = [],
-  comparisonSteps = [],
+  graphStates = [], // Now using graphStates array for all graphs
   conceptText = "",
   pseudocode = "",
   GraphVisualisationComponent = GraphVisualisation,
 }) {
-  // Separate step tracking for each graph
-  const [currentStepA, setCurrentStepA] = useState(0);
-  const [currentStepB, setCurrentStepB] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
   const [isSpeakingExplanation, setIsSpeakingExplanation] = useState(false);
   const [isSpeakingConcept, setIsSpeakingConcept] = useState(false);
-  const [activeTab, setActiveTab] = useState("graph1");
-  const router = useRouter();
-  const [isLoadingGraphA, setIsLoadingGraphA] = useState(false);
-  const [isLoadingGraphB, setIsLoadingGraphB] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (activeTab === "graph1") {
-        setIsLoadingGraphA(false);
-      } else {
-        setIsLoadingGraphB(false);
-      }
+      setIsLoading(false);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, [activeTab]);
 
-  // Navigation functions
   const nextStep = () => {
-    if (activeTab === "graph1") {
-      if (currentStepA < steps.length - 1) {
-        setCurrentStepA(currentStepA + 1);
-      }
-    } else {
-      if (currentStepB < comparisonSteps.length - 1) {
-        setCurrentStepB(currentStepB + 1);
-      }
+    if (currentStep < graphStates[activeTab].length - 1) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
-    if (activeTab === "graph1") {
-      if (currentStepA > 0) {
-        setCurrentStepA(currentStepA - 1);
-      }
-    } else {
-      if (currentStepB > 0) {
-        setCurrentStepB(currentStepB - 1);
-      }
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
   const resetGraph = () => {
-    if (activeTab === "graph1") {
-      setCurrentStepA(0);
-    } else {
-      setCurrentStepB(0);
-    }
+    setCurrentStep(0);
   };
 
   // Speech synthesis handlers
@@ -124,12 +94,6 @@ export default function EducationPageStructure({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
-
-  useEffect(() => {
-    window.speechSynthesis.cancel();
-    setIsSpeakingExplanation(false);
-    setIsSpeakingConcept(false);
-  }, [router.pathname]);
 
   const toggleSpeech = (text, type) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -180,12 +144,12 @@ export default function EducationPageStructure({
     }
   };
 
-  const getCurrentStep = () => {
-    return activeTab === "graph1" ? currentStepA : currentStepB;
+  const getCurrentGraphState = () => {
+    return graphStates[activeTab]?.[currentStep]?.graphState;
   };
 
-  const getCurrentSteps = () => {
-    return activeTab === "graph1" ? steps : comparisonSteps;
+  const getCurrentExplanation = () => {
+    return graphStates[activeTab]?.[currentStep]?.explanation;
   };
 
   const renderConceptText = (text) => (
@@ -220,64 +184,47 @@ export default function EducationPageStructure({
         isDesktop ? "h-[500px]" : "h-[400px]"
       } relative bg-white bg-opacity-50 rounded-lg`}
     >
-      {comparisonSteps.length > 0 ? (
-        <div className="w-full h-full">
+      <div className="w-full h-full">
+        {graphStates.length > 1 && (
           <div className="flex mb-2 border-b">
-            <button
-              onClick={() => setActiveTab("graph1")}
-              className={`px-4 py-2 border-b-2 border-transparent hover:border-blue-500 focus:outline-none ${
-                activeTab === "graph1" ? "border-blue-500 font-bold" : ""
-              }`}
-            >
-              Graph A
-            </button>
-            <button
-              onClick={() => setActiveTab("graph2")}
-              className={`px-4 py-2 border-b-2 border-transparent hover:border-blue-500 focus:outline-none ${
-                activeTab === "graph2" ? "border-blue-500 font-bold" : ""
-              }`}
-            >
-              Graph B
-            </button>
+            {graphStates.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setActiveTab(index);
+                  setCurrentStep(0);
+                }}
+                className={`px-4 py-2 border-b-2 border-transparent hover:border-blue-500 focus:outline-none ${
+                  activeTab === index ? "border-blue-500 font-bold" : ""
+                }`}
+              >
+                Graph {String.fromCharCode(65 + index)}
+              </button>
+            ))}
           </div>
+        )}
 
-          <div className="flex h-[calc(100%-3rem)]">
-            <div className="flex-1 h-full">
-              <div className="h-full flex items-center justify-center">
-                {isLoadingGraphA && activeTab === "graph1" ? (
-                  <p>Loading graph...</p>
-                ) : isLoadingGraphB && activeTab === "graph2" ? (
-                  <p>Loading graph...</p>
-                ) : (
-                  <GraphVisualisationComponent
-                    graphState={
-                      activeTab === "graph1"
-                        ? steps[currentStepA]?.graphState
-                        : comparisonSteps[currentStepB]?.graphState
-                    }
-                    isGraphA={activeTab === "graph1"}
-                  />
-                )}
-              </div>
+        <div className="flex h-[calc(100%-3rem)]">
+          <div className="flex-1 h-full">
+            <div className="h-full flex items-center justify-center">
+              {isLoading ? (
+                <p>Loading graph...</p>
+              ) : (
+                <GraphVisualisationComponent
+                  graphState={getCurrentGraphState()}
+                  isGraphA={activeTab === 0}
+                  graphIndex={activeTab}
+                />
+              )}
             </div>
           </div>
         </div>
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          {isLoadingGraphA ? (
-            <p>Loading graph...</p>
-          ) : (
-            <GraphVisualisationComponent
-              graphState={steps[currentStepA]?.graphState}
-              isGraphA={true}
-            />
-          )}
-        </div>
-      )}
+      </div>
+
       <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
         <button
           onClick={prevStep}
-          disabled={getCurrentStep() === 0}
+          disabled={currentStep === 0}
           className="bg-gray-300 p-2 rounded disabled:opacity-50"
         >
           Prev
@@ -290,7 +237,7 @@ export default function EducationPageStructure({
         </button>
         <button
           onClick={nextStep}
-          disabled={getCurrentStep() === getCurrentSteps().length - 1}
+          disabled={currentStep === graphStates[activeTab]?.length - 1}
           className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
         >
           Next
@@ -315,10 +262,7 @@ export default function EducationPageStructure({
             <h2 className="text-xl font-semibold">Explanation</h2>
             <button
               onClick={() =>
-                toggleSpeech(
-                  getCurrentSteps()[getCurrentStep()]?.explanation,
-                  "explanation"
-                )
+                toggleSpeech(getCurrentExplanation(), "explanation")
               }
               className="ml-2 p-2 rounded-full hover:bg-gray-100"
             >
@@ -327,10 +271,7 @@ export default function EducationPageStructure({
           </div>
 
           <ExplanationSection
-            explanation={
-              getCurrentSteps()[getCurrentStep()]?.explanation ||
-              "No explanation available"
-            }
+            explanation={getCurrentExplanation() || "No explanation available"}
           />
         </div>
 
@@ -376,10 +317,7 @@ export default function EducationPageStructure({
             <h2 className="text-xl font-bold">Explanation</h2>
             <button
               onClick={() =>
-                toggleSpeech(
-                  getCurrentSteps()[getCurrentStep()]?.explanation,
-                  "explanation"
-                )
+                toggleSpeech(getCurrentExplanation(), "explanation")
               }
               className="ml-2 p-2 rounded-full hover:bg-gray-100"
             >
@@ -387,10 +325,7 @@ export default function EducationPageStructure({
             </button>
           </div>
           <ExplanationSection
-            explanation={
-              getCurrentSteps()[getCurrentStep()]?.explanation ||
-              "No explanation available"
-            }
+            explanation={getCurrentExplanation() || "No explanation available"}
           />
         </div>
       </div>

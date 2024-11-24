@@ -339,7 +339,7 @@ export default function AStarEducationPage() {
   return (
     <EducationPageStructure
       title="A* Algorithm"
-      steps={astarSteps}
+      graphStates={[astarSteps]}
       conceptText={astarConceptText}
       pseudocode={astarPseudocode}
     />

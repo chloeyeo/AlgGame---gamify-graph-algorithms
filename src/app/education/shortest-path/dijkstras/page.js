@@ -301,7 +301,7 @@ export default function DijkstraEducationPage() {
   return (
     <EducationPageStructure
       title="Dijkstra's Algorithm Visualization"
-      steps={dijkstraSteps}
+      graphStates={[dijkstraSteps]}
       conceptText={dijkstraConceptText}
       pseudocode={dijkstraPseudocode}
     />
