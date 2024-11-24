@@ -9,6 +9,7 @@ import {
   getDefaultNodes,
   getDFSGameNodes,
   getNetworkFlowNodePositions,
+  getDijkstraNodes,
 } from "@/utils/graphUtils";
 import { usePathname } from "next/navigation";
 import Edges from "@/components/Edges/Edge";
@@ -43,7 +44,7 @@ const GraphVisualisation = ({
     isKruskalsPage
   );
 
-  // // get width and height of svg
+  // get width and height of svg
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
@@ -90,6 +91,12 @@ const GraphVisualisation = ({
     let nodes;
     if (isDFSPage || isBFSPage) {
       const layout = getDFSGameNodes[graphIndex];
+      nodes = graphState.nodes.map((node) => ({
+        ...node,
+        ...(layout?.[node.id] || {}),
+      }));
+    } else if (isDijkstraPage) {
+      const layout = getDijkstraNodes[graphIndex];
       nodes = graphState.nodes.map((node) => ({
         ...node,
         ...(layout?.[node.id] || {}),

@@ -17,6 +17,37 @@ export const getDefaultNodes = () => [
   { id: "G", x: 80, y: 500 },
 ];
 
+export const getDijkstraNodes = [
+  // Graph A (Same as default nodes)
+  {
+    A: { x: 300, y: 50 },
+    B: { x: 200, y: 200 },
+    C: { x: 400, y: 200 },
+    D: { x: 130, y: 350 },
+    E: { x: 270, y: 350 },
+    F: { x: 470, y: 350 },
+    G: { x: 80, y: 500 },
+  },
+  // Graph B (Circular layout)
+  {
+    A: { x: 300, y: 100 },
+    B: { x: 150, y: 200 },
+    C: { x: 450, y: 200 },
+    D: { x: 150, y: 350 },
+    E: { x: 300, y: 400 },
+    F: { x: 450, y: 350 },
+  },
+  // Graph C (Grid layout)
+  {
+    A: { x: 200, y: 100 },
+    B: { x: 400, y: 100 },
+    C: { x: 200, y: 250 },
+    D: { x: 400, y: 250 },
+    E: { x: 200, y: 400 },
+    F: { x: 400, y: 400 },
+  },
+];
+
 export const getDFSGameNodes = [
   {
     // Graph A

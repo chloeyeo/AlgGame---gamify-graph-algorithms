@@ -26,6 +26,48 @@ const initialGraphState = {
   currentNode: null,
 };
 
+// Graph 2: Unique shortest path solution
+const uniqueSolutionGraph = {
+  nodes: [
+    { id: "A", visited: false, distance: 0, recentlyUpdated: false },
+    { id: "B", visited: false, distance: Infinity, recentlyUpdated: false },
+    { id: "C", visited: false, distance: Infinity, recentlyUpdated: false },
+    { id: "D", visited: false, distance: Infinity, recentlyUpdated: false },
+    { id: "E", visited: false, distance: Infinity, recentlyUpdated: false },
+  ],
+  edges: [
+    { source: "A", target: "B", weight: 2 },
+    { source: "A", target: "C", weight: 4 },
+    { source: "B", target: "D", weight: 1 },
+    { source: "B", target: "E", weight: 5 },
+    { source: "C", target: "D", weight: 3 },
+    { source: "C", target: "E", weight: 2 },
+    { source: "D", target: "E", weight: 1 },
+  ],
+  currentNode: null,
+};
+
+// Graph 3: All paths are valid solutions (equal weights)
+const allPathsGraph = {
+  nodes: [
+    { id: "A", visited: false, distance: 0, recentlyUpdated: false },
+    { id: "B", visited: false, distance: Infinity, recentlyUpdated: false },
+    { id: "C", visited: false, distance: Infinity, recentlyUpdated: false },
+    { id: "D", visited: false, distance: Infinity, recentlyUpdated: false },
+    { id: "E", visited: false, distance: Infinity, recentlyUpdated: false },
+  ],
+  edges: [
+    { source: "A", target: "B", weight: 2 },
+    { source: "A", target: "C", weight: 2 },
+    { source: "B", target: "D", weight: 2 },
+    { source: "B", target: "E", weight: 2 },
+    { source: "C", target: "D", weight: 2 },
+    { source: "C", target: "E", weight: 2 },
+    { source: "D", target: "E", weight: 2 },
+  ],
+  currentNode: null,
+};
+
 const findUnvisitedNodeWithSmallestDistance = (nodes) => {
   let smallestDistance = Infinity;
   let nodesWithSmallestDistance = [];
@@ -280,7 +322,7 @@ export default function DijkstraGamePage() {
   return (
     <GamePageStructure
       title="Dijkstra's Algorithm Game"
-      graphStates={[initialGraphState]}
+      graphStates={[initialGraphState, uniqueSolutionGraph, allPathsGraph]}
       isValidMove={isValidMove}
       getNodeStatus={getNodeStatus}
       getScore={getScore}
