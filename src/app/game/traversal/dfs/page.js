@@ -14,6 +14,7 @@ const createGraphState = (graphId, nodes, edges) => ({
   edges,
   currentNode: null,
   stack: [],
+  currentComponent: null,
 });
 
 const graphStates = [
@@ -152,51 +153,63 @@ const graphStates = [
   ),
 ];
 
-const DFSGamePage = () => {
-  return (
-    <div className="w-full max-w-7xl mx-auto p-4">
-      <GamePageStructure
-        title="DFS Graph Game"
-        graphStates={graphStates}
-        isValidMove={isValidMove}
-        getNodeStatus={getNodeStatus}
-        isGameComplete={isGameComplete}
-        getMessage={getMessage}
-        getScore={getScore}
-      />
-    </div>
-  );
-};
-
 const isValidMove = (graphState, nodeId) => {
   const newState = JSON.parse(JSON.stringify(graphState));
   const clickedNode = newState.nodes.find((n) => n.id === nodeId);
 
-  // Starting move validation
+  // For Graph F: Define components
+  const component1 = ["A", "B", "C"];
+  const component2 = ["D", "E", "F"];
+
+  // Helper function to check if all neighbors are visited
+  const areAllNeighborsVisited = (nodeId) => {
+    const neighbors = newState.edges
+      .filter((e) => e.source === nodeId || e.target === nodeId)
+      .map((e) => (e.source === nodeId ? e.target : e.source));
+
+    return neighbors.every(
+      (neighborId) => newState.nodes.find((n) => n.id === neighborId).visited
+    );
+  };
+
+  // Helper function to check if a component is complete
+  const isComponentComplete = (component) => {
+    return component.every(
+      (id) => newState.nodes.find((n) => n.id === id).backtracked
+    );
+  };
+
   if (!newState.currentNode) {
-    switch (graphState.graphId) {
-      case "F":
-        const component1 = ["A", "B", "C"];
-        const component2 = ["D", "E", "F"];
+    if (graphState.graphId === "F") {
+      const isComponent1Complete = isComponentComplete(component1);
+      const isComponent2Complete = isComponentComplete(component2);
 
-        const isComponent1Complete = component1.every(
-          (id) => graphState.nodes.find((n) => n.id === id).backtracked
-        );
-        const isComponent2Complete = component2.every(
-          (id) => graphState.nodes.find((n) => n.id === id).backtracked
-        );
-
-        if (
-          (isComponent1Complete && component1.includes(nodeId)) ||
-          (isComponent2Complete && component2.includes(nodeId))
-        ) {
+      // If starting fresh or one component is complete, we can start with either component
+      if (!isComponent1Complete && !isComponent2Complete) {
+        newState.currentComponent = component1.includes(nodeId)
+          ? component1
+          : component2;
+      } else if (isComponent1Complete && !isComponent2Complete) {
+        if (component1.includes(nodeId)) {
           return {
             newState: graphState,
             validMove: false,
             message:
-              "This component is already completed. Start with a node from the other component.",
+              "The first component is already completed. Start with a node from the second component.",
           };
         }
+        newState.currentComponent = component2;
+      } else if (!isComponent1Complete && isComponent2Complete) {
+        if (component2.includes(nodeId)) {
+          return {
+            newState: graphState,
+            validMove: false,
+            message:
+              "The second component is already completed. Start with a node from the first component.",
+          };
+        }
+        newState.currentComponent = component1;
+      }
     }
     clickedNode.visited = true;
     clickedNode.current = true;
@@ -211,64 +224,75 @@ const isValidMove = (graphState, nodeId) => {
       (e.source === newState.currentNode && e.target === nodeId) ||
       (e.target === newState.currentNode && e.source === nodeId)
   );
-  if (!isConnected && graphState.graphId !== "F") {
-    return {
-      newState: graphState,
-      validMove: false,
-      message: `Node ${nodeId} is not connected to your current position (${newState.currentNode}). 
-                In DFS, we can only move along edges to reach adjacent nodes. Check the available edges 
-                from your current node and try again.`,
-    };
-  }
 
-  // Validate backtracking
-  if (clickedNode.visited) {
-    // For Graph F, handle component separation
-    if (graphState.graphId === "F") {
-      const component1 = ["A", "B", "C"];
-      const component2 = ["D", "E", "F"];
+  if (!isConnected) {
+    // For Graph F, only allow disconnected moves when switching between completed components
+    if (
+      graphState.graphId === "F" &&
+      ((component1.includes(newState.currentNode) &&
+        component2.includes(nodeId)) ||
+        (component2.includes(newState.currentNode) &&
+          component1.includes(nodeId)))
+    ) {
+      // Check if the previous component is complete before allowing switch
       const currentComponent = component1.includes(newState.currentNode)
         ? component1
         : component2;
-
-      if (!currentComponent.includes(nodeId)) {
+      if (
+        !currentComponent.every(
+          (id) => newState.nodes.find((n) => n.id === id).backtracked
+        )
+      ) {
         return {
           newState: graphState,
           validMove: false,
           message:
-            "Complete the current component before moving to another component.",
+            "You must complete the current component before moving to another component.",
         };
       }
+    } else {
+      return {
+        newState: graphState,
+        validMove: false,
+        message: `Node ${nodeId} is not connected to your current position (${newState.currentNode}).`,
+      };
     }
-    // Check if it's a valid backtrack move (must be previous node in stack)
-    if (newState.stack[newState.stack.length - 2] !== nodeId) {
+  }
+
+  // For Graph F, enforce completing the current component
+  if (graphState.graphId === "F" && newState.currentComponent) {
+    if (
+      !newState.currentComponent.includes(nodeId) &&
+      !clickedNode.backtracked
+    ) {
       return {
         newState: graphState,
         validMove: false,
         message:
-          "You must backtrack in the reverse order of visited nodes. " +
-          `The previous node in your path was ${
-            newState.stack[newState.stack.length - 2]
-          }.`,
+          "You must complete the current component before moving to another component.",
       };
     }
-    // Check if all neighbors of current node are visited before allowing backtrack
-    const currentNeighbors = newState.edges
-      .filter(
-        (e) =>
-          e.source === newState.currentNode || e.target === newState.currentNode
-      )
-      .map((e) => (e.source === newState.currentNode ? e.target : e.source));
+  }
 
-    const allNeighborsVisited = currentNeighbors.every(
-      (neighborId) => newState.nodes.find((n) => n.id === neighborId).visited
-    );
-
-    if (!allNeighborsVisited) {
+  // Validate backtracking
+  if (clickedNode.visited) {
+    // Check if it's a valid backtrack move
+    if (newState.stack[newState.stack.length - 2] !== nodeId) {
       return {
         newState: graphState,
         validMove: false,
-        message: `Cannot backtrack yet! You must explore all unvisited neighbors of ${newState.currentNode} first.`,
+        message: `Invalid backtracking order. You must backtrack to ${
+          newState.stack[newState.stack.length - 2]
+        }.`,
+      };
+    }
+
+    // Check if all neighbors are visited before allowing backtrack
+    if (!areAllNeighborsVisited(newState.currentNode)) {
+      return {
+        newState: graphState,
+        validMove: false,
+        message: "You must visit all unvisited neighbors before backtracking!",
       };
     }
 
@@ -283,13 +307,30 @@ const isValidMove = (graphState, nodeId) => {
     // Check if this is the final backtrack move
     const isLastNode =
       newState.stack.length === 1 &&
-      newState.nodes.every((n) => n.id === nodeId || n.backtracked);
+      (graphState.graphId === "F"
+        ? component1.includes(nodeId)
+          ? component1.every(
+              (id) =>
+                id === nodeId ||
+                newState.nodes.find((n) => n.id === id).backtracked
+            )
+          : component2.every(
+              (id) =>
+                id === nodeId ||
+                newState.nodes.find((n) => n.id === id).backtracked
+            )
+        : newState.nodes.every((n) => n.id === nodeId || n.backtracked));
 
     if (isLastNode) {
       clickedNode.backtracked = true;
       clickedNode.current = false;
       newState.currentNode = null;
       newState.stack.pop();
+
+      if (graphState.graphId === "F") {
+        newState.currentComponent = null;
+      }
+
       return { newState, validMove: true, nodeStatus: "final-move" };
     }
     return { newState, validMove: true, nodeStatus: "visited" };
@@ -313,20 +354,87 @@ const getNodeStatus = (node) => {
 };
 
 const isGameComplete = (graphState) => {
+  if (graphState.graphId === "F") {
+    const component1 = ["A", "B", "C"];
+    const component2 = ["D", "E", "F"];
+    return (
+      component1.every(
+        (id) => graphState.nodes.find((n) => n.id === id).backtracked
+      ) &&
+      component2.every(
+        (id) => graphState.nodes.find((n) => n.id === id).backtracked
+      )
+    );
+  }
   return graphState.nodes.every((node) => node.backtracked);
 };
 
-const getMessage = (nodeStatus, nodeId) => {
+const getMessage = (nodeStatus, nodeId, graphState) => {
+  if (!graphState || !nodeId) {
+    return "";
+  }
+
+  const areAllNeighborsVisited = (nodeId) => {
+    if (!graphState.edges || !graphState.nodes) {
+      return false;
+    }
+
+    const edges = graphState.edges;
+    const neighbors = edges
+      .filter((e) => e.source === nodeId || e.target === nodeId)
+      .map((e) => (e.source === nodeId ? e.target : e.source));
+
+    return neighbors.every(
+      (neighborId) =>
+        graphState.nodes.find((n) => n.id === neighborId)?.visited ?? false
+    );
+  };
+
+  const component1 = ["A", "B", "C"];
+  const component2 = ["D", "E", "F"];
+
   switch (nodeStatus) {
     case "unvisited":
-      return `Great! You've visited Node ${nodeId} for the first time. 
-              Continue exploring unvisited neighbors using DFS.`;
+      if (graphState.currentNode && areAllNeighborsVisited(nodeId)) {
+        if (graphState.graphId === "F") {
+          const currentComponent = component1.includes(nodeId)
+            ? "first"
+            : "second";
+          return `You've visited Node ${nodeId}. All neighbors in the ${currentComponent} component have been visited - time to backtrack!`;
+        }
+        return `You've visited Node ${nodeId}. All neighbors have been visited - time to backtrack!`;
+      }
+      if (graphState.graphId === "F") {
+        const currentComponent = component1.includes(nodeId)
+          ? "first"
+          : "second";
+        return `You've visited Node ${nodeId}. Continue exploring unvisited neighbors in the ${currentComponent} component using DFS.`;
+      }
+      return `You've visited Node ${nodeId}. Continue exploring unvisited neighbors using DFS.`;
+
     case "visited":
-      return `Good backtracking to Node ${nodeId}! Remember, in DFS we must backtrack 
-              in the reverse order of our visits once we've explored all neighbors of a node.`;
+      return `Good backtracking to Node ${nodeId}! Remember to backtrack in the reverse order of visits.`;
+
     case "final-move":
-      return `Excellent! You've completed the DFS traversal by backtracking to the starting node. 
-              All nodes have been visited and properly backtracked from in DFS order.`;
+      if (graphState.graphId === "F") {
+        const isComponent1 = component1.includes(nodeId);
+        const componentName = isComponent1 ? "first" : "second";
+        const otherComponentComplete = isComponent1
+          ? component2.every(
+              (id) =>
+                graphState.nodes.find((n) => n.id === id)?.backtracked ?? false
+            )
+          : component1.every(
+              (id) =>
+                graphState.nodes.find((n) => n.id === id)?.backtracked ?? false
+            );
+
+        return otherComponentComplete
+          ? "Excellent! You've completed DFS traversal for both components!"
+          : `You've completed DFS for the ${componentName} component! Now start DFS on the other component.`;
+      }
+      return "Excellent! You've completed the DFS traversal by backtracking to the starting node!";
+
     default:
       return "";
   }
@@ -343,6 +451,22 @@ const getScore = (nodeStatus) => {
     default:
       return 0;
   }
+};
+
+const DFSGamePage = () => {
+  return (
+    <div className="w-full max-w-7xl mx-auto p-4">
+      <GamePageStructure
+        title="DFS Graph Game"
+        graphStates={graphStates}
+        isValidMove={isValidMove}
+        getNodeStatus={getNodeStatus}
+        isGameComplete={isGameComplete}
+        getMessage={getMessage}
+        getScore={getScore}
+      />
+    </div>
+  );
 };
 
 export default DFSGamePage;
