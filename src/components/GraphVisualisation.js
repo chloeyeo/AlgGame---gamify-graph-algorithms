@@ -60,17 +60,12 @@ const GraphVisualisation = ({
 
     if (render !== 0) svg.selectAll("*").remove();
 
-    // // add zoom functionality
-    // const zoom = d3.zoom().on("zoom", (event) => {
-    //   svg.attr("transform", event.transform);
-    // });
-
-    // svg.call(zoom);
-
     setRender(render + 1);
 
+    const xOffset = -viewBoxWidth / 4;
+
     svg
-      .attr("viewBox", `0 -20 ${viewBoxWidth} ${viewBoxHeight}`)
+      .attr("viewBox", `${xOffset} -20 ${viewBoxWidth} ${viewBoxHeight}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
       .attr("width", "100%")
       .attr("height", "100%");
@@ -137,7 +132,7 @@ const GraphVisualisation = ({
   ]);
 
   return (
-    <div className="w-full h-full overflow-x-auto no-scrollbar">
+    <div className="w-full h-full flex justify-center items-center overflow-x-auto no-scrollbar">
       <svg ref={svgRef} className="min-w-[600px]">
         <Legend
           svg={d3.select(svgRef.current)}
