@@ -37,7 +37,7 @@ const uniqueSolutionGraph = {
   ],
   edges: [
     { source: "A", target: "B", weight: 2 },
-    { source: "A", target: "C", weight: 4 },
+    { source: "A", target: "C", weight: 5 },
     { source: "B", target: "D", weight: 1 },
     { source: "B", target: "E", weight: 5 },
     { source: "C", target: "D", weight: 3 },
