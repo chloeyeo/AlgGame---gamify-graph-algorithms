@@ -391,6 +391,7 @@ const kruskalStepsGraphB = [
 
 // Example C specifically shows cycle detection
 const kruskalStepsGraphC = [
+  // Initial state
   {
     graphState: {
       nodes: [
@@ -403,141 +404,243 @@ const kruskalStepsGraphC = [
         { id: "G" },
       ],
       edges: [
-        { source: "A", target: "B", weight: 5 },
-        { source: "B", target: "C", weight: 2 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
+        { source: "A", target: "B", weight: 2 }, // Part of potential cycle
+        { source: "A", target: "C", weight: 2 }, // Part of potential cycle
+        { source: "B", target: "C", weight: 2 }, // The tempting edge that would create cycle
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
       ],
       mstEdges: [],
     },
     explanation:
-      "Initial state: Looking at the same graph structure as before, but we'll focus on cycle detection this time.",
+      "Initial state: Let's build the MST while paying attention to cycle formation.",
   },
+  // First edge: A-B (weight 2)
   {
     graphState: {
       nodes: [
-        { id: "A" },
+        { id: "A", visited: true },
         { id: "B", visited: true },
         { id: "C" },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2, highlight: true },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
+      ],
+      mstEdges: [{ source: "A", target: "B", weight: 2 }],
+    },
+    explanation:
+      "Add edge A-B (weight 2). This is our first edge, so no cycles are possible yet.",
+  },
+  // Second edge: A-C (weight 2)
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2, highlight: true },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
+      ],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+      ],
+    },
+    explanation:
+      "Add edge A-C (weight 2). Both A-B and A-C have the same low weight.",
+  },
+  // Tempting mistake: Try to add B-C (would create cycle)
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E" },
+        { id: "F" },
+        { id: "G" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2, highlight: true },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
+      ],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+      ],
+      cycleEdges: ["A", "B", "C"], // Highlight the potential cycle
+    },
+    explanation:
+      "❌ Tempting mistake: Adding B-C (weight 2) would create a cycle A-B-C! Even though it has the same low weight as our previous edges, we must skip it to avoid the cycle.",
+  },
+  // Add B-E instead (weight 3)
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
         { id: "D" },
         { id: "E", visited: true },
         { id: "F" },
         { id: "G" },
       ],
       edges: [
-        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
         { source: "B", target: "C", weight: 2 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2, highlight: true },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
+        { source: "B", target: "E", weight: 3, highlight: true },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
       ],
-      mstEdges: [{ source: "B", target: "E", weight: 2 }],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+      ],
     },
     explanation:
-      "First, we add B-E (weight 2). This is our first edge, so no cycle is possible yet.",
+      "Instead of creating a cycle, we add B-E (weight 3). Even though it has a higher weight than B-C, it's the better choice as it expands our tree without creating cycles.",
   },
+  // Add F-G (weight 3)
   {
     graphState: {
       nodes: [
-        { id: "A" },
+        { id: "A", visited: true },
         { id: "B", visited: true },
-        { id: "C" },
+        { id: "C", visited: true },
         { id: "D" },
         { id: "E", visited: true },
         { id: "F", visited: true },
         { id: "G", visited: true },
       ],
       edges: [
-        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
         { source: "B", target: "C", weight: 2 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2, highlight: true },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3, highlight: true },
+        { source: "B", target: "D", weight: 3 },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
       ],
       mstEdges: [
-        { source: "B", target: "E", weight: 2 },
-        { source: "F", target: "G", weight: 2 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
       ],
     },
-    explanation:
-      "Then add F-G (weight 2). Still no cycles possible as these edges aren't connected.",
+    explanation: "Add edge F-G (weight 3) to continue expanding our tree.",
   },
   {
     graphState: {
       nodes: [
-        { id: "A" },
+        { id: "A", visited: true },
         { id: "B", visited: true },
-        { id: "C" },
-        { id: "D" },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
         { id: "E", visited: true },
         { id: "F", visited: true },
         { id: "G", visited: true },
       ],
       edges: [
-        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
         { source: "B", target: "C", weight: 2 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4, highlight: true },
-        { source: "F", target: "G", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3, highlight: true },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
       ],
       mstEdges: [
-        { source: "B", target: "E", weight: 2 },
-        { source: "F", target: "G", weight: 2 },
-        { source: "E", target: "G", weight: 4 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
       ],
-      cycleEdges: ["B", "E", "G"], // Optional: Could be used to highlight cycle path
     },
-    explanation:
-      "If we try to add edge E-G (weight 4), it would create a cycle B-E-G! Even though it has a low weight, we must skip it to maintain our tree structure.",
+    explanation: "Add edge B-D (weight 3) to continue expanding our tree.",
   },
   {
     graphState: {
       nodes: [
-        { id: "A" },
+        { id: "A", visited: true },
         { id: "B", visited: true },
-        { id: "C" },
-        { id: "D" },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
         { id: "E", visited: true },
         { id: "F", visited: true },
         { id: "G", visited: true },
       ],
       edges: [
-        { source: "A", target: "B", weight: 4 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
         { source: "B", target: "C", weight: 2 },
-        { source: "A", target: "C", weight: 3, highlight: true },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3, highlight: true },
+        { source: "C", target: "F", weight: 5 },
+        { source: "D", target: "G", weight: 4 },
+        { source: "E", target: "G", weight: 3 },
       ],
       mstEdges: [
-        { source: "B", target: "E", weight: 2 },
-        { source: "F", target: "G", weight: 2 },
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "E", weight: 3 },
+        { source: "F", target: "G", weight: 3 },
+        { source: "B", target: "D", weight: 3 },
+        { source: "E", target: "G", weight: 3 },
       ],
     },
     explanation:
-      "Instead of creating a cycle, we look for the next best edge that doesn't create a cycle. A-C (weight 3) is a good choice.",
+      "Complete the MST by adding remaining edges that don't create cycles. Key lesson: Even when an edge has a very low weight (like B-C), we must skip it if it would create a cycle.",
   },
-  // Continue with the rest of Graph B's steps...
 ];
 
 const kruskalConceptText = {
