@@ -26,6 +26,7 @@ const GraphVisualisation = ({
     (state) => state.algorithm.selectedAlgorithm
   );
   const svgRef = useRef(null);
+  const divRef = useRef(null);
   const pathname = usePathname();
   const {
     isAStarPage,
@@ -80,11 +81,11 @@ const GraphVisualisation = ({
 
     setRender(render + 1);
 
-    const xOffset = -viewBoxWidth / 4;
+    const xOffset = -(viewBoxWidth + 100) / 10;
 
     svg
-      .attr("viewBox", `${xOffset} -20 ${viewBoxWidth} ${viewBoxHeight}`)
-      .attr("preserveAspectRatio", "xMidYMid meet")
+      .attr("viewBox", `${xOffset} -30 ${viewBoxWidth} ${viewBoxHeight}`)
+      .attr("preserveAspectRatio", "xMinYMin meet")
       .attr("width", "100%")
       .attr("height", "100%");
 
@@ -156,20 +157,25 @@ const GraphVisualisation = ({
   ]);
 
   return (
-    <div className="w-full h-full flex justify-center items-center overflow-x-auto no-scrollbar">
-      <svg ref={svgRef} className="min-w-[600px]">
-        <Legend
-          svg={d3.select(svgRef.current)}
-          isAStarPage={isAStarPage}
-          isDFSPage={isDFSPage}
-          isBFSPage={isBFSPage}
-          isDijkstraPage={isDijkstraPage}
-          isEdmondsKarpPage={isEdmondsKarpPage}
-          isFordFulkersonPage={isFordFulkersonPage}
-          isKruskalsPage={isKruskalsPage}
-          isPrimsPage={isPrimsPage}
-        />
-      </svg>
+    <div
+      ref={divRef}
+      className={`w-full h-full flex justify-center items-center overflow-auto no-scrollbar`}
+    >
+      <div className="px-4 w-fit h-full overflow-hidden overflow-x-auto no-scrollbar">
+        <svg ref={svgRef}>
+          <Legend
+            svg={d3.select(svgRef.current)}
+            isAStarPage={isAStarPage}
+            isDFSPage={isDFSPage}
+            isBFSPage={isBFSPage}
+            isDijkstraPage={isDijkstraPage}
+            isEdmondsKarpPage={isEdmondsKarpPage}
+            isFordFulkersonPage={isFordFulkersonPage}
+            isKruskalsPage={isKruskalsPage}
+            isPrimsPage={isPrimsPage}
+          />
+        </svg>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GraphVisualisation from "./GraphVisualisation";
 import CodeEditorPseudocode from "./CodeEditorPseudocode";
 
@@ -248,7 +248,7 @@ export default function EducationPageStructure({
 
   // Mobile content
   const mobileContent = (
-    <main className="flex flex-col p-6 items-center justify-center overflow-y-auto no-scrollbar lg:hidden min-h-screen">
+    <main className="flex flex-col p-6 items-center justify-center lg:hidden min-h-screen">
       <h1 className="text-2xl md:text-3xl font-bold mb-6">Learn {title}</h1>
 
       <div className="w-full max-w-4xl space-y-6">
@@ -305,7 +305,7 @@ export default function EducationPageStructure({
   // Desktop content
   const desktopContent = (
     <div className="hidden lg:flex flex-row h-screen">
-      <div className="w-1/2 p-4 overflow-y-auto no-scrollbar">
+      <div className="w-1/2 p-4">
         <h1 className="text-2xl font-bold mb-4 text-center">Learn {title}</h1>
 
         {/* Graph Section */}

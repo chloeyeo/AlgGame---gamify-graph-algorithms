@@ -181,7 +181,7 @@ const Edges = {
       const edgesList = svg
         .append("g")
         .attr("class", "floating-edges")
-        .attr("transform", "translate(620, 100)");
+        .attr("transform", "translate(570, 100)");
 
       // Add title for the floating edges
       edgesList
