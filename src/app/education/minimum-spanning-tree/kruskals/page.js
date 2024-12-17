@@ -643,6 +643,153 @@ const kruskalStepsGraphC = [
   },
 ];
 
+const kruskalStepsGraphD = [
+  {
+    graphState: {
+      nodes: [{ id: "A" }, { id: "B" }, { id: "C" }, { id: "D" }, { id: "E" }],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "D", weight: 4 },
+        { source: "C", target: "E", weight: 3 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+      mstEdges: [],
+    },
+    explanation:
+      "Initial state: Graph with 5 vertices and 6 edges. We'll select edges in order of increasing weight that don't create cycles.",
+  },
+  // Step 1: Choose A-B
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C" },
+        { id: "D" },
+        { id: "E" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "D", weight: 4 },
+        { source: "C", target: "E", weight: 3 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+      mstEdges: [{ source: "A", target: "B", weight: 2 }],
+    },
+    explanation: "Step 1: Choose edge A-B with weight 2",
+  },
+  // Step 2: Choose A-C
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "D", weight: 4 },
+        { source: "C", target: "E", weight: 3 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+      ],
+    },
+    explanation: "Step 2: Choose edge A-C with weight 2",
+  },
+  // Step 3: Cannot choose B-C (would create cycle)
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D" },
+        { id: "E" },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2, highlight: true },
+        { source: "B", target: "D", weight: 4 },
+        { source: "C", target: "E", weight: 3 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+      ],
+      cycleEdges: ["A", "B", "C"],
+    },
+    explanation:
+      "Step 3: Cannot choose B-C (weight 2) as it would create a cycle A-B-C",
+  },
+  // Step 4: Choose D-E
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "D", weight: 4 },
+        { source: "C", target: "E", weight: 3 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+    },
+    explanation: "Step 4: Choose edge D-E with weight 2",
+  },
+  // Step 5: Choose C-E
+  {
+    graphState: {
+      nodes: [
+        { id: "A", visited: true },
+        { id: "B", visited: true },
+        { id: "C", visited: true },
+        { id: "D", visited: true },
+        { id: "E", visited: true },
+      ],
+      edges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "B", target: "C", weight: 2 },
+        { source: "B", target: "D", weight: 4 },
+        { source: "C", target: "E", weight: 3 },
+        { source: "D", target: "E", weight: 2 },
+      ],
+      mstEdges: [
+        { source: "A", target: "B", weight: 2 },
+        { source: "A", target: "C", weight: 2 },
+        { source: "D", target: "E", weight: 2 },
+        { source: "C", target: "E", weight: 3 },
+      ],
+    },
+    explanation:
+      "Step 5: Complete the MST by adding edge C-E with weight 3. Total MST weight = 9",
+  },
+];
+
 const kruskalConceptText = {
   introduction:
     "Kruskal's algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a weighted, undirected graph. It works by sorting all edges by weight and then adding them to the MST one by one, as long as they don't create a cycle.",
@@ -693,7 +840,12 @@ export default function KruskalsEducationPage() {
   return (
     <EducationPageStructure
       title="Kruskal's Algorithm"
-      graphStates={[kruskalStepsGraphA, kruskalStepsGraphB, kruskalStepsGraphC]}
+      graphStates={[
+        kruskalStepsGraphA,
+        kruskalStepsGraphB,
+        kruskalStepsGraphC,
+        kruskalStepsGraphD,
+      ]}
       conceptText={kruskalConceptText}
       pseudocode={kruskalPseudocode}
     />

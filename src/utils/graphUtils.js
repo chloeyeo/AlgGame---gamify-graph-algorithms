@@ -118,3 +118,54 @@ export const getDFSGameNodes = [
     G: { x: 450, y: 300 },
   },
 ];
+
+export const getKruskalEducationGraphNodes = [
+  // Graph A - Standard layout with 6 nodes
+  [
+    { id: "A", x: 300, y: 50 }, // Top center
+    { id: "B", x: 200, y: 200 }, // Middle left
+    { id: "C", x: 400, y: 200 }, // Middle right
+    { id: "D", x: 130, y: 350 }, // Bottom left
+    { id: "E", x: 270, y: 350 }, // Bottom middle
+    { id: "F", x: 470, y: 350 }, // Bottom right
+  ],
+
+  // Graph B - 7 node layout
+  [
+    { id: "A", x: 300, y: 50 },
+    { id: "B", x: 200, y: 200 },
+    { id: "C", x: 400, y: 200 },
+    { id: "D", x: 130, y: 350 },
+    { id: "E", x: 270, y: 350 },
+    { id: "F", x: 470, y: 350 },
+    { id: "G", x: 80, y: 500 },
+  ],
+
+  // Graph C - Cycle detection example
+  [
+    { id: "A", x: 300, y: 50 },
+    { id: "B", x: 200, y: 200 },
+    { id: "C", x: 400, y: 200 },
+    { id: "D", x: 130, y: 350 },
+    { id: "E", x: 270, y: 350 },
+    { id: "F", x: 470, y: 350 },
+    { id: "G", x: 80, y: 500 },
+  ],
+
+  // Graph D - Triangle with extensions (from your drawing)
+  [
+    { id: "A", x: 300, y: 50 }, // Top vertex
+    { id: "B", x: 150, y: 200 }, // Left vertex
+    { id: "C", x: 450, y: 200 }, // Right vertex
+    { id: "D", x: 100, y: 350 }, // Bottom left
+    { id: "E", x: 500, y: 350 }, // Bottom right
+  ],
+];
+
+// Optional helper function to get specific graph's nodes
+export const getNodesForGraph = (graphIndex) => {
+  if (graphIndex >= 0 && graphIndex < getKruskalEducationGraphNodes.length) {
+    return getKruskalEducationGraphNodes[graphIndex];
+  }
+  return getKruskalEducationGraphNodes[0]; // Default to first graph if invalid index
+};

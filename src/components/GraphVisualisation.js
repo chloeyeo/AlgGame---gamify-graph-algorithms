@@ -10,6 +10,8 @@ import {
   getDFSGameNodes,
   getNetworkFlowNodePositions,
   getDijkstraNodes,
+  getKruskalEducationGraphNodes,
+  getNodesForGraph,
 } from "@/utils/graphUtils";
 import { usePathname } from "next/navigation";
 import Edges from "@/components/Edges/Edge";
@@ -55,23 +57,6 @@ const GraphVisualisation = ({
     setHeight(svg.node().getBoundingClientRect().height);
   }, [svgRef]);
 
-  const calculateViewBox = (nodes) => {
-    if (!nodes.length) return { xOffset: 0, yOffset: -20 };
-
-    // Calculate the bounds of the graph
-    const xValues = nodes.map((n) => n.x);
-    const yValues = nodes.map((n) => n.y);
-    const minX = Math.min(...xValues);
-    const maxX = Math.max(...xValues);
-    const graphWidth = maxX - minX;
-
-    // Calculate center offset
-    const centerX = (minX + maxX) / 2;
-    const xOffset = centerX - viewBoxWidth / 2;
-
-    return { xOffset: -xOffset, yOffset: -20 };
-  };
-
   useEffect(() => {
     if (!graphState) return;
 
@@ -81,7 +66,12 @@ const GraphVisualisation = ({
 
     setRender(render + 1);
 
-    const xOffset = -(viewBoxWidth + 100) / 10;
+    let xOffset = -(viewBoxWidth + 100) / 10;
+
+    // Adjust offset for Kruskal's algorithm
+    if (isKruskalsPage) {
+      xOffset = -80;
+    }
 
     svg
       .attr("viewBox", `${xOffset} -30 ${viewBoxWidth} ${viewBoxHeight}`)
@@ -108,7 +98,17 @@ const GraphVisualisation = ({
         ...n,
         ...networkFlowNodePositions[n.id],
       }));
-    } else if (isPrimsPage || isKruskalsPage) {
+    } else if (isKruskalsPage) {
+      // Use Kruskal's specific node positions
+      const kruskalNodes = getKruskalEducationGraphNodes[graphIndex];
+      nodes = graphState.nodes.map((node) => {
+        const layoutNode = kruskalNodes.find((n) => n.id === node.id);
+        return {
+          ...node,
+          ...(layoutNode || {}),
+        };
+      });
+    } else if (isPrimsPage) {
       const allNodes = getDefaultNodes();
       nodes = isGraphA ? allNodes.filter((node) => node.id !== "G") : allNodes;
     } else {
