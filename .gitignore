@@ -7,7 +7,13 @@ backend/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+
+# Environment variables
+.env
+*.env
+.env.*
 backend/.env
+/backend/.env
 
 # testing
 /coverage
