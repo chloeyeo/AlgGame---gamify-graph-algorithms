@@ -21,15 +21,17 @@ export default function Header({ toggleSidebar }) {
           About
         </Link>
       </div>
-      <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
-        <Image
-          src="/images/lion.png"
-          alt="default user profile image"
-          width={30}
-          height={30}
-          className="object-cover w-full h-full rounded-full"
-        />
-      </div>
+      <Link href="/auth">
+        <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">
+          <Image
+            src="/images/lion.png"
+            alt="default user profile image"
+            width={30}
+            height={30}
+            className="object-cover w-full h-full rounded-full"
+          />
+        </div>
+      </Link>
     </header>
   );
 }
