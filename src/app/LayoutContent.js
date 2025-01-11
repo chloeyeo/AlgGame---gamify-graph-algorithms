@@ -37,6 +37,7 @@ export default function LayoutContent({ children }) {
     "/game/network-flow/edmonds-karp",
     "/education/matching/hungarian-kuhn-munkres",
     "/game/matching/hungarian-kuhn-munkres",
+    "/auth",
   ];
 
   const pageExists = validPaths.includes(pathname);
