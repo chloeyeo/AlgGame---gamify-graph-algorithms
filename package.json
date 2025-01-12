@@ -24,6 +24,7 @@
     "react-force-graph": "^1.44.4",
     "react-force-graph-2d": "^1.25.5",
     "react-redux": "^9.1.2",
+    "react-toastify": "^11.0.2",
     "recharts": "^2.13.0"
   },
   "devDependencies": {

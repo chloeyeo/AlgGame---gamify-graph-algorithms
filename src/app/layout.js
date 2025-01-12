@@ -1,8 +1,10 @@
 "use client";
 
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
+import { ToastContainer } from "react-toastify";
 import LayoutContent from "./LayoutContent";
 
 export default function RootLayout({ children }) {
@@ -21,6 +23,7 @@ export default function RootLayout({ children }) {
                 <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-blue-200 to-purple-200">
                   <Provider store={store}>
                     <LayoutContent>{children}</LayoutContent>
+                    <ToastContainer position="top-right" autoClose={3000} />
                   </Provider>
                 </div>
               </div>

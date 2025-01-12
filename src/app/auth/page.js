@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AuthPage = () => {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
@@ -23,26 +24,20 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
-      console.log("Form data:", formData);
-
       if (formData.password.length < 6) {
-        throw new Error("Password must be at least 6 characters long");
+        toast.error("Password must be at least 6 characters long");
+        return;
       }
 
       if (!isLogin && formData.password !== formData.confirmPassword) {
-        throw new Error("Passwords don't match");
+        toast.error("Passwords don't match");
+        return;
       }
 
       const endpoint = isLogin ? "/login" : "/register";
-      console.log(
-        "Making request to:",
-        `http://localhost:5000/api/auth${endpoint}`
-      );
-
       const response = await fetch(
         `http://localhost:5000/api/auth${endpoint}`,
         {
@@ -66,18 +61,18 @@ const AuthPage = () => {
       );
 
       const data = await response.json();
-      console.log("Response:", data);
 
       if (!response.ok) {
-        throw new Error(data.message || "Authentication failed");
+        toast.error(data.message || "Authentication failed");
+        return;
       }
 
+      toast.success(isLogin ? "Login successful!" : "Registration successful!");
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/");
     } catch (err) {
-      console.error("Error:", err);
-      setError(err.message);
+      toast.error(err.message || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -89,12 +84,6 @@ const AuthPage = () => {
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
           {isLogin ? "Welcome Back!" : "Create Account"}
         </h2>
-
-        {error && (
-          <div className="p-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
