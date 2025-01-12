@@ -31,8 +31,26 @@ app.get("/health", (_, res) => {
 // Database connection
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .then(() => {
+    console.log("Connected to MongoDB");
+    console.log(
+      "MongoDB URI:",
+      process.env.MONGODB_URI.replace(
+        /mongodb\+srv:\/\/([^:]+):([^@]+)@/,
+        "mongodb+srv://***:***@"
+      )
+    );
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // Exit if can't connect to database
+  });
+
+// Add this to test the routes are properly set up
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
