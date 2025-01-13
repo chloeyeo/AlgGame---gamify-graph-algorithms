@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 import { usePathname } from "next/navigation";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -22,6 +24,9 @@ export default function GamePageStructure({
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
+  const [scoreSubmitted, setScoreSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitAttempted = useRef(false);
   const pathname = usePathname();
   const startTime = Date.now();
 
@@ -50,16 +55,28 @@ export default function GamePageStructure({
     setMoves(0);
     setMessage("Game reset. Click on a node to begin!");
     setShowOverlay(false);
+    setScoreSubmitted(false);
+    setIsSubmitting(false);
+    submitAttempted.current = false;
   };
 
   const submitScore = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("You must be logged in to submit scores");
-        return;
-      }
+    if (submitAttempted.current) return;
+    submitAttempted.current = true;
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.info("Playing as guest - scores are not saved when not logged in", {
+        toastId: "guest-score",
+        position: "top-right",
+        autoClose: 3000,
+        pauseOnFocusLoss: false,
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
       const response = await fetch("/api/scores", {
         method: "POST",
         headers: {
@@ -75,15 +92,18 @@ export default function GamePageStructure({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit score");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
+      setScoreSubmitted(true);
       toast.success("Score submitted successfully!");
       return data;
     } catch (error) {
       console.error("Error submitting score:", error);
-      toast.error("Failed to submit score");
+      toast.error("Failed to submit score. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -144,13 +164,22 @@ export default function GamePageStructure({
     }
   };
 
+  // Handle game completion
   useEffect(() => {
-    if (isGameComplete(getCurrentGraphState())) {
-      submitScore();
-      setMessage("Congratulations! You've completed the game!");
-      setShowOverlay(true);
-    }
-  }, [getCurrentGraphState, isGameComplete]);
+    const checkGameCompletion = async () => {
+      if (
+        isGameComplete(getCurrentGraphState()) &&
+        !scoreSubmitted &&
+        !submitAttempted.current
+      ) {
+        await submitScore();
+        setMessage("Congratulations! You've completed the game!");
+        setShowOverlay(true);
+      }
+    };
+
+    checkGameCompletion();
+  }, [getCurrentGraphState, isGameComplete, scoreSubmitted]);
 
   if (!graphStates.length) {
     return (
@@ -179,7 +208,6 @@ export default function GamePageStructure({
 
   const renderMainContent = () => (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
-      <Toaster position="top-right" />
       <h1 className="text-2xl md:text-3xl font-bold mb-6">{title}</h1>
 
       <div className="w-full max-w-4xl">

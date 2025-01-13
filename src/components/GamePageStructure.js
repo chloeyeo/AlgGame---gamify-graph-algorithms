@@ -89,11 +89,10 @@ export default function GamePageStructure({
           timeSpent: Date.now() - startTime,
           movesCount: moves,
         }),
-        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit score");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -102,12 +101,7 @@ export default function GamePageStructure({
       return data;
     } catch (error) {
       console.error("Error submitting score:", error);
-      // Only show error toast if we haven't shown the guest message
-      if (token) {
-        toast.error("Failed to submit score", {
-          toastId: "submit-error",
-        });
-      }
+      toast.error("Failed to submit score. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
