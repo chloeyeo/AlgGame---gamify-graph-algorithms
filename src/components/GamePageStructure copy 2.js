@@ -68,10 +68,7 @@ export default function GamePageStructure({
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        toast.info(
-          "Playing as guest - scores are not saved when not logged in"
-        );
-        setScoreSubmitted(true);
+        toast.error("You must be logged in to submit scores");
         return;
       }
 
@@ -87,11 +84,10 @@ export default function GamePageStructure({
           timeSpent: Date.now() - startTime,
           movesCount: moves,
         }),
-        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to submit score: ${response.statusText}`);
+        throw new Error("Failed to submit score");
       }
 
       const data = await response.json();
@@ -100,13 +96,7 @@ export default function GamePageStructure({
       return data;
     } catch (error) {
       console.error("Error submitting score:", error);
-      if (error.message.includes("401")) {
-        toast.info(
-          "Playing as guest - scores are not saved when not logged in"
-        );
-      } else {
-        toast.error("Failed to submit score: " + error.message);
-      }
+      toast.error("Failed to submit score");
     } finally {
       setIsSubmitting(false);
     }

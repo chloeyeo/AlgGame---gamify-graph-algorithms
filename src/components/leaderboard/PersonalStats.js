@@ -14,7 +14,7 @@ const PersonalStats = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          setError("No authentication token found");
+          setError("Please log in to view your personal stats");
           setLoading(false);
           return;
         }
@@ -23,10 +23,11 @@ const PersonalStats = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch stats");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -35,10 +36,10 @@ const PersonalStats = () => {
         }
 
         setPersonalStats(data);
-        setLoading(false);
       } catch (err) {
         console.error("Personal stats error:", err);
         setError(err.message || "Failed to fetch personal stats");
+      } finally {
         setLoading(false);
       }
     };
