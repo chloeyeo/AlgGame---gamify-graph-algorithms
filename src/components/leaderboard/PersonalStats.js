@@ -66,7 +66,7 @@ const PersonalStats = () => {
               </h4>
               <dl className="grid grid-cols-4 gap-4">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">
+                  <dt className="text-sm font-medium text-gray-800">
                     Best Score
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
@@ -74,7 +74,7 @@ const PersonalStats = () => {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">
+                  <dt className="text-sm font-medium text-gray-800">
                     Best Time
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
@@ -82,7 +82,7 @@ const PersonalStats = () => {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">
+                  <dt className="text-sm font-medium text-gray-800">
                     Games Played
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
@@ -90,7 +90,7 @@ const PersonalStats = () => {
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">
+                  <dt className="text-sm font-medium text-gray-800">
                     Average Score
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
@@ -98,7 +98,7 @@ const PersonalStats = () => {
                   </dd>
                 </div>
               </dl>
-              <div className="mt-2 text-sm text-gray-500">
+              <div className="mt-2 text-sm text-gray-800">
                 Last played: {new Date(stat.lastPlayed).toLocaleDateString()}
               </div>
             </div>
