@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { BACKEND_URL } from "@/constants/constants";
 
 const PersonalStats = () => {
   const [personalStats, setPersonalStats] = useState([]);

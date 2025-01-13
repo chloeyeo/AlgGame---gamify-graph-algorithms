@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { BACKEND_URL } from "@/constants/constants";
 import axios from "axios";
 
-const API_URL = process.env.BACKEND_URL || "http://localhost:5000";
+// process.env.BACKEND_URL
+const API_URL = BACKEND_URL || "http://localhost:5000";
 
 export async function GET(request, { params }) {
   try {

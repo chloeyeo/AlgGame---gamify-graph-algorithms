@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { BACKEND_URL } from "@/constants/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = BACKEND_URL;
 
 export const register = createAsyncThunk(
   "auth/register",

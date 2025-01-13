@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { BACKEND_URL } from "@/constants/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = BACKEND_URL;
 
 const Leaderboard = ({ algorithm }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);

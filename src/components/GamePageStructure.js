@@ -6,8 +6,9 @@ import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import { BACKEND_URL } from "@/constants/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = BACKEND_URL;
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
