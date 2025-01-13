@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/", auth, async (req, res) => {
   try {
     const { algorithm, score, timeSpent, movesCount } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     const newScore = new Score({
       userId,
