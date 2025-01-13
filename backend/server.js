@@ -12,12 +12,17 @@ const app = express();
 // Middleware
 // app.use(cors());
 // updated CORS configuration
+// origin:
+//   process.env.NODE_ENV === "production"
+//     ? ["https://algggame.netlify.app"] // my Netlify URL
+//     : ["http://localhost:3000"],
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://algggame.netlify.app"] // my Netlify URL
-        : ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://algggame.netlify.app",
+      "https://your-vercel-domain.vercel.app", // add this later
+    ],
     credentials: true,
   })
 );
