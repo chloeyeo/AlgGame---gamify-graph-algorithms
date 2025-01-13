@@ -22,6 +22,7 @@ app.use(
       "http://localhost:3000",
       "https://algggame.netlify.app",
       "https://alggame-backend.onrender.com",
+      "https://dashboard.render.com/web/srv-cu2omk8gph6c73a8lk2g/deploys/dep-cu2omk8gph6c73a8lkg0/api/auth/login",
       "https://your-vercel-domain.vercel.app", // add this later
     ],
     credentials: true,
