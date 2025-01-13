@@ -21,9 +21,12 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://algggame.netlify.app",
+      "https://alggame-backend.onrender.com",
       "https://your-vercel-domain.vercel.app", // add this later
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());

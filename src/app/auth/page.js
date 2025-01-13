@@ -33,10 +33,16 @@ const AuthPage = () => {
 
       if (isLogin) {
         // Login request
-        response = await axios.post(`${API_URL}/api/auth/login`, {
-          emailOrUsername: formData.email,
-          password: formData.password,
-        });
+        response = await axios.post(
+          `${API_URL}/api/auth/login`,
+          { emailOrUsername: formData.email, password: formData.password },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
       } else {
         // Register request
         response = await axios.post(`${API_URL}/api/auth/register`, {
