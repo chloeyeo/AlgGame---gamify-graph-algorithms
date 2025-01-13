@@ -18,6 +18,7 @@ const scoreSchema = new mongoose.Schema({
       "prim",
       "fordFulkerson",
       "edmondsKarp",
+      "hungarianKuhnMunkres",
     ],
   },
   score: {
@@ -38,7 +39,8 @@ const scoreSchema = new mongoose.Schema({
   },
 });
 
-// Index for faster leaderboard queries
+// Indexes for faster queries
 scoreSchema.index({ algorithm: 1, score: -1 });
+scoreSchema.index({ userId: 1, algorithm: 1 });
 
 module.exports = mongoose.model("Score", scoreSchema);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 import { usePathname } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
@@ -22,9 +22,6 @@ export default function GamePageStructure({
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
-  const [scoreSubmitted, setScoreSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const submitAttempted = useRef(false);
   const pathname = usePathname();
   const startTime = Date.now();
 
@@ -53,18 +50,9 @@ export default function GamePageStructure({
     setMoves(0);
     setMessage("Game reset. Click on a node to begin!");
     setShowOverlay(false);
-    setScoreSubmitted(false);
-    setIsSubmitting(false);
-    submitAttempted.current = false;
   };
 
   const submitScore = async () => {
-    // Prevent submission if already submitted or attempting to submit
-    if (scoreSubmitted || isSubmitting || submitAttempted.current) return;
-
-    setIsSubmitting(true);
-    submitAttempted.current = true;
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -91,14 +79,11 @@ export default function GamePageStructure({
       }
 
       const data = await response.json();
-      setScoreSubmitted(true);
-      toast.success("Game completed! Score submitted successfully!");
+      toast.success("Score submitted successfully!");
       return data;
     } catch (error) {
       console.error("Error submitting score:", error);
       toast.error("Failed to submit score");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -159,22 +144,13 @@ export default function GamePageStructure({
     }
   };
 
-  // Handle game completion
   useEffect(() => {
-    const checkGameCompletion = async () => {
-      if (
-        isGameComplete(getCurrentGraphState()) &&
-        !scoreSubmitted &&
-        !submitAttempted.current
-      ) {
-        await submitScore();
-        setMessage("Congratulations! You've completed the game!");
-        setShowOverlay(true);
-      }
-    };
-
-    checkGameCompletion();
-  }, [getCurrentGraphState, isGameComplete, scoreSubmitted]);
+    if (isGameComplete(getCurrentGraphState())) {
+      submitScore();
+      setMessage("Congratulations! You've completed the game!");
+      setShowOverlay(true);
+    }
+  }, [getCurrentGraphState, isGameComplete]);
 
   if (!graphStates.length) {
     return (

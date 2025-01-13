@@ -13,13 +13,32 @@ const PersonalStats = () => {
     const fetchPersonalStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${API_URL}/api/scores/personal`, {
-          headers: { Authorization: `Bearer ${token}` },
+        if (!token) {
+          setError("No authentication token found");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch("/api/scores/personal", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-        setPersonalStats(response.data);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch stats");
+        }
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        setPersonalStats(data);
         setLoading(false);
       } catch (err) {
-        setError("Failed to fetch personal stats");
+        console.error("Personal stats error:", err);
+        setError(err.message || "Failed to fetch personal stats");
         setLoading(false);
       }
     };
@@ -34,7 +53,7 @@ const PersonalStats = () => {
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="px-4 py-5 sm:px-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900">
-          Your Personal Best Scores
+          Your Personal Stats
         </h3>
       </div>
       <div className="border-t border-gray-200">
@@ -44,7 +63,7 @@ const PersonalStats = () => {
               <h4 className="text-md font-medium text-gray-900 mb-2">
                 {stat._id.toUpperCase()}
               </h4>
-              <dl className="grid grid-cols-3 gap-4">
+              <dl className="grid grid-cols-4 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
                     Best Score
@@ -63,10 +82,18 @@ const PersonalStats = () => {
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Best Moves
+                    Games Played
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {stat.bestMoves}
+                    {stat.gamesPlayed}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Average Score
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {Math.round(stat.averageScore)}
                   </dd>
                 </div>
               </dl>

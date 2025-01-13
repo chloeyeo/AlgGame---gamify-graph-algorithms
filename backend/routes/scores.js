@@ -1,6 +1,7 @@
 const express = require("express");
 const Score = require("../models/Score");
 const auth = require("../middleware/auth");
+const mongoose = require("mongoose");
 
 const router = express.Router();
 
@@ -47,10 +48,22 @@ router.get("/leaderboard/:algorithm", async (req, res) => {
 router.get("/personal", auth, async (req, res) => {
   try {
     const userId = req.user.id;
+    if (!userId) {
+      return res.status(401).json({ message: "User ID not found in token" });
+    }
 
     const personalBests = await Score.aggregate([
-      { $match: { userId: mongoose.Types.ObjectId(userId) } },
-      { $sort: { score: -1 } },
+      {
+        $match: {
+          userId: mongoose.Types.ObjectId.createFromHexString(userId),
+        },
+      },
+      {
+        $sort: {
+          score: -1,
+          timeSpent: 1,
+        },
+      },
       {
         $group: {
           _id: "$algorithm",
@@ -58,13 +71,19 @@ router.get("/personal", auth, async (req, res) => {
           bestTime: { $first: "$timeSpent" },
           bestMoves: { $first: "$movesCount" },
           lastPlayed: { $first: "$createdAt" },
+          gamesPlayed: { $sum: 1 },
+          averageScore: { $avg: "$score" },
         },
       },
     ]);
 
     res.json(personalBests);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Personal stats error:", error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 });
 
