@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import { ToastContainer } from "react-toastify";
 import LayoutContent from "./LayoutContent";
+import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }) {
   return (
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/images/alg.png" />
       </head>
       <body>
+        <Toaster position="top-right" />
         <div className="bg-gray-50 w-full min-h-screen flex justify-center items-center">
           <div className="bg-white w-full h-full relative flex flex-col overflow-hidden shadow-lg py-0">
             <div className="flex-grow overflow-hidden">

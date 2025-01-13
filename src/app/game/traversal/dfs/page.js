@@ -354,6 +354,8 @@ const getNodeStatus = (node) => {
 };
 
 const isGameComplete = (graphState) => {
+  if (!graphState) return false;
+
   if (graphState.graphId === "F") {
     const component1 = ["A", "B", "C"];
     const component2 = ["D", "E", "F"];

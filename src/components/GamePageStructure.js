@@ -1,7 +1,8 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 import { usePathname } from "next/navigation";
-import { toast } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -170,6 +171,7 @@ export default function GamePageStructure({
 
   const renderMainContent = () => (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
+      <Toaster position="top-right" />
       <h1 className="text-2xl md:text-3xl font-bold mb-6">{title}</h1>
 
       <div className="w-full max-w-4xl">
