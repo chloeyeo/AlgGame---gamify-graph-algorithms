@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 import { usePathname } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -21,6 +22,7 @@ export default function GamePageStructure({
   const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const pathname = usePathname();
+  const startTime = Date.now();
 
   useEffect(() => {
     setCurrentGraphStates(graphStates);
@@ -47,6 +49,34 @@ export default function GamePageStructure({
     setMoves(0);
     setMessage("Game reset. Click on a node to begin!");
     setShowOverlay(false);
+  };
+
+  const submitScore = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch("/api/scores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithm: title.toLowerCase().split(" ")[0],
+          score: getScore(),
+          timeSpent: Date.now() - startTime,
+          movesCount: moves,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to submit score");
+
+      toast.success("Score submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting score:", error);
+      toast.error("Failed to submit score");
+    }
   };
 
   useEffect(() => {
@@ -105,6 +135,13 @@ export default function GamePageStructure({
       }
     }
   };
+
+  useEffect(() => {
+    if (isGameComplete()) {
+      submitScore();
+      setMessage("Congratulations! You've completed the game!");
+    }
+  }, [moves, isGameComplete]);
 
   if (!graphStates.length) {
     return (

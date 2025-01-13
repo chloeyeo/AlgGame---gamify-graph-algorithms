@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -8,11 +8,11 @@ const PersonalStats = () => {
   const [personalStats, setPersonalStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchPersonalStats = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await axios.get(`${API_URL}/api/scores/personal`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -25,7 +25,7 @@ const PersonalStats = () => {
     };
 
     fetchPersonalStats();
-  }, [token]);
+  }, []);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

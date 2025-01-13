@@ -51,6 +51,12 @@ export default function Header({ toggleSidebar }) {
         <Link href="/about" className="text-md md:text-lg hover:text-blue-600">
           About
         </Link>
+        <Link
+          href="/leaderboard"
+          className="text-md md:text-lg hover:text-blue-600"
+        >
+          Leaderboard
+        </Link>
       </div>
       <div onClick={handleProfileClick} className="cursor-pointer">
         <div className="w-10 h-10 border-2 border-gray-200 rounded-full flex items-center justify-center">

@@ -39,6 +39,7 @@ export default function LayoutContent({ children }) {
     "/game/matching/hungarian-kuhn-munkres",
     "/auth",
     "/myaccount",
+    "/leaderboard",
   ];
 
   const pageExists = validPaths.includes(pathname);

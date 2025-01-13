@@ -22,5 +22,5 @@ export function middleware(request) {
 
 // Add config to specify which routes middleware should run on
 export const config = {
-  matcher: ["/myaccount", "/auth"],
+  matcher: ["/myaccount", "/auth", "/leaderboard"],
 };
