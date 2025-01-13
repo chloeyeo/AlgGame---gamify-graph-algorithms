@@ -47,7 +47,7 @@ router.get("/leaderboard/:algorithm", async (req, res) => {
 // Get user's personal best scores
 router.get("/personal", auth, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     if (!userId) {
       return res.status(401).json({ message: "User ID not found in token" });
     }
