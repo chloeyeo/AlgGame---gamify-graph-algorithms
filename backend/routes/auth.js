@@ -58,7 +58,6 @@ router.post("/login", async (req, res) => {
 
     // Input validation
     if (!emailOrUsername || !password) {
-      console.log(`Login attempt failed - missing fields. IP: ${req.ip}`);
       return res.status(400).json({
         status: "error",
         message: "Email/Username and password are required",
@@ -71,9 +70,6 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      console.log(
-        `Login attempt failed - user not found for: ${emailOrUsername}. IP: ${req.ip}`
-      );
       return res.status(401).json({
         status: "error",
         message: "Invalid credentials",
@@ -83,9 +79,6 @@ router.post("/login", async (req, res) => {
     // Verify password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      console.log(
-        `Login attempt failed - invalid password for: ${emailOrUsername}. IP: ${req.ip}`
-      );
       return res.status(401).json({
         status: "error",
         message: "Invalid credentials",
@@ -97,7 +90,6 @@ router.post("/login", async (req, res) => {
       expiresIn: "24h",
     });
 
-    console.log(`Successful login for user: ${emailOrUsername}. IP: ${req.ip}`);
     res.json({
       status: "success",
       token,
@@ -108,7 +100,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(`Login error: ${error.message}`);
+    console.error("Login error:", error);
     res.status(500).json({
       status: "error",
       message: "Server error",

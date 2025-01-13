@@ -2,9 +2,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const AuthPage = () => {
   const router = useRouter();
@@ -29,38 +26,23 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let response;
+      // Simulating successful auth for now
+      const mockUser = {
+        username: formData.email.split("@")[0],
+        email: formData.email,
+      };
+      const mockToken = "mock-jwt-token";
 
-      if (isLogin) {
-        // Login request
-        response = await axios.post(`${API_URL}/api/auth/login`, {
-          emailOrUsername: formData.email,
-          password: formData.password,
-        });
-      } else {
-        // Register request
-        response = await axios.post(`${API_URL}/api/auth/register`, {
-          username: formData.email.split("@")[0], // You might want to add a separate username field
-          email: formData.email,
-          password: formData.password,
-        });
-      }
-
-      const { token, user } = response.data;
-
-      // Store token and user data
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      document.cookie = `token=${token}; path=/; max-age=86400`;
+      localStorage.setItem("token", mockToken);
+      localStorage.setItem("user", JSON.stringify(mockUser));
+      document.cookie = `token=${mockToken}; path=/; max-age=86400`;
 
       toast.success(
         isLogin ? "Login successful!" : "Account created successfully!"
       );
       router.push("/myaccount");
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Authentication failed";
-      toast.error(errorMessage);
+      toast.error(error.message || "Authentication failed");
     }
   };
 
