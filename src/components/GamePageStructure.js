@@ -2,7 +2,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import GraphVisualisation from "@/components/GraphVisualisation";
 import { usePathname } from "next/navigation";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -59,22 +61,22 @@ export default function GamePageStructure({
   };
 
   const submitScore = async () => {
-    // Prevent submission if already submitted or attempting to submit
-    if (scoreSubmitted || isSubmitting || submitAttempted.current) return;
-
-    setIsSubmitting(true);
+    if (submitAttempted.current) return;
     submitAttempted.current = true;
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.info(
-          "Playing as guest - scores are not saved when not logged in"
-        );
-        setScoreSubmitted(true);
-        return;
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.info("Playing as guest - scores are not saved when not logged in", {
+        toastId: "guest-score",
+        position: "top-right",
+        autoClose: 3000,
+        pauseOnFocusLoss: false,
+      });
+      return;
+    }
 
+    try {
+      setIsSubmitting(true);
       const response = await fetch("/api/scores", {
         method: "POST",
         headers: {
@@ -91,21 +93,20 @@ export default function GamePageStructure({
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to submit score: ${response.statusText}`);
+        throw new Error("Failed to submit score");
       }
 
       const data = await response.json();
       setScoreSubmitted(true);
-      toast.success("Game completed! Score submitted successfully!");
+      toast.success("Score submitted successfully!");
       return data;
     } catch (error) {
       console.error("Error submitting score:", error);
-      if (error.message.includes("401")) {
-        toast.info(
-          "Playing as guest - scores are not saved when not logged in"
-        );
-      } else {
-        toast.error("Failed to submit score: " + error.message);
+      // Only show error toast if we haven't shown the guest message
+      if (token) {
+        toast.error("Failed to submit score", {
+          toastId: "submit-error",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -213,7 +214,6 @@ export default function GamePageStructure({
 
   const renderMainContent = () => (
     <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
-      <Toaster position="top-right" />
       <h1 className="text-2xl md:text-3xl font-bold mb-6">{title}</h1>
 
       <div className="w-full max-w-4xl">

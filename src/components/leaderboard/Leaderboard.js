@@ -31,7 +31,7 @@ const Leaderboard = ({ algorithm }) => {
   }, [algorithm]);
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error) return <div className="text-red-500">Nothing fetched</div>;
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
