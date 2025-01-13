@@ -9,6 +9,7 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    emailOrUsername: "",
     username: "",
     email: "",
     password: "",
@@ -48,7 +49,7 @@ const AuthPage = () => {
           body: JSON.stringify(
             isLogin
               ? {
-                  email: formData.email,
+                  emailOrUsername: formData.emailOrUsername,
                   password: formData.password,
                 }
               : {
@@ -86,23 +87,62 @@ const AuthPage = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-800 mb-1"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-            />
-          </div>
+          {isLogin ? (
+            <div>
+              <label
+                htmlFor="emailOrUsername"
+                className="block text-sm font-medium text-gray-800 mb-1"
+              >
+                Email or Username
+              </label>
+              <input
+                id="emailOrUsername"
+                type="text"
+                placeholder="Enter your email or username"
+                required
+                value={formData.emailOrUsername}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-800 mb-1"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-800 mb-1"
+                >
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="Enter your username"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                />
+              </div>
+            </>
+          )}
 
           <div>
             <label
@@ -145,29 +185,12 @@ const AuthPage = () => {
             </div>
           )}
 
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-800 mb-1"
-            >
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Enter your username"
-              required={!isLogin}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-            />
-          </div>
-
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
           >
-            {isLogin ? "Sign In" : "Sign Up"}
+            {loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
           </button>
         </form>
 

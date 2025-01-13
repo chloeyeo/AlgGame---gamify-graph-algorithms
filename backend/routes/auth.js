@@ -54,22 +54,25 @@ router.post("/register", async (req, res) => {
 // Login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { emailOrUsername, password } = req.body;
 
     // Input validation
-    if (!email || !password) {
+    if (!emailOrUsername || !password) {
       console.log(`Login attempt failed - missing fields. IP: ${req.ip}`);
       return res.status(400).json({
         status: "error",
-        message: "Email and password are required",
+        message: "Email/Username and password are required",
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email });
+    // Find user by email or username
+    const user = await User.findOne({
+      $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    });
+
     if (!user) {
       console.log(
-        `Login attempt failed - user not found for email: ${email}. IP: ${req.ip}`
+        `Login attempt failed - user not found for: ${emailOrUsername}. IP: ${req.ip}`
       );
       return res.status(401).json({
         status: "error",
@@ -81,7 +84,7 @@ router.post("/login", async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       console.log(
-        `Login attempt failed - invalid password for email: ${email}. IP: ${req.ip}`
+        `Login attempt failed - invalid password for: ${emailOrUsername}. IP: ${req.ip}`
       );
       return res.status(401).json({
         status: "error",
@@ -94,7 +97,7 @@ router.post("/login", async (req, res) => {
       expiresIn: "24h",
     });
 
-    console.log(`Successful login for user: ${email}. IP: ${req.ip}`);
+    console.log(`Successful login for user: ${emailOrUsername}. IP: ${req.ip}`);
     res.json({
       status: "success",
       token,
