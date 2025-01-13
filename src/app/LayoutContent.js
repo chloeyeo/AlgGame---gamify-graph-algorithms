@@ -38,6 +38,7 @@ export default function LayoutContent({ children }) {
     "/education/matching/hungarian-kuhn-munkres",
     "/game/matching/hungarian-kuhn-munkres",
     "/auth",
+    "/myaccount",
   ];
 
   const pageExists = validPaths.includes(pathname);

@@ -1,20 +1,26 @@
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
-  // Check if the path is /leaderboard
-  if (request.nextUrl.pathname.startsWith("/leaderboard")) {
-    // Get the token from cookies
-    const token = request.cookies.get("token")?.value;
+  const token = request.cookies.get("token")?.value;
 
+  // Protect /myaccount route
+  if (request.nextUrl.pathname === "/myaccount") {
     if (!token) {
-      // Redirect to login if no token is present
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/auth", request.url));
+    }
+  }
+
+  // Prevent authenticated users from accessing /auth
+  if (request.nextUrl.pathname === "/auth") {
+    if (token) {
+      return NextResponse.redirect(new URL("/myaccount", request.url));
     }
   }
 
   return NextResponse.next();
 }
 
+// Add config to specify which routes middleware should run on
 export const config = {
-  matcher: ["/leaderboard/:path*"],
+  matcher: ["/myaccount", "/auth"],
 };

@@ -1,81 +1,48 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 const AuthPage = () => {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    emailOrUsername: "",
-    username: "",
     email: "",
+    username: "",
     password: "",
-    confirmPassword: "",
   });
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/myaccount");
+    }
+  }, [router]);
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
     try {
-      if (formData.password.length < 6) {
-        toast.error("Password must be at least 6 characters long");
-        return;
-      }
+      // Simulating successful auth for now
+      const mockUser = {
+        username: formData.email.split("@")[0],
+        email: formData.email,
+      };
+      const mockToken = "mock-jwt-token";
 
-      if (!isLogin && formData.password !== formData.confirmPassword) {
-        toast.error("Passwords don't match");
-        return;
-      }
+      localStorage.setItem("token", mockToken);
+      localStorage.setItem("user", JSON.stringify(mockUser));
+      document.cookie = `token=${mockToken}; path=/; max-age=86400`;
 
-      const endpoint = isLogin ? "/login" : "/register";
-      const response = await fetch(
-        `http://localhost:5000/api/auth${endpoint}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(
-            isLogin
-              ? {
-                  emailOrUsername: formData.emailOrUsername,
-                  password: formData.password,
-                }
-              : {
-                  username: formData.username,
-                  email: formData.email,
-                  password: formData.password,
-                }
-          ),
-        }
+      toast.success(
+        isLogin ? "Login successful!" : "Account created successfully!"
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || "Authentication failed");
-        return;
-      }
-
-      toast.success(isLogin ? "Login successful!" : "Registration successful!");
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/");
-    } catch (err) {
-      toast.error(err.message || "An error occurred");
-    } finally {
-      setLoading(false);
+      router.push("/myaccount");
+    } catch (error) {
+      toast.error(error.message || "Authentication failed");
     }
   };
 
@@ -87,62 +54,23 @@ const AuthPage = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {isLogin ? (
-            <div>
-              <label
-                htmlFor="emailOrUsername"
-                className="block text-sm font-medium text-gray-800 mb-1"
-              >
-                Email or Username
-              </label>
-              <input
-                id="emailOrUsername"
-                type="text"
-                placeholder="Enter your email or username"
-                required
-                value={formData.emailOrUsername}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-              />
-            </div>
-          ) : (
-            <>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-800 mb-1"
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-gray-800 mb-1"
-                >
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="Enter your username"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                />
-              </div>
-            </>
-          )}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-800 mb-1"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+            />
+          </div>
 
           <div>
             <label
@@ -160,59 +88,25 @@ const AuthPage = () => {
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             />
-            <p className="mt-1 text-sm text-gray-800">
-              Password must be at least 6 characters long
-            </p>
           </div>
-
-          {!isLogin && (
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-800 mb-1"
-              >
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-              />
-            </div>
-          )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
-            {loading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
+            {isLogin ? "Sign In" : "Sign Up"}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-800">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <span
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium"
-            >
-              {isLogin ? "Sign Up" : "Sign In"}
-            </span>
-          </p>
-        </div>
-
-        {isLogin && (
-          <div className="mt-4 text-center">
-            <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
-              Forgot your password?
-            </a>
-          </div>
-        )}
+        <p className="mt-4 text-center text-gray-600">
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-blue-600 hover:underline"
+          >
+            {isLogin ? "Sign Up" : "Sign In"}
+          </button>
+        </p>
       </div>
     </div>
   );
