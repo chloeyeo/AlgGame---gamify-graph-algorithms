@@ -20,8 +20,8 @@ export async function POST(request) {
   } catch (error) {
     console.error("Score submission error:", error);
     return NextResponse.json(
-      { error: "Failed to submit score" },
-      { status: 500 }
+      { error: error.response?.data?.message || "Failed to submit score" },
+      { status: error.response?.status || 500 }
     );
   }
 }

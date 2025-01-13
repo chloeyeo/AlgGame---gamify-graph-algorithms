@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -66,42 +69,37 @@ export default function GamePageStructure({
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.info("Playing as guest - scores are not saved when not logged in", {
+      toast.info("Playing as guest - sign in to save your scores!", {
         toastId: "guest-score",
         position: "top-right",
         autoClose: 3000,
-        pauseOnFocusLoss: false,
       });
+      setScoreSubmitted(true);
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const response = await fetch("/api/scores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        `${API_URL}/api/scores`,
+        {
           algorithm: title.toLowerCase().split(" ")[0],
           score: score,
           timeSpent: Date.now() - startTime,
           movesCount: moves,
-        }),
-      });
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
       setScoreSubmitted(true);
       toast.success("Score submitted successfully!");
-      return data;
+      return response.data;
     } catch (error) {
       console.error("Error submitting score:", error);
-      toast.error("Failed to submit score. Please try again.");
+      toast.error("Failed to submit score");
+      setScoreSubmitted(true);
     } finally {
       setIsSubmitting(false);
     }
