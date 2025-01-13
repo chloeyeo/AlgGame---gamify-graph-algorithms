@@ -16,7 +16,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://your-frontend-url.netlify.app"] // my Netlify URL
+        ? ["https://algggame.netlify.app"] // my Netlify URL
         : ["http://localhost:3000"],
     credentials: true,
   })
