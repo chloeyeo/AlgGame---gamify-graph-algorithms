@@ -22,15 +22,20 @@ const Leaderboard = ({ algorithm }) => {
         });
 
         const data = await response.json();
-        if (data.error) {
+
+        // Check if data is valid and is an array
+        if (data && Array.isArray(data)) {
+          setLeaderboardData(data);
+        } else if (data.error) {
           throw new Error(data.error);
+        } else {
+          throw new Error("Invalid data format received");
         }
 
-        setLeaderboardData(data);
         setLoading(false);
       } catch (err) {
         console.error("Leaderboard fetch error:", err);
-        setError("Failed to fetch leaderboard data");
+        setError(err.message || "Failed to fetch leaderboard data");
         setLoading(false);
       }
     };
@@ -39,7 +44,8 @@ const Leaderboard = ({ algorithm }) => {
   }, [algorithm]);
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">Nothing fetched</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!Array.isArray(leaderboardData)) return <div>No data available</div>;
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
