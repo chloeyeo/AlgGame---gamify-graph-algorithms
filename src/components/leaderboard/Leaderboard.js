@@ -14,7 +14,7 @@ const Leaderboard = ({ algorithm }) => {
     const fetchLeaderboard = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log(`Fetching leaderboard for ${algorithm}...`); // Debug log
+        console.log(`Fetching leaderboard for ${algorithm}...`);
 
         const response = await fetch(`/api/scores/leaderboard/${algorithm}`, {
           headers: {
@@ -28,15 +28,29 @@ const Leaderboard = ({ algorithm }) => {
         }
 
         const data = await response.json();
-        console.log(`Received data:`, data); // Debug log
+        console.log(`Received data for ${algorithm}:`, data);
 
-        // Ensure we always set an array
-        setLeaderboardData(Array.isArray(data) ? data : []);
-        setLoading(false);
+        // Ensure we're working with valid data
+        if (Array.isArray(data)) {
+          // Map the data to ensure all required fields exist
+          const processedData = data.map((entry) => ({
+            _id: entry._id || `temp-${Math.random()}`,
+            userId: {
+              username: entry.userId?.username || "Anonymous",
+            },
+            score: entry.score || 0,
+            timeSpent: entry.timeSpent || 0,
+            movesCount: entry.movesCount || 0,
+          }));
+          setLeaderboardData(processedData);
+        } else {
+          setLeaderboardData([]);
+        }
       } catch (err) {
         console.error(`Leaderboard fetch error for ${algorithm}:`, err);
         setError(err.message || "Failed to fetch leaderboard data");
-        setLeaderboardData([]); // Ensure we always have an array
+        setLeaderboardData([]);
+      } finally {
         setLoading(false);
       }
     };
