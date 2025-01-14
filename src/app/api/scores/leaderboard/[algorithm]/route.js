@@ -10,6 +10,10 @@ export async function GET(request, { params }) {
     const { algorithm } = params;
     const token = request.cookies.get("token")?.value;
 
+    if (!token) {
+      return NextResponse.json({ error: "No token found" }, { status: 401 });
+    }
+
     const response = await axios.get(
       `${API_URL}/api/scores/leaderboard/${algorithm}`,
       {
@@ -17,12 +21,16 @@ export async function GET(request, { params }) {
       }
     );
 
-    return NextResponse.json(response.data);
+    // Ensure we're returning an array
+    const data = response.data;
+    if (!Array.isArray(data)) {
+      console.error("Invalid data format received:", data);
+      return NextResponse.json([], { status: 200 }); // Return empty array instead of error
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Leaderboard API error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch leaderboard" },
-      { status: 500 }
-    );
+    return NextResponse.json([], { status: 200 }); // Return empty array on error
   }
 }

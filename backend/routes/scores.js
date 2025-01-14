@@ -32,15 +32,20 @@ router.get("/leaderboard/:algorithm", async (req, res) => {
     const { algorithm } = req.params;
     const { limit = 10 } = req.query;
 
+    console.log(`Fetching leaderboard for ${algorithm}`); // Debug log
+
     const leaderboard = await Score.find({ algorithm })
       .sort({ score: -1 })
       .limit(Number(limit))
       .populate("userId", "username")
       .select("score timeSpent movesCount createdAt");
 
-    res.json(leaderboard);
+    console.log(`Found ${leaderboard.length} scores`); // Debug log
+
+    res.json(leaderboard || []); // Ensure we always send an array
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Leaderboard fetch error:", error);
+    res.json([]); // Return empty array instead of error
   }
 });
 
