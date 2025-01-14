@@ -8,6 +8,16 @@ import PersonalStats from "@/components/leaderboard/PersonalStats";
 export default function LeaderboardPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const algorithms = [
+    "dfs",
+    "bfs",
+    "dijkstra",
+    "astar",
+    "kruskal",
+    "prim",
+    "fordFulkerson",
+    "edmondsKarp",
+  ];
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -21,6 +31,7 @@ export default function LeaderboardPage() {
     try {
       setUser(JSON.parse(userData));
     } catch (error) {
+      console.error("Error parsing user data:", error);
       router.replace("/auth");
     }
   }, [router]);
@@ -38,18 +49,10 @@ export default function LeaderboardPage() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
-          {[
-            "dfs",
-            "bfs",
-            "dijkstra",
-            "astar",
-            "kruskal",
-            "prim",
-            "fordFulkerson",
-            "edmondsKarp",
-          ].map((algorithm) => (
-            <Leaderboard key={algorithm} algorithm={algorithm} />
-          ))}
+          {Array.isArray(algorithms) &&
+            algorithms.map((algorithm) => (
+              <Leaderboard key={algorithm} algorithm={algorithm} />
+            ))}
         </div>
       </div>
     </div>
