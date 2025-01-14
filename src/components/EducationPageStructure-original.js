@@ -43,132 +43,9 @@ const ExplanationSection = ({ explanation }) => {
   );
 };
 
-const generateRandomGraph = (nodeCount) => {
-  // Generate nodes with randomized positions in a circular layout
-  const nodes = Array.from({ length: nodeCount }, (_, i) => {
-    // Random angle with some jitter
-    const baseAngle = (2 * Math.PI * i) / nodeCount;
-    const angleJitter = Math.random() * 0.5 - 0.25; // ±0.25 radians of jitter
-    const angle = baseAngle + angleJitter;
-
-    // Random radius with bounds
-    const minRadius = 100;
-    const maxRadius = 200;
-    const radius = minRadius + Math.random() * (maxRadius - minRadius);
-
-    return {
-      id: String.fromCharCode(65 + i),
-      visited: false,
-      x: 300 + radius * Math.cos(angle),
-      y: 300 + radius * Math.sin(angle),
-    };
-  });
-
-  const edges = [];
-  // Ensure graph is connected
-  for (let i = 1; i < nodes.length; i++) {
-    const parent = Math.floor(Math.random() * i);
-    edges.push({
-      source: nodes[parent].id,
-      target: nodes[i].id,
-    });
-  }
-
-  // Add random extra edges
-  const maxExtraEdges = Math.min(nodeCount - 1, 3);
-  for (let i = 0; i < maxExtraEdges; i++) {
-    const source = Math.floor(Math.random() * nodes.length);
-    const target = Math.floor(Math.random() * nodes.length);
-
-    if (
-      source !== target &&
-      !edges.some(
-        (e) =>
-          (e.source === nodes[source].id && e.target === nodes[target].id) ||
-          (e.source === nodes[target].id && e.target === nodes[source].id)
-      )
-    ) {
-      edges.push({
-        source: nodes[source].id,
-        target: nodes[target].id,
-      });
-    }
-  }
-
-  return { nodes, edges };
-};
-
-const generateDFSSteps = (initialNodes, edges) => {
-  const steps = [];
-  const visited = new Set();
-  const backtracked = new Set();
-  const stack = [initialNodes[0].id];
-
-  // Add initial state
-  steps.push({
-    graphState: {
-      nodes: initialNodes.map((node) => ({
-        ...node,
-        visited: false,
-        backtracked: false,
-      })),
-      edges,
-      currentNode: null,
-    },
-    explanation: "Initial state: No nodes have been visited yet.",
-  });
-
-  while (stack.length > 0) {
-    const currentNode = stack[stack.length - 1];
-
-    if (!visited.has(currentNode)) {
-      visited.add(currentNode);
-
-      // Add step for visiting current node
-      steps.push({
-        graphState: {
-          nodes: initialNodes.map((node) => ({
-            ...node,
-            visited: visited.has(node.id),
-            backtracked: backtracked.has(node.id),
-          })),
-          edges,
-          currentNode,
-        },
-        explanation: `Visit node ${currentNode}`,
-      });
-
-      // Find unvisited neighbors
-      const neighbors = edges
-        .filter(
-          (edge) => edge.source === currentNode || edge.target === currentNode
-        )
-        .map((edge) =>
-          edge.source === currentNode ? edge.target : edge.source
-        )
-        .filter((neighbor) => !visited.has(neighbor))
-        .sort();
-
-      if (neighbors.length === 0) {
-        stack.pop();
-        backtracked.add(currentNode);
-      } else {
-        stack.push(neighbors[0]);
-      }
-    } else {
-      stack.pop();
-      if (!backtracked.has(currentNode)) {
-        backtracked.add(currentNode);
-      }
-    }
-  }
-
-  return steps;
-};
-
 export default function EducationPageStructure({
   title = "Graph Algorithm",
-  graphStates = [],
+  graphStates = [], // Now using graphStates array for all graphs
   conceptText = "",
   pseudocode = "",
   GraphVisualisationComponent = GraphVisualisation,
@@ -178,16 +55,6 @@ export default function EducationPageStructure({
   const [isSpeakingExplanation, setIsSpeakingExplanation] = useState(false);
   const [isSpeakingConcept, setIsSpeakingConcept] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [nodeCount, setNodeCount] = useState(5);
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentGraphStates, setCurrentGraphStates] = useState([]);
-
-  // Generate initial graph on mount
-  useEffect(() => {
-    const { nodes, edges } = generateRandomGraph(nodeCount);
-    const steps = generateDFSSteps(nodes, edges);
-    setCurrentGraphStates([steps]);
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -311,81 +178,73 @@ export default function EducationPageStructure({
     </div>
   );
 
-  const renderGraphSection = (isDesktop = false) => {
-    return (
-      <div
-        className={`${
-          isDesktop ? "h-[500px]" : "h-[400px]"
-        } relative bg-white bg-opacity-50 rounded-lg`}
-      >
-        <div className="w-full h-full">
-          <div className="flex items-center gap-4 mb-4 p-4">
-            <div>
-              <label className="mr-2">Number of nodes:</label>
-              <input
-                type="range"
-                min="3"
-                max="10"
-                value={nodeCount}
-                onChange={(e) => setNodeCount(parseInt(e.target.value))}
-                className="w-48"
-              />
-              <span className="ml-2">{nodeCount}</span>
-            </div>
-
-            <button
-              onClick={() => {
-                const { nodes, edges } = generateRandomGraph(nodeCount);
-                const steps = generateDFSSteps(nodes, edges);
-                setCurrentGraphStates([steps]);
-                setCurrentStep(0);
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Generate New Graph
-            </button>
-
-            <button
-              onClick={async () => {
-                setIsRunning(true);
-                setCurrentStep(0);
-
-                for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
-                  if (!isRunning) break;
-                  setCurrentStep(i);
-                  await new Promise((resolve) => setTimeout(resolve, 1000));
-                }
-
-                setIsRunning(false);
-              }}
-              disabled={isRunning}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
-            >
-              {isRunning ? "Running..." : "Run DFS"}
-            </button>
+  const renderGraphSection = (isDesktop = false) => (
+    <div
+      className={`${
+        isDesktop ? "h-[500px]" : "h-[400px]"
+      } relative bg-white bg-opacity-50 rounded-lg`}
+    >
+      <div className="w-full h-full">
+        {graphStates.length > 1 && (
+          <div className="flex mb-2 border-b">
+            {graphStates.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setActiveTab(index);
+                  setCurrentStep(0);
+                }}
+                className={`px-4 py-2 border-b-2 border-transparent hover:border-blue-500 focus:outline-none ${
+                  activeTab === index ? "border-blue-500 font-bold" : ""
+                }`}
+              >
+                Graph {String.fromCharCode(65 + index)}
+              </button>
+            ))}
           </div>
+        )}
 
-          <div className="flex h-[calc(100%-3rem)]">
-            <div className="flex-1 h-full">
-              <div className="h-full flex items-center justify-center">
-                {isLoading ? (
-                  <p>Loading graph...</p>
-                ) : (
-                  <GraphVisualisationComponent
-                    graphState={
-                      currentGraphStates[activeTab]?.[currentStep]?.graphState
-                    }
-                    isGraphA={activeTab === 0}
-                    graphIndex={activeTab}
-                  />
-                )}
-              </div>
+        <div className="flex h-[calc(100%-3rem)]">
+          <div className="flex-1 h-full">
+            <div className="h-full flex items-center justify-center">
+              {isLoading ? (
+                <p>Loading graph...</p>
+              ) : (
+                <GraphVisualisationComponent
+                  graphState={getCurrentGraphState()}
+                  isGraphA={activeTab === 0}
+                  graphIndex={activeTab}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
-    );
-  };
+
+      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+        <button
+          onClick={prevStep}
+          disabled={currentStep === 0}
+          className="bg-gray-300 p-2 rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <button
+          onClick={resetGraph}
+          className="bg-yellow-500 text-white p-2 rounded"
+        >
+          Reset
+        </button>
+        <button
+          onClick={nextStep}
+          disabled={currentStep === graphStates[activeTab]?.length - 1}
+          className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
 
   // Mobile content
   const mobileContent = (

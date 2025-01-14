@@ -44,28 +44,23 @@ const ExplanationSection = ({ explanation }) => {
 };
 
 const generateRandomGraph = (nodeCount) => {
-  // Generate nodes with randomized positions in a circular layout
+  // Generate nodes with random positions in a circular layout with some randomness
   const nodes = Array.from({ length: nodeCount }, (_, i) => {
-    // Random angle with some jitter
-    const baseAngle = (2 * Math.PI * i) / nodeCount;
-    const angleJitter = Math.random() * 0.5 - 0.25; // ±0.25 radians of jitter
-    const angle = baseAngle + angleJitter;
-
-    // Random radius with bounds
-    const minRadius = 100;
-    const maxRadius = 200;
-    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+    const angle = (2 * Math.PI * i) / nodeCount;
+    const radius = 200; // Base radius
+    const randomOffset = Math.random() * 50; // Random offset for more natural look
 
     return {
       id: String.fromCharCode(65 + i),
       visited: false,
-      x: 300 + radius * Math.cos(angle),
-      y: 300 + radius * Math.sin(angle),
+      // Random position within a circle, with some jitter
+      x: 300 + (radius + randomOffset) * Math.cos(angle + Math.random() * 0.5),
+      y: 300 + (radius + randomOffset) * Math.sin(angle + Math.random() * 0.5),
     };
   });
 
   const edges = [];
-  // Ensure graph is connected
+  // First ensure the graph is connected
   for (let i = 1; i < nodes.length; i++) {
     const parent = Math.floor(Math.random() * i);
     edges.push({
@@ -74,7 +69,7 @@ const generateRandomGraph = (nodeCount) => {
     });
   }
 
-  // Add random extra edges
+  // Add a few more random edges without creating too many intersections
   const maxExtraEdges = Math.min(nodeCount - 1, 3);
   for (let i = 0; i < maxExtraEdges; i++) {
     const source = Math.floor(Math.random() * nodes.length);
@@ -104,14 +99,9 @@ const generateDFSSteps = (initialNodes, edges) => {
   const backtracked = new Set();
   const stack = [initialNodes[0].id];
 
-  // Add initial state
   steps.push({
     graphState: {
-      nodes: initialNodes.map((node) => ({
-        ...node,
-        visited: false,
-        backtracked: false,
-      })),
+      nodes: initialNodes,
       edges,
       currentNode: null,
     },
@@ -123,8 +113,6 @@ const generateDFSSteps = (initialNodes, edges) => {
 
     if (!visited.has(currentNode)) {
       visited.add(currentNode);
-
-      // Add step for visiting current node
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
@@ -135,10 +123,9 @@ const generateDFSSteps = (initialNodes, edges) => {
           edges,
           currentNode,
         },
-        explanation: `Visit node ${currentNode}`,
+        explanation: `Visit node ${currentNode}. Push ${currentNode} onto the stack and mark it as visited.`,
       });
 
-      // Find unvisited neighbors
       const neighbors = edges
         .filter(
           (edge) => edge.source === currentNode || edge.target === currentNode
@@ -180,14 +167,7 @@ export default function EducationPageStructure({
   const [isLoading, setIsLoading] = useState(false);
   const [nodeCount, setNodeCount] = useState(5);
   const [isRunning, setIsRunning] = useState(false);
-  const [currentGraphStates, setCurrentGraphStates] = useState([]);
-
-  // Generate initial graph on mount
-  useEffect(() => {
-    const { nodes, edges } = generateRandomGraph(nodeCount);
-    const steps = generateDFSSteps(nodes, edges);
-    setCurrentGraphStates([steps]);
-  }, []);
+  const [currentGraphStates, setCurrentGraphStates] = useState(graphStates);
 
   useEffect(() => {
     const timer = setTimeout(() => {
