@@ -40,6 +40,7 @@ export default function LayoutContent({ children }) {
     "/auth",
     "/myaccount",
     "/leaderboard",
+    "/examples/node-graph",
   ];
 
   const pageExists = validPaths.includes(pathname);
