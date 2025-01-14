@@ -14,15 +14,22 @@ const Leaderboard = ({ algorithm }) => {
     const fetchLeaderboard = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${API_URL}/api/scores/leaderboard/${algorithm}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setLeaderboardData(response.data);
+        const response = await fetch(`/api/scores/leaderboard/${algorithm}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        setLeaderboardData(data);
         setLoading(false);
       } catch (err) {
+        console.error("Leaderboard fetch error:", err);
         setError("Failed to fetch leaderboard data");
         setLoading(false);
       }
