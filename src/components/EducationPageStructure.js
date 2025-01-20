@@ -464,43 +464,50 @@ export default function EducationPageStructure({
   const runDFS = async () => {
     if (!currentGraphStates || !currentGraphStates[activeTab]) return;
 
+    // If not running, start fresh
     if (!isRunning) {
-      // Starting the animation
       setIsRunning(true);
       setCurrentStep(0);
       setIsPaused(false);
       isPausedRef.current = false;
-
-      try {
-        for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
-          const step = currentGraphStates[activeTab][i];
-          setCurrentStep(i);
-          setPseudoCodeHighlight(getPseudoCodeHighlight(step));
-
-          while (isPausedRef.current) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, animationSpeed));
-
-          // Check if all nodes are backtracked
-          const allNodesBacktracked = step.graphState.nodes.every(
-            (node) => node.backtracked
-          );
-          if (allNodesBacktracked) {
-            break;
-          }
-        }
-      } finally {
-        setIsRunning(false);
-        setIsPaused(false);
-        isPausedRef.current = false;
-        setPseudoCodeHighlight([]);
-      }
     } else {
       // Toggle pause state
       setIsPaused(!isPaused);
       isPausedRef.current = !isPausedRef.current;
+      return; // Return here to keep the existing animation loop running
+    }
+
+    // Main animation loop
+    try {
+      let i = currentStep;
+      while (i < currentGraphStates[activeTab].length) {
+        if (isPausedRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, 100)); // Check pause state every 100ms
+          continue; // Keep checking pause state without advancing
+        }
+
+        const step = currentGraphStates[activeTab][i];
+        setCurrentStep(i);
+        setPseudoCodeHighlight(getPseudoCodeHighlight(step));
+
+        await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+
+        // Check if all nodes are backtracked
+        const allNodesBacktracked = step.graphState.nodes.every(
+          (node) => node.backtracked
+        );
+        if (allNodesBacktracked) {
+          break;
+        }
+
+        i++; // Only increment if not paused
+      }
+    } finally {
+      if (!isPausedRef.current) {
+        setIsRunning(false);
+        setIsPaused(false);
+        setPseudoCodeHighlight([]);
+      }
     }
   };
 
