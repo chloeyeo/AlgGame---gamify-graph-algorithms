@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import GraphVisualisation from "./GraphVisualisation";
 import CodeEditorPseudocode from "./CodeEditorPseudocode";
+import { FaPlay, FaPause, FaRedo } from "react-icons/fa";
 
 const ExplanationSection = ({ explanation }) => {
   const formatExplanation = (text) => {
@@ -357,7 +358,7 @@ export default function EducationPageStructure({
         } relative bg-white bg-opacity-50 rounded-lg`}
       >
         <div className="w-full h-full flex flex-col">
-          <div className="flex items-center gap-4 p-4">
+          <div className="flex items-center gap-4 mb-4 p-4">
             <div>
               <label className="mr-2">Number of nodes:</label>
               <input
@@ -383,13 +384,32 @@ export default function EducationPageStructure({
               Generate New Graph
             </button>
 
-            <button
-              onClick={runDFS}
-              disabled={isRunning}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
-            >
-              {isRunning ? "Running..." : "Run DFS"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={runDFS}
+                className={`p-2 rounded-full ${
+                  !isRunning
+                    ? "bg-green-500 hover:bg-green-600"
+                    : "bg-yellow-500 hover:bg-yellow-600"
+                } text-white`}
+                title={!isRunning ? "Start" : "Pause"}
+              >
+                {!isRunning ? <FaPlay size={20} /> : <FaPause size={20} />}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsRunning(false);
+                  setIsPaused(false);
+                  setCurrentStep(0);
+                  setPseudoCodeHighlight([]);
+                }}
+                className="p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+                title="Restart"
+              >
+                <FaRedo size={20} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1">
@@ -439,32 +459,42 @@ export default function EducationPageStructure({
   const runDFS = async () => {
     if (!currentGraphStates || !currentGraphStates[activeTab]) return;
 
-    setIsRunning(true);
-    setCurrentStep(0);
+    if (!isRunning) {
+      // Starting the animation
+      setIsRunning(true);
+      setCurrentStep(0);
+      setIsPaused(false);
 
-    for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
-      const step = currentGraphStates[activeTab][i];
-      setCurrentStep(i);
-      setPseudoCodeHighlight(getPseudoCodeHighlight(step));
-      await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+      try {
+        for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
+          const step = currentGraphStates[activeTab][i];
+          setCurrentStep(i);
+          setPseudoCodeHighlight(getPseudoCodeHighlight(step));
 
-      // Check if all nodes are backtracked
-      const allNodesBacktracked = step.graphState.nodes.every(
-        (node) => node.backtracked
-      );
-      if (allNodesBacktracked) {
-        break;
+          // Use a ref to check the current pause state
+          while (isPaused) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+
+          // Check if all nodes are backtracked
+          const allNodesBacktracked = step.graphState.nodes.every(
+            (node) => node.backtracked
+          );
+          if (allNodesBacktracked) {
+            break;
+          }
+        }
+      } finally {
+        setIsRunning(false);
+        setIsPaused(false);
+        setPseudoCodeHighlight([]);
       }
+    } else {
+      // Toggle pause state
+      setIsPaused(!isPaused);
     }
-
-    // Ensure we process the final backtracking state
-    const finalStep =
-      currentGraphStates[activeTab][currentGraphStates[activeTab].length - 1];
-    setCurrentStep(currentGraphStates[activeTab].length - 1);
-    setPseudoCodeHighlight(getPseudoCodeHighlight(finalStep));
-
-    setIsRunning(false);
-    setPseudoCodeHighlight([]);
   };
 
   // Add speed control UI
