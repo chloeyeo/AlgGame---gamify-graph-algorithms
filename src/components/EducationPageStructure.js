@@ -125,7 +125,6 @@ const generateDFSSteps = (initialNodes, edges) => {
     const currentNode = stack[stack.length - 1];
 
     if (!visited.has(currentNode)) {
-      // Mark as visited
       visited.add(currentNode);
       steps.push({
         graphState: {
@@ -144,18 +143,20 @@ const generateDFSSteps = (initialNodes, edges) => {
       });
     }
 
-    // Get ALL unvisited neighbors
-    const unvisitedNeighbors = edges
+    // Get ALL neighbors and find first unvisited one (done in background)
+    const allNeighbors = edges
       .filter(
         (edge) => edge.source === currentNode || edge.target === currentNode
       )
       .map((edge) => (edge.source === currentNode ? edge.target : edge.source))
-      .filter((neighbor) => !visited.has(neighbor))
       .sort();
 
-    if (unvisitedNeighbors.length > 0) {
-      // Still have unvisited neighbors - explore next one
-      const nextNeighbor = unvisitedNeighbors[0];
+    const unvisitedNeighbor = allNeighbors.find(
+      (neighbor) => !visited.has(neighbor)
+    );
+
+    if (unvisitedNeighbor) {
+      // Only show the step when we've found an unvisited neighbor
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
@@ -167,71 +168,32 @@ const generateDFSSteps = (initialNodes, edges) => {
           edges,
           currentNode,
           stack: [...stack],
-          activeNeighbor: nextNeighbor,
+          activeNeighbor: unvisitedNeighbor,
         },
-        explanation: `Found unvisited neighbor ${nextNeighbor} from ${currentNode}.`,
-        pseudoCodeLines: [11],
+        explanation: `Found unvisited neighbor ${unvisitedNeighbor}, pushing onto the stack.`,
+        pseudoCodeLines: [12],
       });
-
-      stack.push(nextNeighbor);
+      stack.push(unvisitedNeighbor);
     } else {
-      // No more unvisited neighbors for current node
-      // Get ALL neighbors to check if we can backtrack
-      const allNeighbors = edges
-        .filter(
-          (edge) => edge.source === currentNode || edge.target === currentNode
-        )
-        .map((edge) =>
-          edge.source === currentNode ? edge.target : edge.source
-        );
-
-      // Only backtrack if all neighbors have been visited
-      const allNeighborsVisited = allNeighbors.every((neighbor) =>
-        visited.has(neighbor)
-      );
-
-      if (allNeighborsVisited) {
-        stack.pop();
-        backtracked.add(currentNode);
-        steps.push({
-          graphState: {
-            nodes: initialNodes.map((node) => ({
-              ...node,
-              visited: visited.has(node.id),
-              backtracked: backtracked.has(node.id),
-              current:
-                stack.length > 0 ? node.id === stack[stack.length - 1] : false,
-            })),
-            edges,
-            currentNode: stack[stack.length - 1],
-            stack: [...stack],
-          },
-          explanation: `All neighbors of ${currentNode} have been visited. Backtracking.`,
-          pseudoCodeLines: [6],
-        });
-      } else {
-        // We have visited neighbors that might have unvisited neighbors
-        // Pop current node but don't mark as backtracked yet
-        stack.pop();
-        steps.push({
-          graphState: {
-            nodes: initialNodes.map((node) => ({
-              ...node,
-              visited: visited.has(node.id),
-              backtracked: backtracked.has(node.id),
-              current:
-                stack.length > 0 ? node.id === stack[stack.length - 1] : false,
-            })),
-            edges,
-            currentNode: stack[stack.length - 1],
-            stack: [...stack],
-          },
-          explanation: `Returning to ${
-            stack[stack.length - 1]
-          } to check for other unvisited paths.`,
-          pseudoCodeLines: [6],
-        });
-      }
+      // No unvisited neighbors found, backtrack
+      stack.pop();
+      backtracked.add(currentNode);
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current:
+              stack.length > 0 ? node.id === stack[stack.length - 1] : false,
+          })),
+          edges,
+          currentNode: stack[stack.length - 1],
+          stack: [...stack],
+        },
+        explanation: `All neighbors of ${currentNode} have been visited. Backtracking...`,
+        pseudoCodeLines: [6],
+      });
     }
   }
 
