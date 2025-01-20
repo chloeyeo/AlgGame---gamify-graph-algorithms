@@ -13,7 +13,8 @@ const Legend = ({
   const legend = svg
     .append("g")
     .attr("class", "legend")
-    .attr("transform", "translate(-80, 10)");
+    .attr("transform-origin", "top left")
+    .attr("transform", "translate(-80, 10) scale(1.4)");
 
   const getLegendItems = () => {
     let commonItems = [];
