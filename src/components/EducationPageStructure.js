@@ -389,13 +389,17 @@ export default function EducationPageStructure({
               <button
                 onClick={runDFS}
                 className={`p-2 rounded-full ${
-                  !isRunning
+                  !isRunning || isPaused
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-yellow-500 hover:bg-yellow-600"
                 } text-white`}
-                title={!isRunning ? "Start" : "Pause"}
+                title={!isRunning || isPaused ? "Start" : "Pause"}
               >
-                {!isRunning ? <FaPlay size={20} /> : <FaPause size={20} />}
+                {!isRunning || isPaused ? (
+                  <FaPlay size={20} />
+                ) : (
+                  <FaPause size={20} />
+                )}
               </button>
 
               <button
