@@ -111,10 +111,10 @@ const generateDFSSteps = (initialNodes, edges) => {
         ...node,
         visited: false,
         backtracked: false,
-        current: false,
+        current: node.id === initialNodes[0].id,
       })),
       edges,
-      currentNode: null,
+      currentNode: initialNodes[0].id,
       stack: [...stack],
     },
     explanation: "Initial state: Starting DFS with node A.",
@@ -125,8 +125,8 @@ const generateDFSSteps = (initialNodes, edges) => {
     const currentNode = stack[stack.length - 1];
 
     if (!visited.has(currentNode)) {
+      // Mark node as visited
       visited.add(currentNode);
-
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
@@ -143,7 +143,7 @@ const generateDFSSteps = (initialNodes, edges) => {
         pseudoCodeLines: [8],
       });
 
-      // Get unvisited neighbors only
+      // Get unvisited neighbors
       const neighbors = edges
         .filter(
           (edge) => edge.source === currentNode || edge.target === currentNode
@@ -151,37 +151,29 @@ const generateDFSSteps = (initialNodes, edges) => {
         .map((edge) =>
           edge.source === currentNode ? edge.target : edge.source
         )
-        .filter(
-          (neighbor) => !visited.has(neighbor) && !backtracked.has(neighbor)
-        )
+        .filter((neighbor) => !visited.has(neighbor))
         .sort();
 
-      if (neighbors.length > 0) {
-        // Process each unvisited neighbor
-        for (const neighbor of neighbors) {
-          steps.push({
-            graphState: {
-              nodes: initialNodes.map((node) => ({
-                ...node,
-                visited: visited.has(node.id),
-                backtracked: backtracked.has(node.id),
-                current: node.id === currentNode,
-              })),
-              edges,
-              currentNode,
-              stack: [...stack],
-              activeNeighbor: neighbor,
-            },
-            explanation: `Checking unvisited neighbor ${neighbor}.`,
-            pseudoCodeLines: [10],
-          });
+      // Show checking neighbors state
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current: node.id === currentNode,
+          })),
+          edges,
+          currentNode,
+          stack: [...stack],
+        },
+        explanation: `Looking for unvisited neighbors of ${currentNode}.`,
+        pseudoCodeLines: [10],
+      });
 
-          stack.push(neighbor);
-        }
-      } else {
-        // Backtrack when no unvisited neighbors
-        stack.pop();
-        backtracked.add(currentNode);
+      if (neighbors.length > 0) {
+        // Show state before pushing neighbor
+        const nextNeighbor = neighbors[0];
         steps.push({
           graphState: {
             nodes: initialNodes.map((node) => ({
@@ -193,18 +185,90 @@ const generateDFSSteps = (initialNodes, edges) => {
             edges,
             currentNode,
             stack: [...stack],
+            activeNeighbor: nextNeighbor,
+          },
+          explanation: `Found unvisited neighbor ${nextNeighbor}. Pushing it onto the stack.`,
+          pseudoCodeLines: [11, 12],
+        });
+
+        stack.push(nextNeighbor);
+
+        // Show state after pushing neighbor
+        steps.push({
+          graphState: {
+            nodes: initialNodes.map((node) => ({
+              ...node,
+              visited: visited.has(node.id),
+              backtracked: backtracked.has(node.id),
+              current: node.id === nextNeighbor,
+            })),
+            edges,
+            currentNode: nextNeighbor,
+            stack: [...stack],
+          },
+          explanation: `Moving to node ${nextNeighbor}.`,
+          pseudoCodeLines: [12],
+        });
+      } else {
+        // Backtrack when no unvisited neighbors
+        stack.pop();
+        backtracked.add(currentNode);
+        steps.push({
+          graphState: {
+            nodes: initialNodes.map((node) => ({
+              ...node,
+              visited: visited.has(node.id),
+              backtracked: backtracked.has(node.id),
+              current:
+                stack.length > 0 ? node.id === stack[stack.length - 1] : false,
+            })),
+            edges,
+            currentNode: stack[stack.length - 1],
+            stack: [...stack],
           },
           explanation: `No unvisited neighbors for ${currentNode}. Backtracking.`,
           pseudoCodeLines: [6],
         });
       }
     } else {
+      // Node already visited, backtrack
       stack.pop();
-      if (!backtracked.has(currentNode)) {
-        backtracked.add(currentNode);
-      }
+      backtracked.add(currentNode);
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current:
+              stack.length > 0 ? node.id === stack[stack.length - 1] : false,
+          })),
+          edges,
+          currentNode: stack[stack.length - 1],
+          stack: [...stack],
+        },
+        explanation: `Node ${currentNode} already visited. Backtracking.`,
+        pseudoCodeLines: [6],
+      });
     }
   }
+
+  // Final state
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: true,
+        backtracked: true,
+        current: false,
+      })),
+      edges,
+      currentNode: null,
+      stack: [],
+    },
+    explanation: "DFS complete. All nodes have been visited and backtracked.",
+    pseudoCodeLines: [],
+  });
 
   return steps;
 };
@@ -458,7 +522,21 @@ export default function EducationPageStructure({
       setCurrentStep(i);
       setPseudoCodeHighlight(getPseudoCodeHighlight(step));
       await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+
+      // Check if all nodes are backtracked
+      const allNodesBacktracked = step.graphState.nodes.every(
+        (node) => node.backtracked
+      );
+      if (allNodesBacktracked) {
+        break;
+      }
     }
+
+    // Ensure we process the final backtracking state
+    const finalStep =
+      currentGraphStates[activeTab][currentGraphStates[activeTab].length - 1];
+    setCurrentStep(currentGraphStates[activeTab].length - 1);
+    setPseudoCodeHighlight(getPseudoCodeHighlight(finalStep));
 
     setIsRunning(false);
     setPseudoCodeHighlight([]);
