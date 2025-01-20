@@ -125,7 +125,7 @@ const generateDFSSteps = (initialNodes, edges) => {
     const currentNode = stack[stack.length - 1];
 
     if (!visited.has(currentNode)) {
-      // Mark node as visited
+      // Mark as visited
       visited.add(currentNode);
       steps.push({
         graphState: {
@@ -142,19 +142,20 @@ const generateDFSSteps = (initialNodes, edges) => {
         explanation: `Visit node ${currentNode} and mark it as visited.`,
         pseudoCodeLines: [8],
       });
+    }
 
-      // Get unvisited neighbors
-      const neighbors = edges
-        .filter(
-          (edge) => edge.source === currentNode || edge.target === currentNode
-        )
-        .map((edge) =>
-          edge.source === currentNode ? edge.target : edge.source
-        )
-        .filter((neighbor) => !visited.has(neighbor))
-        .sort();
+    // Get ALL unvisited neighbors
+    const unvisitedNeighbors = edges
+      .filter(
+        (edge) => edge.source === currentNode || edge.target === currentNode
+      )
+      .map((edge) => (edge.source === currentNode ? edge.target : edge.source))
+      .filter((neighbor) => !visited.has(neighbor))
+      .sort();
 
-      // Show checking neighbors state
+    if (unvisitedNeighbors.length > 0) {
+      // Still have unvisited neighbors - explore next one
+      const nextNeighbor = unvisitedNeighbors[0];
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
@@ -166,51 +167,30 @@ const generateDFSSteps = (initialNodes, edges) => {
           edges,
           currentNode,
           stack: [...stack],
+          activeNeighbor: nextNeighbor,
         },
-        explanation: `Looking for unvisited neighbors of ${currentNode}.`,
-        pseudoCodeLines: [10],
+        explanation: `Found unvisited neighbor ${nextNeighbor} from ${currentNode}.`,
+        pseudoCodeLines: [11],
       });
 
-      if (neighbors.length > 0) {
-        // Show state before pushing neighbor
-        const nextNeighbor = neighbors[0];
-        steps.push({
-          graphState: {
-            nodes: initialNodes.map((node) => ({
-              ...node,
-              visited: visited.has(node.id),
-              backtracked: backtracked.has(node.id),
-              current: node.id === currentNode,
-            })),
-            edges,
-            currentNode,
-            stack: [...stack],
-            activeNeighbor: nextNeighbor,
-          },
-          explanation: `Found unvisited neighbor ${nextNeighbor}. Pushing it onto the stack.`,
-          pseudoCodeLines: [11, 12],
-        });
+      stack.push(nextNeighbor);
+    } else {
+      // No more unvisited neighbors for current node
+      // Get ALL neighbors to check if we can backtrack
+      const allNeighbors = edges
+        .filter(
+          (edge) => edge.source === currentNode || edge.target === currentNode
+        )
+        .map((edge) =>
+          edge.source === currentNode ? edge.target : edge.source
+        );
 
-        stack.push(nextNeighbor);
+      // Only backtrack if all neighbors have been visited
+      const allNeighborsVisited = allNeighbors.every((neighbor) =>
+        visited.has(neighbor)
+      );
 
-        // Show state after pushing neighbor
-        steps.push({
-          graphState: {
-            nodes: initialNodes.map((node) => ({
-              ...node,
-              visited: visited.has(node.id),
-              backtracked: backtracked.has(node.id),
-              current: node.id === nextNeighbor,
-            })),
-            edges,
-            currentNode: nextNeighbor,
-            stack: [...stack],
-          },
-          explanation: `Moving to node ${nextNeighbor}.`,
-          pseudoCodeLines: [12],
-        });
-      } else {
-        // Backtrack when no unvisited neighbors
+      if (allNeighborsVisited) {
         stack.pop();
         backtracked.add(currentNode);
         steps.push({
@@ -226,49 +206,34 @@ const generateDFSSteps = (initialNodes, edges) => {
             currentNode: stack[stack.length - 1],
             stack: [...stack],
           },
-          explanation: `No unvisited neighbors for ${currentNode}. Backtracking.`,
+          explanation: `All neighbors of ${currentNode} have been visited. Backtracking.`,
+          pseudoCodeLines: [6],
+        });
+      } else {
+        // We have visited neighbors that might have unvisited neighbors
+        // Pop current node but don't mark as backtracked yet
+        stack.pop();
+        steps.push({
+          graphState: {
+            nodes: initialNodes.map((node) => ({
+              ...node,
+              visited: visited.has(node.id),
+              backtracked: backtracked.has(node.id),
+              current:
+                stack.length > 0 ? node.id === stack[stack.length - 1] : false,
+            })),
+            edges,
+            currentNode: stack[stack.length - 1],
+            stack: [...stack],
+          },
+          explanation: `Returning to ${
+            stack[stack.length - 1]
+          } to check for other unvisited paths.`,
           pseudoCodeLines: [6],
         });
       }
-    } else {
-      // Node already visited, backtrack
-      stack.pop();
-      backtracked.add(currentNode);
-      steps.push({
-        graphState: {
-          nodes: initialNodes.map((node) => ({
-            ...node,
-            visited: visited.has(node.id),
-            backtracked: backtracked.has(node.id),
-            current:
-              stack.length > 0 ? node.id === stack[stack.length - 1] : false,
-          })),
-          edges,
-          currentNode: stack[stack.length - 1],
-          stack: [...stack],
-        },
-        explanation: `Node ${currentNode} already visited. Backtracking.`,
-        pseudoCodeLines: [6],
-      });
     }
   }
-
-  // Final state
-  steps.push({
-    graphState: {
-      nodes: initialNodes.map((node) => ({
-        ...node,
-        visited: true,
-        backtracked: true,
-        current: false,
-      })),
-      edges,
-      currentNode: null,
-      stack: [],
-    },
-    explanation: "DFS complete. All nodes have been visited and backtracked.",
-    pseudoCodeLines: [],
-  });
 
   return steps;
 };
