@@ -570,8 +570,11 @@ export default function EducationPageStructure({
 
         {pseudocode && (
           <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
-            <h2 className="text-xl font-semibold mb-2">Pseudocode</h2>
-            <CodeEditorPseudocode pseudocode={pseudocode} />
+            <h2 className="text-xl font-bold mb-2">Pseudocode</h2>
+            <CodeEditorPseudocode
+              pseudocode={pseudocode}
+              highlightedLines={pseudoCodeHighlight}
+            />
           </div>
         )}
       </div>
@@ -610,7 +613,10 @@ export default function EducationPageStructure({
         {pseudocode && (
           <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
             <h2 className="text-xl font-bold mb-2">Pseudocode</h2>
-            <CodeEditorPseudocode pseudocode={pseudocode} />
+            <CodeEditorPseudocode
+              pseudocode={pseudocode}
+              highlightedLines={pseudoCodeHighlight}
+            />
           </div>
         )}
         <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 mt-4">
