@@ -429,8 +429,8 @@ export default function EducationPageStructure({
           isDesktop ? "h-[500px]" : "h-[400px]"
         } relative bg-white bg-opacity-50 rounded-lg`}
       >
-        <div className="w-full h-full">
-          <div className="flex items-center gap-4 mb-4 p-4">
+        <div className="w-full h-full flex flex-col">
+          <div className="flex items-center gap-4 p-4">
             <div>
               <label className="mr-2">Number of nodes:</label>
               <input
@@ -465,21 +465,19 @@ export default function EducationPageStructure({
             </button>
           </div>
 
-          <div className="flex h-[calc(100%-3rem)]">
-            <div className="flex-1 h-full">
-              <div className="h-full flex items-center justify-center">
-                {isLoading ? (
-                  <p>Loading graph...</p>
-                ) : (
-                  <GraphVisualisationComponent
-                    graphState={
-                      currentGraphStates[activeTab]?.[currentStep]?.graphState
-                    }
-                    isGraphA={activeTab === 0}
-                    graphIndex={activeTab}
-                  />
-                )}
-              </div>
+          <div className="flex-1">
+            <div className="h-full flex items-center justify-center">
+              {isLoading ? (
+                <p>Loading graph...</p>
+              ) : (
+                <GraphVisualisationComponent
+                  graphState={
+                    currentGraphStates[activeTab]?.[currentStep]?.graphState
+                  }
+                  isGraphA={activeTab === 0}
+                  graphIndex={activeTab}
+                />
+              )}
             </div>
           </div>
         </div>
