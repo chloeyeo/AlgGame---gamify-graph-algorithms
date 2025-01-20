@@ -220,6 +220,7 @@ export default function EducationPageStructure({
   const [stack, setStack] = useState([]);
   const [animationSpeed, setAnimationSpeed] = useState(1000); // 1 second default
   const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
 
   // Generate initial graph on mount
   useEffect(() => {
@@ -464,6 +465,7 @@ export default function EducationPageStructure({
       setIsRunning(true);
       setCurrentStep(0);
       setIsPaused(false);
+      isPausedRef.current = false;
 
       try {
         for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
@@ -471,8 +473,7 @@ export default function EducationPageStructure({
           setCurrentStep(i);
           setPseudoCodeHighlight(getPseudoCodeHighlight(step));
 
-          // Use a ref to check the current pause state
-          while (isPaused) {
+          while (isPausedRef.current) {
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
 
@@ -489,11 +490,13 @@ export default function EducationPageStructure({
       } finally {
         setIsRunning(false);
         setIsPaused(false);
+        isPausedRef.current = false;
         setPseudoCodeHighlight([]);
       }
     } else {
       // Toggle pause state
       setIsPaused(!isPaused);
+      isPausedRef.current = !isPausedRef.current;
     }
   };
 
