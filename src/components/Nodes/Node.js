@@ -77,9 +77,7 @@ const Nodes = {
       .attr("font-weight", "bold")
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
-        return node && node.visited
-          ? COLORS.NODE_TEXT_VISITED
-          : COLORS.NODE_TEXT_UNVISITED;
+        return getTextColor(node, graphState, COLORS);
       });
 
     if (isFordFulkersonPage || isEdmondsKarpPage) {
@@ -164,6 +162,13 @@ const Nodes = {
         .text((d) => d.id);
     }
   },
+};
+
+const getTextColor = (node, graphState, COLORS) => {
+  if (node.id === graphState.currentNode) return "#FFFFFF"; // Current - Green bg
+  if (node.backtracked) return "#FFFFFF"; // Backtracked - Orange bg
+  if (node.visited) return "#FFFFFF"; // Visited - Blue bg
+  return "#000000"; // Unvisited - White bg
 };
 
 export default Nodes;

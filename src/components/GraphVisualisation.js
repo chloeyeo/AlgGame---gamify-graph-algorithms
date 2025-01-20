@@ -81,7 +81,6 @@ const GraphVisualisation = ({
 
     let nodes = graphState.nodes.map((node) => ({
       ...node,
-      // Use the random positions generated in generateRandomGraph
       x: node.x || 0,
       y: node.y || 0,
     }));
@@ -127,10 +126,24 @@ const GraphVisualisation = ({
     isPrimsPage,
   ]);
 
+  const getNodeColor = (node) => {
+    if (node.id === graphState.activeNeighbor) return "#FFE082"; // Highlight checking neighbor
+    if (node.id === graphState.currentNode) return "#4CAF50"; // Current - Green
+    if (node.backtracked) return "#FFA726"; // Backtracked - Orange
+    if (node.visited) return "#42A5F5"; // Visited - Blue
+    return "#FFFFFF"; // Unvisited - White
+  };
+
+  const getTextColor = (node) => {
+    // Text should be white for all colored nodes, black for unvisited (white) nodes
+    const bgColor = getNodeColor(node);
+    return bgColor === "#FFFFFF" ? "#000000" : "#FFFFFF";
+  };
+
   return (
     <div
       ref={divRef}
-      className={`w-full h-full flex justify-center items-center overflow-auto no-scrollbar`}
+      className="w-full h-full flex justify-center items-center overflow-auto no-scrollbar"
     >
       <div className="px-4 w-fit h-full overflow-hidden overflow-x-auto no-scrollbar">
         <svg ref={svgRef}>

@@ -104,18 +104,21 @@ const generateDFSSteps = (initialNodes, edges) => {
   const backtracked = new Set();
   const stack = [initialNodes[0].id];
 
-  // Add initial state
+  // Initial state
   steps.push({
     graphState: {
       nodes: initialNodes.map((node) => ({
         ...node,
         visited: false,
         backtracked: false,
+        current: false,
       })),
       edges,
       currentNode: null,
+      stack: [...stack],
     },
-    explanation: "Initial state: No nodes have been visited yet.",
+    explanation: "Initial state: Starting DFS with node A.",
+    pseudoCodeLines: [2],
   });
 
   while (stack.length > 0) {
@@ -124,21 +127,23 @@ const generateDFSSteps = (initialNodes, edges) => {
     if (!visited.has(currentNode)) {
       visited.add(currentNode);
 
-      // Add step for visiting current node
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
             ...node,
             visited: visited.has(node.id),
             backtracked: backtracked.has(node.id),
+            current: node.id === currentNode,
           })),
           edges,
           currentNode,
+          stack: [...stack],
         },
-        explanation: `Visit node ${currentNode}`,
+        explanation: `Visit node ${currentNode} and mark it as visited.`,
+        pseudoCodeLines: [8],
       });
 
-      // Find unvisited neighbors
+      // Get unvisited neighbors only
       const neighbors = edges
         .filter(
           (edge) => edge.source === currentNode || edge.target === currentNode
@@ -146,14 +151,52 @@ const generateDFSSteps = (initialNodes, edges) => {
         .map((edge) =>
           edge.source === currentNode ? edge.target : edge.source
         )
-        .filter((neighbor) => !visited.has(neighbor))
+        .filter(
+          (neighbor) => !visited.has(neighbor) && !backtracked.has(neighbor)
+        )
         .sort();
 
-      if (neighbors.length === 0) {
+      if (neighbors.length > 0) {
+        // Process each unvisited neighbor
+        for (const neighbor of neighbors) {
+          steps.push({
+            graphState: {
+              nodes: initialNodes.map((node) => ({
+                ...node,
+                visited: visited.has(node.id),
+                backtracked: backtracked.has(node.id),
+                current: node.id === currentNode,
+              })),
+              edges,
+              currentNode,
+              stack: [...stack],
+              activeNeighbor: neighbor,
+            },
+            explanation: `Checking unvisited neighbor ${neighbor}.`,
+            pseudoCodeLines: [10],
+          });
+
+          stack.push(neighbor);
+        }
+      } else {
+        // Backtrack when no unvisited neighbors
         stack.pop();
         backtracked.add(currentNode);
-      } else {
-        stack.push(neighbors[0]);
+        steps.push({
+          graphState: {
+            nodes: initialNodes.map((node) => ({
+              ...node,
+              visited: visited.has(node.id),
+              backtracked: backtracked.has(node.id),
+              current: node.id === currentNode,
+            })),
+            edges,
+            currentNode,
+            stack: [...stack],
+          },
+          explanation: `No unvisited neighbors for ${currentNode}. Backtracking.`,
+          pseudoCodeLines: [6],
+        });
       }
     } else {
       stack.pop();
@@ -181,6 +224,10 @@ export default function EducationPageStructure({
   const [nodeCount, setNodeCount] = useState(5);
   const [isRunning, setIsRunning] = useState(false);
   const [currentGraphStates, setCurrentGraphStates] = useState([]);
+  const [pseudoCodeHighlight, setPseudoCodeHighlight] = useState([]);
+  const [stack, setStack] = useState([]);
+  const [animationSpeed, setAnimationSpeed] = useState(1000); // 1 second default
+  const [isPaused, setIsPaused] = useState(false);
 
   // Generate initial graph on mount
   useEffect(() => {
@@ -346,18 +393,7 @@ export default function EducationPageStructure({
             </button>
 
             <button
-              onClick={async () => {
-                setIsRunning(true);
-                setCurrentStep(0);
-
-                for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
-                  if (!isRunning) break;
-                  setCurrentStep(i);
-                  await new Promise((resolve) => setTimeout(resolve, 1000));
-                }
-
-                setIsRunning(false);
-              }}
+              onClick={runDFS}
               disabled={isRunning}
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
             >
@@ -386,6 +422,64 @@ export default function EducationPageStructure({
       </div>
     );
   };
+
+  const getPseudoCodeHighlight = (step) => {
+    const explanation = step?.explanation?.toLowerCase() || "";
+
+    // Return single line numbers based on the current action
+    if (explanation.includes("initial state")) {
+      return [2]; // Only highlight Stack initialization
+    } else if (
+      explanation.includes("visit node") &&
+      explanation.includes("mark it as visited")
+    ) {
+      return [8]; // Only highlight Visited.add(node)
+    } else if (explanation.includes("checking unvisited neighbor")) {
+      return [10]; // Only highlight neighbor iteration
+    } else if (
+      explanation.includes("push") &&
+      explanation.includes("onto the stack")
+    ) {
+      return [12]; // Only highlight Stack.push
+    } else if (explanation.includes("backtrack")) {
+      return [6]; // Only highlight Stack.pop()
+    }
+    return [];
+  };
+
+  const runDFS = async () => {
+    if (!currentGraphStates || !currentGraphStates[activeTab]) return;
+
+    setIsRunning(true);
+    setCurrentStep(0);
+
+    for (let i = 0; i < currentGraphStates[activeTab].length; i++) {
+      const step = currentGraphStates[activeTab][i];
+      setCurrentStep(i);
+      setPseudoCodeHighlight(getPseudoCodeHighlight(step));
+      await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+    }
+
+    setIsRunning(false);
+    setPseudoCodeHighlight([]);
+  };
+
+  // Add speed control UI
+  const SpeedControl = () => (
+    <div className="flex items-center gap-2">
+      <label className="text-sm">Speed:</label>
+      <input
+        type="range"
+        min="200"
+        max="2000"
+        step="100"
+        value={animationSpeed}
+        onChange={(e) => setAnimationSpeed(Number(e.target.value))}
+        className="w-24"
+      />
+      <span className="text-sm">{animationSpeed}ms</span>
+    </div>
+  );
 
   // Mobile content
   const mobileContent = (
