@@ -474,16 +474,17 @@ export default function EducationPageStructure({
       // Toggle pause state
       setIsPaused(!isPaused);
       isPausedRef.current = !isPausedRef.current;
-      return; // Return here to keep the existing animation loop running
+      return;
     }
 
     // Main animation loop
     try {
-      let i = currentStep;
+      // Always start from beginning (i = 0) instead of currentStep
+      let i = 0;
       while (i < currentGraphStates[activeTab].length) {
         if (isPausedRef.current) {
-          await new Promise((resolve) => setTimeout(resolve, 100)); // Check pause state every 100ms
-          continue; // Keep checking pause state without advancing
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          continue;
         }
 
         const step = currentGraphStates[activeTab][i];
@@ -500,7 +501,7 @@ export default function EducationPageStructure({
           break;
         }
 
-        i++; // Only increment if not paused
+        i++;
       }
     } finally {
       if (!isPausedRef.current) {
