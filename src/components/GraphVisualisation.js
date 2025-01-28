@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useLayoutEffect,
+  memo,
+} from "react";
 import * as d3 from "d3";
 import { useSelector } from "react-redux";
 import { useAlgorithmType } from "@/hooks/useAlgorithmType";
@@ -16,6 +22,12 @@ import {
 import { usePathname } from "next/navigation";
 import Edges from "@/components/Edges/Edge";
 import Nodes from "@/components/Nodes/Node";
+
+// Memoized Legend component
+const MemoizedLegend = memo(({ svg, isDFSPage }) => {
+  // Existing Legend code here
+  return null;
+});
 
 const GraphVisualisation = ({
   graphState,
@@ -52,23 +64,12 @@ const GraphVisualisation = ({
   const [height, setHeight] = useState(0);
 
   useLayoutEffect(() => {
-    const svg = d3.select(svgRef.current);
-    setWidth(svg.node().getBoundingClientRect().width);
-    setHeight(svg.node().getBoundingClientRect().height);
-  }, [svgRef]);
-
-  useEffect(() => {
-    if (!graphState) return;
+    if (!svgRef.current) return;
 
     const svg = d3.select(svgRef.current);
 
-    if (render !== 0) svg.selectAll("*").remove();
-
-    setRender(render + 1);
-
+    // Initialize SVG first
     let xOffset = -(viewBoxWidth + 100) / 10;
-
-    // Adjust offset for Kruskal's algorithm
     if (isKruskalsPage) {
       xOffset = -80;
     }
@@ -78,6 +79,38 @@ const GraphVisualisation = ({
       .attr("preserveAspectRatio", "xMinYMin meet")
       .attr("width", "100%")
       .attr("height", "100%");
+
+    // Now it's safe to get dimensions
+    const bbox = svg.node()?.getBoundingClientRect();
+    if (bbox) {
+      setWidth(bbox.width);
+      setHeight(bbox.height);
+    }
+  }, [svgRef.current, viewBoxWidth, viewBoxHeight, isKruskalsPage]);
+
+  useEffect(() => {
+    if (!graphState) return;
+
+    const svg = d3.select(svgRef.current);
+
+    // First render - add legend
+    if (render === 0) {
+      Legend({
+        svg,
+        isDFSPage,
+        isAStarPage,
+        isDijkstraPage,
+        isEdmondsKarpPage,
+        isFordFulkersonPage,
+        isKruskalsPage,
+        isPrimsPage,
+      });
+    }
+
+    // Remove all elements except legend and its children
+    svg.selectAll("g:not(.legend, .legend *)").remove();
+
+    setRender(render + 1);
 
     let nodes = graphState.nodes.map((node) => ({
       ...node,
@@ -146,19 +179,7 @@ const GraphVisualisation = ({
       className="w-full h-full flex justify-center items-center overflow-auto no-scrollbar"
     >
       <div className="px-4 w-fit h-full overflow-hidden overflow-x-auto no-scrollbar">
-        <svg ref={svgRef}>
-          <Legend
-            svg={d3.select(svgRef.current)}
-            isAStarPage={isAStarPage}
-            isDFSPage={isDFSPage}
-            isBFSPage={isBFSPage}
-            isDijkstraPage={isDijkstraPage}
-            isEdmondsKarpPage={isEdmondsKarpPage}
-            isFordFulkersonPage={isFordFulkersonPage}
-            isKruskalsPage={isKruskalsPage}
-            isPrimsPage={isPrimsPage}
-          />
-        </svg>
+        <svg ref={svgRef}></svg>
       </div>
     </div>
   );
