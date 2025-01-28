@@ -394,6 +394,7 @@ export default function EducationPageStructure({
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
   const [animationController, setAnimationController] = useState(null);
+  const animationSpeedRef = useRef(animationSpeed);
 
   // Generate initial graph on mount
   useEffect(() => {
@@ -408,6 +409,11 @@ export default function EducationPageStructure({
     }, 1000);
     return () => clearTimeout(timer);
   }, [activeTab]);
+
+  // Update the ref whenever animationSpeed changes
+  useEffect(() => {
+    animationSpeedRef.current = animationSpeed;
+  }, [animationSpeed]);
 
   const nextStep = () => {
     if (currentStep < graphStates[activeTab].length - 1) {
@@ -592,6 +598,20 @@ export default function EducationPageStructure({
                 <FaRedo size={20} />
               </button>
             </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm">Speed:</label>
+              <input
+                type="range"
+                min="100"
+                max="2000"
+                step="100"
+                value={animationSpeed}
+                onChange={(e) => setAnimationSpeed(Number(e.target.value))}
+                className="w-32"
+              />
+              <span className="text-sm">{animationSpeed}ms</span>
+            </div>
           </div>
 
           <div className="flex-1">
@@ -668,11 +688,13 @@ export default function EducationPageStructure({
           const step = currentGraphStates[activeTab][i];
           setCurrentStep(i);
 
-          // Update highlights based on current step
           const highlights = getPseudoCodeHighlight(step);
           setPseudoCodeHighlight(highlights);
 
-          await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+          // Use the ref here instead of the state
+          await new Promise((resolve) =>
+            setTimeout(resolve, animationSpeedRef.current)
+          );
 
           const allNodesBacktracked = step.graphState.nodes.every(
             (node) => node.backtracked
@@ -710,23 +732,6 @@ export default function EducationPageStructure({
       }
     };
   }, [animationController]);
-
-  // Add speed control UI
-  const SpeedControl = () => (
-    <div className="flex items-center gap-2">
-      <label className="text-sm">Speed:</label>
-      <input
-        type="range"
-        min="200"
-        max="2000"
-        step="100"
-        value={animationSpeed}
-        onChange={(e) => setAnimationSpeed(Number(e.target.value))}
-        className="w-24"
-      />
-      <span className="text-sm">{animationSpeed}ms</span>
-    </div>
-  );
 
   // Mobile content
   const mobileContent = (
