@@ -585,10 +585,12 @@ export default function EducationPageStructure({
                 onClick={() => {
                   if (animationController) {
                     animationController.abort();
-                    setAnimationController(null);
                   }
+                  // Reset all states including pause states
+                  setAnimationController(null);
                   setIsRunning(false);
                   setIsPaused(false);
+                  isPausedRef.current = false; // Important: Reset the pause ref
                   setCurrentStep(0);
                   setPseudoCodeHighlight([]);
                 }}
@@ -645,81 +647,75 @@ export default function EducationPageStructure({
   const runDFS = async () => {
     if (!currentGraphStates || !currentGraphStates[activeTab]) return;
 
-    // If animation just finished (isRunning is false but controller exists)
-    if (!isRunning && animationController) {
-      setAnimationController(null);
-      setPseudoCodeHighlight([]); // Clear highlights only when truly finished
+    // If paused, just toggle pause state
+    if (isRunning) {
+      setIsPaused(!isPaused);
+      isPausedRef.current = !isPausedRef.current;
       return;
     }
 
-    // If not running, start fresh
-    if (!isRunning) {
-      const controller = new AbortController();
-      setAnimationController(controller);
-      setIsRunning(true);
-      setCurrentStep(0);
-      setIsPaused(false);
-      isPausedRef.current = false;
+    // Start fresh animation
+    const controller = new AbortController();
+    setAnimationController(controller);
+    setIsRunning(true);
+    setCurrentStep(0);
+    setIsPaused(false);
+    isPausedRef.current = false;
 
-      // Set initial pseudocode highlight for Stack initialization
-      setPseudoCodeHighlight([2, 3]);
+    // Set initial pseudocode highlight for Stack initialization
+    setPseudoCodeHighlight([2, 3]);
 
-      // Main animation loop
-      try {
-        let i = 0;
-        while (
-          i < currentGraphStates[activeTab].length &&
-          !controller.signal.aborted
-        ) {
-          if (isPausedRef.current) {
-            await new Promise((resolve) => {
-              const checkPause = () => {
-                if (!isPausedRef.current) {
-                  resolve();
-                } else {
-                  setTimeout(checkPause, 100);
-                }
-              };
-              checkPause();
-            });
-            continue;
-          }
-
-          const step = currentGraphStates[activeTab][i];
-          setCurrentStep(i);
-
-          const highlights = getPseudoCodeHighlight(step);
-          setPseudoCodeHighlight(highlights);
-
-          // Use the ref here instead of the state
-          await new Promise((resolve) =>
-            setTimeout(resolve, animationSpeedRef.current)
-          );
-
-          const allNodesBacktracked = step.graphState.nodes.every(
-            (node) => node.backtracked
-          );
-          if (allNodesBacktracked) {
-            break;
-          }
-
-          i++;
+    // Main animation loop
+    try {
+      let i = 0;
+      while (
+        i < currentGraphStates[activeTab].length &&
+        !controller.signal.aborted
+      ) {
+        if (isPausedRef.current) {
+          await new Promise((resolve) => {
+            const checkPause = () => {
+              if (!isPausedRef.current) {
+                resolve();
+              } else {
+                setTimeout(checkPause, 100);
+              }
+            };
+            checkPause();
+          });
+          continue;
         }
-      } finally {
-        if (!isPausedRef.current) {
-          setIsRunning(false);
-          setIsPaused(false);
-          // Only clear highlights if we've completed the animation
-          if (!controller.signal.aborted) {
-            setPseudoCodeHighlight([]);
-          }
-          setAnimationController(null);
+
+        const step = currentGraphStates[activeTab][i];
+        setCurrentStep(i);
+
+        const highlights = getPseudoCodeHighlight(step);
+        setPseudoCodeHighlight(highlights);
+
+        // Use the ref here instead of the state
+        await new Promise((resolve) =>
+          setTimeout(resolve, animationSpeedRef.current)
+        );
+
+        const allNodesBacktracked = step.graphState.nodes.every(
+          (node) => node.backtracked
+        );
+        if (allNodesBacktracked) {
+          break;
         }
+
+        i++;
       }
-    } else {
-      // Toggle pause state
-      setIsPaused(!isPaused);
-      isPausedRef.current = !isPausedRef.current;
+    } finally {
+      if (!isPausedRef.current) {
+        setIsRunning(false);
+        setIsPaused(false);
+        // Only clear highlights if we've completed the animation
+        if (!controller.signal.aborted) {
+          setPseudoCodeHighlight([]);
+        }
+        setAnimationController(null);
+      }
     }
   };
 
