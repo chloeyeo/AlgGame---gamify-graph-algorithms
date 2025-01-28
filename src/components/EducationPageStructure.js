@@ -356,7 +356,7 @@ export default function EducationPageStructure({
     return (
       <div
         className={`${
-          isDesktop ? "h-[500px]" : "h-[400px]"
+          isDesktop ? "h-full" : "h-[400px]"
         } relative bg-white bg-opacity-50 rounded-lg`}
       >
         <div className="w-full h-full flex flex-col">
@@ -614,16 +614,16 @@ export default function EducationPageStructure({
 
   // Desktop content
   const desktopContent = (
-    <div className="hidden lg:flex flex-row h-screen">
-      <div className="w-1/2 p-4">
-        <h1 className="text-2xl font-bold mb-4 text-center">Learn {title}</h1>
+    <div className="hidden lg:flex flex-row h-[calc(100vh-4rem)]">
+      <div className="w-1/2 p-4 flex flex-col">
+        <h1 className="text-2xl font-bold mb-2 text-center">Learn {title}</h1>
 
-        {/* Graph Section */}
-        <div className="mb-6">{renderGraphSection(true)}</div>
+        {/* Graph Section - Set to take remaining height */}
+        <div className="flex-1 mb-2">{renderGraphSection(true)}</div>
 
-        {/* Explanation Section - Moved below graph */}
-        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
-          <div className="flex items-center mb-2">
+        {/* Explanation Section - Set to auto height */}
+        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-2">
+          <div className="flex items-center mb-1">
             <h2 className="text-xl font-bold">Explanation</h2>
             <button
               onClick={() =>

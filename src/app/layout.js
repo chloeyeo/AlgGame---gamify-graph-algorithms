@@ -16,8 +16,8 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/images/alg.png" />
       </head>
       <body>
-        <div className="bg-gray-50 w-full min-h-screen flex justify-center items-center">
-          <div className="bg-white w-full h-full relative flex flex-col overflow-hidden shadow-lg py-0">
+        <div className="bg-gray-50 w-full min-h-screen">
+          <div className="bg-white w-full h-full relative flex flex-col overflow-hidden shadow-lg">
             <div className="flex-grow overflow-hidden">
               <div className="h-full overflow-y-auto bg-white no-scrollbar">
                 <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-blue-200 to-purple-200">
