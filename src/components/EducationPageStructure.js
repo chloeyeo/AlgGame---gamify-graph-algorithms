@@ -221,6 +221,7 @@ export default function EducationPageStructure({
   const [animationSpeed, setAnimationSpeed] = useState(1000); // 1 second default
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
+  const [animationController, setAnimationController] = useState(null);
 
   // Generate initial graph on mount
   useEffect(() => {
@@ -404,6 +405,10 @@ export default function EducationPageStructure({
 
               <button
                 onClick={() => {
+                  if (animationController) {
+                    animationController.abort();
+                    setAnimationController(null);
+                  }
                   setIsRunning(false);
                   setIsPaused(false);
                   setCurrentStep(0);
@@ -466,51 +471,63 @@ export default function EducationPageStructure({
 
     // If not running, start fresh
     if (!isRunning) {
+      const controller = new AbortController();
+      setAnimationController(controller);
       setIsRunning(true);
       setCurrentStep(0);
       setIsPaused(false);
       isPausedRef.current = false;
+
+      // Main animation loop
+      try {
+        let i = 0;
+        while (
+          i < currentGraphStates[activeTab].length &&
+          !controller.signal.aborted
+        ) {
+          if (isPausedRef.current) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            continue;
+          }
+
+          const step = currentGraphStates[activeTab][i];
+          setCurrentStep(i);
+          setPseudoCodeHighlight(getPseudoCodeHighlight(step));
+
+          await new Promise((resolve) => setTimeout(resolve, animationSpeed));
+
+          const allNodesBacktracked = step.graphState.nodes.every(
+            (node) => node.backtracked
+          );
+          if (allNodesBacktracked) {
+            break;
+          }
+
+          i++;
+        }
+      } finally {
+        if (!isPausedRef.current) {
+          setIsRunning(false);
+          setIsPaused(false);
+          setPseudoCodeHighlight([]);
+        }
+      }
     } else {
       // Toggle pause state
       setIsPaused(!isPaused);
       isPausedRef.current = !isPausedRef.current;
-      return;
-    }
-
-    // Main animation loop
-    try {
-      // Always start from beginning (i = 0) instead of currentStep
-      let i = 0;
-      while (i < currentGraphStates[activeTab].length) {
-        if (isPausedRef.current) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          continue;
-        }
-
-        const step = currentGraphStates[activeTab][i];
-        setCurrentStep(i);
-        setPseudoCodeHighlight(getPseudoCodeHighlight(step));
-
-        await new Promise((resolve) => setTimeout(resolve, animationSpeed));
-
-        // Check if all nodes are backtracked
-        const allNodesBacktracked = step.graphState.nodes.every(
-          (node) => node.backtracked
-        );
-        if (allNodesBacktracked) {
-          break;
-        }
-
-        i++;
-      }
-    } finally {
-      if (!isPausedRef.current) {
-        setIsRunning(false);
-        setIsPaused(false);
-        setPseudoCodeHighlight([]);
-      }
     }
   };
+
+  // Add cleanup effect
+  useEffect(() => {
+    return () => {
+      if (animationController) {
+        animationController.abort();
+        setAnimationController(null);
+      }
+    };
+  }, [animationController]);
 
   // Add speed control UI
   const SpeedControl = () => (
