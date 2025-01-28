@@ -469,6 +469,12 @@ export default function EducationPageStructure({
   const runDFS = async () => {
     if (!currentGraphStates || !currentGraphStates[activeTab]) return;
 
+    // If animation just finished (isRunning is false but controller exists)
+    if (!isRunning && animationController) {
+      setAnimationController(null); // Clear the old controller first
+      return;
+    }
+
     // If not running, start fresh
     if (!isRunning) {
       const controller = new AbortController();
@@ -510,6 +516,7 @@ export default function EducationPageStructure({
           setIsRunning(false);
           setIsPaused(false);
           setPseudoCodeHighlight([]);
+          setAnimationController(null); // Clear controller when animation finishes
         }
       }
     } else {
