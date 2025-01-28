@@ -32,12 +32,16 @@ const dfsPseudocode = `DFS(graph, start_node):
                 if neighbor not in Visited:
                     Stack.push(neighbor)`;
 
+// Import the generateDFSSteps function from EducationPageStructure
+import { generateDFSSteps } from "@/components/EducationPageStructure";
+
 export default function DFSEducationPage() {
   return (
     <EducationPageStructure
       title="Depth-First Search (DFS)"
       conceptText={dfsConceptText}
       pseudocode={dfsPseudocode}
+      generateSteps={generateDFSSteps}
     />
   );
 }

@@ -373,11 +373,99 @@ const generateDFSSteps = (initialNodes, edges) => {
   return steps;
 };
 
+const generateBFSExplanation = (step, visited, queue) => {
+  // Initial state
+  if (queue.length === 1 && visited.size === 0) {
+    return "Starting BFS from node " + queue[0];
+  }
+
+  // Just visited a node
+  if (step.graphState.activeNeighbor) {
+    return `Found unvisited neighbor ${step.graphState.activeNeighbor} at current level`;
+  }
+
+  // Processing new level
+  if (visited.has(step.graphState.currentNode)) {
+    return `Visiting node ${step.graphState.currentNode}, exploring all neighbors at this level`;
+  }
+
+  return "Processing next BFS step";
+};
+
+const generateBFSSteps = (initialNodes, edges) => {
+  const steps = [];
+  const visited = new Set();
+  const queue = [initialNodes[0].id];
+
+  // Step 1: Initialize Queue
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: false,
+        current: node.id === initialNodes[0].id,
+      })),
+      edges,
+      currentNode: initialNodes[0].id,
+      queue: [...queue],
+    },
+    explanation: generateBFSExplanation(null, visited, queue),
+    pseudoCodeLines: [2], // Queue = [start_node]
+  });
+
+  while (queue.length > 0) {
+    const currentNode = queue.shift();
+
+    if (!visited.has(currentNode)) {
+      visited.add(currentNode);
+
+      const neighbors = edges
+        .filter(
+          (edge) =>
+            (edge.source === currentNode && !visited.has(edge.target)) ||
+            (edge.target === currentNode && !visited.has(edge.source))
+        )
+        .map((edge) =>
+          edge.source === currentNode ? edge.target : edge.source
+        )
+        .sort();
+
+      // Add unvisited neighbors to queue
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          queue.push(neighbor);
+          steps.push({
+            graphState: {
+              nodes: initialNodes.map((node) => ({
+                ...node,
+                visited: visited.has(node.id),
+                current: node.id === currentNode,
+              })),
+              edges,
+              currentNode,
+              queue: [...queue],
+              activeNeighbor: neighbor,
+            },
+            explanation: generateBFSExplanation(
+              { graphState: { currentNode, activeNeighbor: neighbor } },
+              visited,
+              queue
+            ),
+            pseudoCodeLines: [10, 11, 12], // neighbor loop and queue addition
+          });
+        }
+      }
+    }
+  }
+
+  return steps;
+};
+
 export default function EducationPageStructure({
   title = "Graph Algorithm",
-  graphStates = [],
   conceptText = "",
   pseudocode = "",
+  generateSteps,
   GraphVisualisationComponent = GraphVisualisation,
 }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -399,7 +487,7 @@ export default function EducationPageStructure({
   // Generate initial graph on mount
   useEffect(() => {
     const { nodes, edges } = generateRandomGraph(nodeCount);
-    const steps = generateDFSSteps(nodes, edges);
+    const steps = generateSteps(nodes, edges);
     setCurrentGraphStates([steps]);
   }, []);
 
@@ -416,7 +504,7 @@ export default function EducationPageStructure({
   }, [animationSpeed]);
 
   const nextStep = () => {
-    if (currentStep < graphStates[activeTab].length - 1) {
+    if (currentStep < currentGraphStates[activeTab].length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -497,11 +585,11 @@ export default function EducationPageStructure({
   };
 
   const getCurrentGraphState = () => {
-    return graphStates[activeTab]?.[currentStep]?.graphState;
+    return currentGraphStates[activeTab]?.[currentStep]?.graphState;
   };
 
   const getCurrentExplanation = () => {
-    return graphStates[activeTab]?.[currentStep]?.explanation;
+    return currentGraphStates[activeTab]?.[currentStep]?.explanation;
   };
 
   const renderConceptText = (text) => (
@@ -555,7 +643,7 @@ export default function EducationPageStructure({
             <button
               onClick={() => {
                 const { nodes, edges } = generateRandomGraph(nodeCount);
-                const steps = generateDFSSteps(nodes, edges);
+                const steps = generateSteps(nodes, edges);
                 setCurrentGraphStates([steps]);
                 setCurrentStep(0);
               }}
@@ -566,7 +654,7 @@ export default function EducationPageStructure({
 
             <div className="flex gap-2">
               <button
-                onClick={runDFS}
+                onClick={runTraversal}
                 className={`p-2 rounded-full ${
                   !isRunning || isPaused
                     ? "bg-green-500 hover:bg-green-600"
@@ -622,9 +710,7 @@ export default function EducationPageStructure({
                 <p>Loading graph...</p>
               ) : (
                 <GraphVisualisationComponent
-                  graphState={
-                    currentGraphStates[activeTab]?.[currentStep]?.graphState
-                  }
+                  graphState={getCurrentGraphState()}
                   isGraphA={activeTab === 0}
                   graphIndex={activeTab}
                 />
@@ -644,7 +730,7 @@ export default function EducationPageStructure({
     return step.pseudoCodeLines || []; // Default to empty array if not specified
   };
 
-  const runDFS = async () => {
+  const runTraversal = async () => {
     if (!currentGraphStates || !currentGraphStates[activeTab]) return;
 
     // If paused, just toggle pause state
@@ -662,8 +748,8 @@ export default function EducationPageStructure({
     setIsPaused(false);
     isPausedRef.current = false;
 
-    // Set initial pseudocode highlight for Stack initialization
-    setPseudoCodeHighlight([2, 3]);
+    // Set initial pseudocode highlight based on algorithm type
+    setPseudoCodeHighlight(title.includes("BFS") ? [2, 3] : [2, 3]);
 
     // Main animation loop
     try {
@@ -853,3 +939,5 @@ export default function EducationPageStructure({
     </>
   );
 }
+
+export { generateDFSSteps, generateBFSSteps };
