@@ -7,7 +7,6 @@ const ExplanationSection = ({ step }) => {
   if (!step) {
     return (
       <div className="explanation-section" data-testid="explanation-text">
-        <h2>Explanation</h2>
         <p>
           Generate a graph and run the algorithm to see step-by-step
           explanations
@@ -108,7 +107,7 @@ const generateDFSSteps = (initialNodes, edges) => {
   const backtracked = new Set();
   const stack = [initialNodes[0].id];
 
-  // Initial state
+  // Step 1: Initialize Stack
   steps.push({
     graphState: {
       nodes: initialNodes.map((node) => ({
@@ -121,14 +120,103 @@ const generateDFSSteps = (initialNodes, edges) => {
       currentNode: initialNodes[0].id,
       stack: [...stack],
     },
-    explanation: generateDFSExplanation(steps[0], visited, backtracked, stack),
-    pseudoCodeLines: [2],
+    explanation: generateDFSExplanation(null, visited, backtracked, stack),
+    pseudoCodeLines: [2], // Stack = [start_node]
+  });
+
+  // Step 2: Initialize Visited Set
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: false,
+        backtracked: false,
+        current: node.id === initialNodes[0].id,
+      })),
+      edges,
+      currentNode: initialNodes[0].id,
+      stack: [...stack],
+    },
+    explanation: generateDFSExplanation(
+      steps[steps.length - 1],
+      visited,
+      backtracked,
+      stack
+    ),
+    pseudoCodeLines: [3], // Visited = set()
   });
 
   while (stack.length > 0) {
     const currentNode = stack[stack.length - 1];
 
+    // Step 3: While loop check
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          backtracked: backtracked.has(node.id),
+          current: node.id === currentNode,
+        })),
+        edges,
+        currentNode,
+        stack: [...stack],
+      },
+      explanation: generateDFSExplanation(
+        steps[steps.length - 1],
+        visited,
+        backtracked,
+        stack
+      ),
+      pseudoCodeLines: [5], // while Stack is not empty
+    });
+
     if (!visited.has(currentNode)) {
+      // Step 4: Pop operation
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current: node.id === currentNode,
+          })),
+          edges,
+          currentNode,
+          stack: [...stack],
+        },
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
+        pseudoCodeLines: [6], // node = Stack.pop()
+      });
+
+      // Step 5: Check if node not visited
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current: node.id === currentNode,
+          })),
+          edges,
+          currentNode,
+          stack: [...stack],
+        },
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
+        pseudoCodeLines: [7], // if node not in Visited
+      });
+
+      // Step 6: Add to visited
       visited.add(currentNode);
       steps.push({
         graphState: {
@@ -148,23 +236,67 @@ const generateDFSSteps = (initialNodes, edges) => {
           backtracked,
           stack
         ),
-        pseudoCodeLines: [8],
+        pseudoCodeLines: [8], // Visited.add(node)
+      });
+
+      // Step 7: Process node
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current: node.id === currentNode,
+          })),
+          edges,
+          currentNode,
+          stack: [...stack],
+        },
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
+        pseudoCodeLines: [9], // process(node)
       });
     }
 
-    // Get ALL neighbors and find first unvisited one (done in background)
     const allNeighbors = edges
       .filter(
         (edge) => edge.source === currentNode || edge.target === currentNode
       )
       .map((edge) => (edge.source === currentNode ? edge.target : edge.source))
       .sort();
+
+    // Step 8: Start neighbor loop
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          backtracked: backtracked.has(node.id),
+          current: node.id === currentNode,
+        })),
+        edges,
+        currentNode,
+        stack: [...stack],
+      },
+      explanation: generateDFSExplanation(
+        steps[steps.length - 1],
+        visited,
+        backtracked,
+        stack
+      ),
+      pseudoCodeLines: [10], // for neighbor in graph[node]
+    });
+
     const unvisitedNeighbor = allNeighbors.find(
       (neighbor) => !visited.has(neighbor)
     );
 
     if (unvisitedNeighbor) {
-      // Only show the step when we've found an unvisited neighbor
+      // Step 9: Check unvisited neighbor
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
@@ -184,11 +316,34 @@ const generateDFSSteps = (initialNodes, edges) => {
           backtracked,
           stack
         ),
-        pseudoCodeLines: [12],
+        pseudoCodeLines: [11], // if neighbor not in Visited
       });
+
+      // Step 10: Push to stack
       stack.push(unvisitedNeighbor);
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            backtracked: backtracked.has(node.id),
+            current: node.id === currentNode,
+          })),
+          edges,
+          currentNode,
+          stack: [...stack],
+          activeNeighbor: unvisitedNeighbor,
+        },
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
+        pseudoCodeLines: [12], // Stack.push(neighbor)
+      });
     } else {
-      // No unvisited neighbors found, backtrack
+      // Backtracking
       stack.pop();
       backtracked.add(currentNode);
       steps.push({
@@ -210,10 +365,11 @@ const generateDFSSteps = (initialNodes, edges) => {
           backtracked,
           stack
         ),
-        pseudoCodeLines: [6],
+        pseudoCodeLines: [5], // back to while Stack is not empty
       });
     }
   }
+
   return steps;
 };
 
@@ -459,27 +615,11 @@ export default function EducationPageStructure({
   };
 
   const getPseudoCodeHighlight = (step) => {
-    const explanation = step?.explanation?.toLowerCase() || "";
+    if (!step) return [];
+    const { graphState } = step;
 
-    // Return single line numbers based on the current action
-    if (explanation.includes("initial state")) {
-      return [2]; // Only highlight Stack initialization
-    } else if (
-      explanation.includes("visit node") &&
-      explanation.includes("mark it as visited")
-    ) {
-      return [8]; // Only highlight Visited.add(node)
-    } else if (explanation.includes("checking unvisited neighbor")) {
-      return [10]; // Only highlight neighbor iteration
-    } else if (
-      explanation.includes("push") &&
-      explanation.includes("onto the stack")
-    ) {
-      return [12]; // Only highlight Stack.push
-    } else if (explanation.includes("backtrack")) {
-      return [6]; // Only highlight Stack.pop()
-    }
-    return [];
+    // Return the pseudoCodeLines directly from the step
+    return step.pseudoCodeLines || []; // Default to empty array if not specified
   };
 
   const runDFS = async () => {
@@ -487,7 +627,8 @@ export default function EducationPageStructure({
 
     // If animation just finished (isRunning is false but controller exists)
     if (!isRunning && animationController) {
-      setAnimationController(null); // Clear the old controller first
+      setAnimationController(null);
+      setPseudoCodeHighlight([]); // Clear highlights only when truly finished
       return;
     }
 
@@ -500,6 +641,9 @@ export default function EducationPageStructure({
       setIsPaused(false);
       isPausedRef.current = false;
 
+      // Set initial pseudocode highlight for Stack initialization
+      setPseudoCodeHighlight([2, 3]);
+
       // Main animation loop
       try {
         let i = 0;
@@ -508,13 +652,25 @@ export default function EducationPageStructure({
           !controller.signal.aborted
         ) {
           if (isPausedRef.current) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            await new Promise((resolve) => {
+              const checkPause = () => {
+                if (!isPausedRef.current) {
+                  resolve();
+                } else {
+                  setTimeout(checkPause, 100);
+                }
+              };
+              checkPause();
+            });
             continue;
           }
 
           const step = currentGraphStates[activeTab][i];
           setCurrentStep(i);
-          setPseudoCodeHighlight(getPseudoCodeHighlight(step));
+
+          // Update highlights based on current step
+          const highlights = getPseudoCodeHighlight(step);
+          setPseudoCodeHighlight(highlights);
 
           await new Promise((resolve) => setTimeout(resolve, animationSpeed));
 
@@ -531,8 +687,11 @@ export default function EducationPageStructure({
         if (!isPausedRef.current) {
           setIsRunning(false);
           setIsPaused(false);
-          setPseudoCodeHighlight([]);
-          setAnimationController(null); // Clear controller when animation finishes
+          // Only clear highlights if we've completed the animation
+          if (!controller.signal.aborted) {
+            setPseudoCodeHighlight([]);
+          }
+          setAnimationController(null);
         }
       }
     } else {
