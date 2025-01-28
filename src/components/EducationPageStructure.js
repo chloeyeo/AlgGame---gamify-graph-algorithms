@@ -3,43 +3,22 @@ import GraphVisualisation from "./GraphVisualisation";
 import CodeEditorPseudocode from "./CodeEditorPseudocode";
 import { FaPlay, FaPause, FaRedo } from "react-icons/fa";
 
-const ExplanationSection = ({ explanation }) => {
-  const formatExplanation = (text) => {
-    if (text.includes("•")) {
-      const [mainText, ...bullets] = text.split("•").map((t) => t.trim());
-      return (
-        <div className="space-y-2">
-          {mainText && <p>{mainText}</p>}
-          {bullets.length > 0 && (
-            <ul className="list-disc pl-6 space-y-1">
-              {bullets.map((bullet, index) => (
-                <li key={index}>{bullet}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      );
-    }
-
-    if (/^\d+\./.test(text)) {
-      const parts = text.split(/(?=\d+\.)/).map((t) => t.trim());
-      if (parts.length > 1) {
-        return (
-          <ol className="list-decimal pl-6 space-y-1">
-            {parts.map((part, index) => (
-              <li key={index}>{part.replace(/^\d+\./, "").trim()}</li>
-            ))}
-          </ol>
-        );
-      }
-    }
-
-    return <p>{text}</p>;
-  };
+const ExplanationSection = ({ step }) => {
+  if (!step) {
+    return (
+      <div className="explanation-section" data-testid="explanation-text">
+        <h2>Explanation</h2>
+        <p>
+          Generate a graph and run the algorithm to see step-by-step
+          explanations
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4">
-      {formatExplanation(explanation)}
+    <div className="explanation-section" data-testid="explanation-text">
+      <p>{step.explanation}</p>
     </div>
   );
 };
@@ -99,6 +78,30 @@ const generateRandomGraph = (nodeCount) => {
   return { nodes, edges };
 };
 
+const generateDFSExplanation = (step, visited, backtracked, stack) => {
+  // Initial state
+  if (stack.length === 1 && visited.size === 0) {
+    return "Starting DFS from node " + stack[0];
+  }
+
+  // Just visited a node
+  if (step.graphState.activeNeighbor) {
+    return `Found unvisited neighbor ${step.graphState.activeNeighbor} from node ${step.graphState.currentNode}`;
+  }
+
+  // Backtracking
+  if (backtracked.has(step.graphState.currentNode)) {
+    return `Backtracking from node ${step.graphState.currentNode} (all neighbors visited)`;
+  }
+
+  // Just visited a new node
+  if (visited.has(step.graphState.currentNode)) {
+    return `Visiting node ${step.graphState.currentNode}, exploring its neighbors`;
+  }
+
+  return "Processing next DFS step";
+};
+
 const generateDFSSteps = (initialNodes, edges) => {
   const steps = [];
   const visited = new Set();
@@ -118,7 +121,7 @@ const generateDFSSteps = (initialNodes, edges) => {
       currentNode: initialNodes[0].id,
       stack: [...stack],
     },
-    explanation: "Initial state: Starting DFS with node A.",
+    explanation: generateDFSExplanation(steps[0], visited, backtracked, stack),
     pseudoCodeLines: [2],
   });
 
@@ -139,7 +142,12 @@ const generateDFSSteps = (initialNodes, edges) => {
           currentNode,
           stack: [...stack],
         },
-        explanation: `Visit node ${currentNode} and mark it as visited.`,
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
         pseudoCodeLines: [8],
       });
     }
@@ -151,7 +159,6 @@ const generateDFSSteps = (initialNodes, edges) => {
       )
       .map((edge) => (edge.source === currentNode ? edge.target : edge.source))
       .sort();
-
     const unvisitedNeighbor = allNeighbors.find(
       (neighbor) => !visited.has(neighbor)
     );
@@ -171,7 +178,12 @@ const generateDFSSteps = (initialNodes, edges) => {
           stack: [...stack],
           activeNeighbor: unvisitedNeighbor,
         },
-        explanation: `Found unvisited neighbor ${unvisitedNeighbor}, pushing onto the stack.`,
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
         pseudoCodeLines: [12],
       });
       stack.push(unvisitedNeighbor);
@@ -192,12 +204,16 @@ const generateDFSSteps = (initialNodes, edges) => {
           currentNode: stack[stack.length - 1],
           stack: [...stack],
         },
-        explanation: `All neighbors of ${currentNode} have been visited. Backtracking...`,
+        explanation: generateDFSExplanation(
+          steps[steps.length - 1],
+          visited,
+          backtracked,
+          stack
+        ),
         pseudoCodeLines: [6],
       });
     }
   }
-
   return steps;
 };
 
@@ -578,7 +594,7 @@ export default function EducationPageStructure({
           </div>
 
           <ExplanationSection
-            explanation={getCurrentExplanation() || "No explanation available"}
+            step={currentGraphStates[activeTab]?.[currentStep]}
           />
         </div>
 
@@ -635,7 +651,7 @@ export default function EducationPageStructure({
             </button>
           </div>
           <ExplanationSection
-            explanation={getCurrentExplanation() || "No explanation available"}
+            step={currentGraphStates[activeTab]?.[currentStep]}
           />
         </div>
       </div>
