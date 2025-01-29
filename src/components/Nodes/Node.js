@@ -7,7 +7,6 @@ const Nodes = {
     graphState,
     {
       isFordFulkersonPage,
-      isEdmondsKarpPage,
       isDijkstraPage,
       isAStarPage,
       isDFSPage,
@@ -33,14 +32,14 @@ const Nodes = {
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", isFordFulkersonPage || isEdmondsKarpPage ? 25 : 35)
+      .attr("r", isFordFulkersonPage ? 25 : 35)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
         if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
         if (node && node.recentlyUpdated) return COLORS.UPDATED_NODE;
-        if (isFordFulkersonPage || isEdmondsKarpPage) {
+        if (isFordFulkersonPage) {
           return d.id === "S"
             ? COLORS.SOURCE_NODE
             : d.id === "T"
@@ -54,7 +53,7 @@ const Nodes = {
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
         if (node && node.backtracked) return COLORS.BACKTRACKED_NODE;
         if (node && node.visited) return COLORS.VISITED_NODE;
-        if (isFordFulkersonPage || isEdmondsKarpPage) {
+        if (isFordFulkersonPage) {
           return graphState.currentPath?.includes(d.id)
             ? COLORS.FLOW_PATH
             : "#64748b";
@@ -80,7 +79,7 @@ const Nodes = {
         return getTextColor(node, graphState, COLORS);
       });
 
-    if (isFordFulkersonPage || isEdmondsKarpPage) {
+    if (isFordFulkersonPage) {
       nodeGroups.attr("fill", "#000").text((d) => d.id);
     }
 
@@ -132,7 +131,7 @@ const Nodes = {
       });
     }
 
-    if (isFordFulkersonPage || isEdmondsKarpPage) {
+    if (isFordFulkersonPage) {
       nodeGroups
         .append("circle")
         .attr("cx", (d) => d.x)

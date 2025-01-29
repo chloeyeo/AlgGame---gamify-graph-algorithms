@@ -17,7 +17,6 @@ const scoreSchema = new mongoose.Schema({
       "kruskal",
       "prim",
       "fordFulkerson",
-      "edmondsKarp",
       "hungarianKuhnMunkres",
     ],
   },

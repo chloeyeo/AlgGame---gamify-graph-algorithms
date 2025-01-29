@@ -8,7 +8,6 @@ export const useAlgorithmType = (pathname) => {
       isDFSPage: false,
       isBFSPage: false,
       isFordFulkersonPage: false,
-      isEdmondsKarpPage: false,
     };
   }
 
@@ -22,6 +21,5 @@ export const useAlgorithmType = (pathname) => {
     isDFSPage: path.includes("dfs"),
     isBFSPage: path.includes("bfs"),
     isFordFulkersonPage: path.includes("ford-fulkerson"),
-    isEdmondsKarpPage: path.includes("edmonds-karp"),
   };
 };

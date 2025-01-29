@@ -5,7 +5,6 @@ const Legend = ({
   isAStarPage,
   isDFSPage,
   isDijkstraPage,
-  isEdmondsKarpPage,
   isFordFulkersonPage,
   isKruskalsPage,
   isPrimsPage,
@@ -33,7 +32,7 @@ const Legend = ({
       }
     );
 
-    if (isFordFulkersonPage || isEdmondsKarpPage) {
+    if (isFordFulkersonPage) {
       commonItems = [
         { color: COLORS.SOURCE_NODE, text: "Source Node" },
         { color: COLORS.SINK_NODE, text: "Sink Node" },

@@ -47,14 +47,12 @@ const GraphVisualisation = ({
     isDFSPage,
     isBFSPage,
     isDijkstraPage,
-    isEdmondsKarpPage,
     isFordFulkersonPage,
     isKruskalsPage,
     isPrimsPage,
   } = useAlgorithmType(pathname);
 
   const { viewBoxWidth, viewBoxHeight } = useGraphDimensions(
-    isEdmondsKarpPage,
     isFordFulkersonPage,
     isKruskalsPage
   );
@@ -100,7 +98,6 @@ const GraphVisualisation = ({
         isDFSPage,
         isAStarPage,
         isDijkstraPage,
-        isEdmondsKarpPage,
         isFordFulkersonPage,
         isKruskalsPage,
         isPrimsPage,
@@ -126,7 +123,6 @@ const GraphVisualisation = ({
       isDijkstraPage,
       isAStarPage,
       isFordFulkersonPage,
-      isEdmondsKarpPage,
       isDFSPage,
       isBFSPage,
       COLORS,
@@ -136,7 +132,6 @@ const GraphVisualisation = ({
 
     Nodes.draw(svg, nodes, graphState, {
       isFordFulkersonPage,
-      isEdmondsKarpPage,
       isDijkstraPage,
       isAStarPage,
       isDFSPage,

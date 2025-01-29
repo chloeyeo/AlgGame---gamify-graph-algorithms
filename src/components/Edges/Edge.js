@@ -13,7 +13,6 @@ const Edges = {
       isDijkstraPage,
       isAStarPage,
       isFordFulkersonPage,
-      isEdmondsKarpPage,
       isDFSPage,
       isBFSPage,
       COLORS,
@@ -27,10 +26,9 @@ const Edges = {
     }
 
     // Get network flow positions if needed
-    const networkFlowNodePositions =
-      isFordFulkersonPage || isEdmondsKarpPage
-        ? getNetworkFlowNodePositions()
-        : null;
+    const networkFlowNodePositions = isFordFulkersonPage
+      ? getNetworkFlowNodePositions()
+      : null;
 
     // Draw edges
     const edgeGroups = svg
@@ -81,14 +79,10 @@ const Edges = {
       sourceNode,
       targetNode,
       networkFlowNodePositions,
-      isFordFulkersonPage,
-      isEdmondsKarpPage
+      isFordFulkersonPage
     ) => {
       // For network flow pages, use predefined positions
-      if (
-        (isFordFulkersonPage || isEdmondsKarpPage) &&
-        networkFlowNodePositions
-      ) {
+      if (isFordFulkersonPage && networkFlowNodePositions) {
         const sourcePos = networkFlowNodePositions[sourceNode.id];
         const targetPos = networkFlowNodePositions[targetNode.id];
 
@@ -122,8 +116,7 @@ const Edges = {
         sourceNode,
         targetNode,
         networkFlowNodePositions,
-        isFordFulkersonPage,
-        isEdmondsKarpPage
+        isFordFulkersonPage
       );
 
       // Verify positions exist before using them
@@ -182,7 +175,7 @@ const Edges = {
           .attr("y1", sourcePos.y)
           .attr("x2", targetPos.x)
           .attr("y2", targetPos.y);
-        if (!isFordFulkersonPage && !isEdmondsKarpPage) {
+        if (!isFordFulkersonPage) {
           elem
             .attr("stroke", (d) =>
               getEdgeColor(d, graphState, COLORS, isKruskalsPage, isPrimsPage)
@@ -348,7 +341,7 @@ const Edges = {
       });
     }
 
-    if (isFordFulkersonPage || isEdmondsKarpPage) {
+    if (isFordFulkersonPage) {
       // Define arrow markers
       svg
         .append("defs")
@@ -379,8 +372,7 @@ const Edges = {
           sourceNode,
           targetNode,
           networkFlowNodePositions,
-          isFordFulkersonPage,
-          isEdmondsKarpPage
+          isFordFulkersonPage
         );
 
         if (!sourcePos?.x || !sourcePos?.y || !targetPos?.x || !targetPos?.y) {

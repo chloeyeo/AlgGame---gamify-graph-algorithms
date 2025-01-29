@@ -16,7 +16,6 @@ export default function LeaderboardPage() {
     "kruskal",
     "prim",
     "fordFulkerson",
-    "edmondsKarp",
   ];
 
   useEffect(() => {
