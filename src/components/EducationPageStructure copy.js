@@ -50,7 +50,6 @@ const generateRandomGraph = (nodeCount) => {
     edges.push({
       source: nodes[parent].id,
       target: nodes[i].id,
-      weight: Math.floor(Math.random() * 9) + 1, // Random weight between 1-9
     });
   }
 
@@ -71,7 +70,6 @@ const generateRandomGraph = (nodeCount) => {
       edges.push({
         source: nodes[source].id,
         target: nodes[target].id,
-        weight: Math.floor(Math.random() * 9) + 1, // Random weight between 1-9
       });
     }
   }
@@ -463,36 +461,6 @@ const generateBFSSteps = (initialNodes, edges) => {
   return steps;
 };
 
-const generateDijkstraExplanation = (step, visited, distances) => {
-  if (!step) return "Starting Dijkstra's algorithm";
-
-  // Initial state
-  if (visited.size === 0) {
-    return "Initial state: All nodes have infinite distance except the start node";
-  }
-
-  // Node distance update
-  if (step.graphState.nodes.some((node) => node.recentlyUpdated)) {
-    const updatedNode = step.graphState.nodes.find(
-      (node) => node.recentlyUpdated
-    );
-    return `Updated distance to ${updatedNode.id}: ${distances.get(
-      updatedNode.id
-    )} through node ${step.graphState.currentNode}`;
-  }
-
-  // Processing new node
-  if (step.graphState.currentNode) {
-    return `Processing node ${
-      step.graphState.currentNode
-    } (current shortest distance: ${distances.get(
-      step.graphState.currentNode
-    )})`;
-  }
-
-  return "Processing next step in Dijkstra's algorithm";
-};
-
 export default function EducationPageStructure({
   title = "Graph Algorithm",
   conceptText = "",
@@ -781,15 +749,7 @@ export default function EducationPageStructure({
     isPausedRef.current = false;
 
     // Set initial pseudocode highlight based on algorithm type
-    setPseudoCodeHighlight(
-      title.includes("BFS")
-        ? [2, 3]
-        : title.includes("DFS")
-        ? [2, 3]
-        : title.includes("Dijkstra")
-        ? [2, 3, 4, 5, 6]
-        : [2, 3]
-    );
+    setPseudoCodeHighlight(title.includes("BFS") ? [2, 3] : [2, 3]);
 
     // Main animation loop
     try {
@@ -818,18 +778,16 @@ export default function EducationPageStructure({
         const highlights = getPseudoCodeHighlight(step);
         setPseudoCodeHighlight(highlights);
 
+        // Use the ref here instead of the state
         await new Promise((resolve) =>
           setTimeout(resolve, animationSpeedRef.current)
         );
 
-        // Only check for backtracking in DFS
-        if (title.includes("DFS")) {
-          const allNodesBacktracked = step.graphState.nodes.every(
-            (node) => node.backtracked
-          );
-          if (allNodesBacktracked) {
-            break;
-          }
+        const allNodesBacktracked = step.graphState.nodes.every(
+          (node) => node.backtracked
+        );
+        if (allNodesBacktracked) {
+          break;
         }
 
         i++;
@@ -838,6 +796,7 @@ export default function EducationPageStructure({
       if (!isPausedRef.current) {
         setIsRunning(false);
         setIsPaused(false);
+        // Only clear highlights if we've completed the animation
         if (!controller.signal.aborted) {
           setPseudoCodeHighlight([]);
         }
@@ -981,4 +940,4 @@ export default function EducationPageStructure({
   );
 }
 
-export { generateDFSSteps, generateBFSSteps, generateDijkstraExplanation };
+export { generateDFSSteps, generateBFSSteps };
