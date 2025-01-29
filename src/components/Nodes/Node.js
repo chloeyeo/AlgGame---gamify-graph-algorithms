@@ -15,24 +15,77 @@ const Nodes = {
       onNodeClick,
     }
   ) => {
-    // Draw nodes
     const nodeGroups = svg
       .selectAll(".node")
       .data(nodes)
       .enter()
       .append("g")
       .attr("class", "node")
+      .style("cursor", "pointer")
       .on("click", (event, d) => {
-        if (onNodeClick) {
-          onNodeClick(d.id);
-        }
+        if (onNodeClick) onNodeClick(d.id);
       });
+
+    if (isFordFulkersonPage) {
+      // Main circle for nodes
+      nodeGroups
+        .append("circle")
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
+        .attr("r", 30)
+        .attr("fill", (d) => {
+          if (d.id === "S") return COLORS.SOURCE_NODE;
+          if (d.id === "T") return COLORS.SINK_NODE;
+          return graphState.currentPath?.includes(d.id)
+            ? COLORS.FLOW_PATH
+            : COLORS.UNVISITED_NODE;
+        })
+        .attr("stroke", (d) => {
+          const node = graphState.nodes.find((n) => n.id === d.id);
+          return node?.highlight ? COLORS.FLOW_PATH : "#64748b";
+        })
+        .attr("stroke-width", (d) => {
+          const node = graphState.nodes.find((n) => n.id === d.id);
+          return node?.highlight ? 3 : 2;
+        })
+        .style("transition", "all 0.3s ease");
+
+      // Node labels
+      nodeGroups
+        .append("text")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", "middle")
+        .attr("fill", "#000")
+        .attr("class", "text-sm font-bold")
+        .text((d) => d.id);
+
+      // Add flow values display for non-source/sink nodes
+      nodeGroups
+        .filter((d) => d.id !== "S" && d.id !== "T")
+        .append("text")
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + 35)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#4B5563")
+        .attr("class", "text-xs")
+        .text((d) => {
+          const inFlow = graphState.edges
+            .filter((e) => e.target === d.id)
+            .reduce((sum, e) => sum + (e.flow || 0), 0);
+          const outFlow = graphState.edges
+            .filter((e) => e.source === d.id)
+            .reduce((sum, e) => sum + (e.flow || 0), 0);
+          return `in: ${inFlow} | out: ${outFlow}`;
+        });
+    }
 
     nodeGroups
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", isFordFulkersonPage ? 25 : 35)
+      .attr("r", 35)
       .attr("fill", (d) => {
         const node = graphState.nodes.find((n) => n.id === d.id);
         if (d.id === graphState.currentNode) return COLORS.CURRENT_NODE;
@@ -78,10 +131,6 @@ const Nodes = {
         const node = graphState.nodes.find((n) => n.id === d.id);
         return getTextColor(node, graphState, COLORS);
       });
-
-    if (isFordFulkersonPage) {
-      nodeGroups.attr("fill", "#000").text((d) => d.id);
-    }
 
     if (isDijkstraPage) {
       nodeGroups
@@ -129,36 +178,6 @@ const Nodes = {
             .attr("paint-order", "stroke");
         }
       });
-    }
-
-    if (isFordFulkersonPage) {
-      nodeGroups
-        .append("circle")
-        .attr("cx", (d) => d.x)
-        .attr("cy", (d) => d.y)
-        .attr("r", 25)
-        .attr("fill", (d) => {
-          if (d.id === "S") return COLORS.SOURCE_NODE;
-          if (d.id === "T") return COLORS.SINK_NODE;
-          return graphState.currentPath?.includes(d.id)
-            ? COLORS.FLOW_PATH
-            : COLORS.UNVISITED_NODE;
-        })
-        .attr("stroke", (d) =>
-          graphState.currentPath?.includes(d.id) ? COLORS.FLOW_PATH : "#64748b"
-        )
-        .attr("stroke-width", 2);
-
-      // Add text labels for nodes
-      nodeGroups
-        .append("text")
-        .attr("x", (d) => d.x)
-        .attr("y", (d) => d.y)
-        .attr("dy", "0.35em")
-        .attr("text-anchor", "middle")
-        .attr("fill", "#000")
-        .attr("class", "text-sm font-medium")
-        .text((d) => d.id);
     }
   },
 };

@@ -104,107 +104,187 @@ const updateFlows = (path, bottleneck, flows) => {
 const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
   const steps = [];
   const flows = new Map();
+
+  // Initialize flows
   edges.forEach((e) => flows.set(`${e.source}-${e.target}`, 0));
 
-  // Initial state with both graphs
+  // Initial state
   steps.push({
     graphState: {
       nodes: initialNodes.map((node) => ({
         ...node,
         highlight: false,
       })),
-      networkEdges: edges.map((edge) => ({
+      edges: edges.map((edge) => ({
         ...edge,
         flow: 0,
         highlight: false,
-      })),
-      residualEdges: edges.map((edge) => ({
-        ...edge,
-        flow: 0,
-        capacity: edge.capacity,
-        highlight: false,
+        residualCapacity: edge.capacity,
       })),
       currentPath: [],
       maxFlow: 0,
-      showResidual: false, // Toggle between network and residual views
     },
-    explanation: `Initial state of the network:\n• Left: Network Graph shows current flows\n• Right: Residual Graph shows available capacities\n• Looking for augmenting path from ${source} to ${sink}\n• Current flow: 0 units`,
+    explanation:
+      "Initial state: All flows are zero. Looking for augmenting path from source (S) to sink (T).",
     pseudoCodeLines: [1],
   });
 
-  let maxFlow = 0;
   let path = findPath(source, sink, edges, flows);
+  let iteration = 1;
 
   while (path) {
     const bottleneck = calculateBottleneck(path, edges, flows);
-    maxFlow += bottleneck;
-    updateFlows(path, bottleneck, flows);
 
-    // Add step showing both graphs
+    // Add step showing current path
     steps.push({
       graphState: {
         nodes: initialNodes.map((node) => ({
           ...node,
           highlight: path.includes(node.id),
         })),
-        networkEdges: edges.map((edge) => ({
+        edges: edges.map((edge) => ({
           ...edge,
           flow: flows.get(`${edge.source}-${edge.target}`) || 0,
           highlight: isEdgeInPath(edge, path),
+          residualCapacity:
+            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
         })),
-        residualEdges: edges.map((edge) => {
-          const forwardFlow = flows.get(`${edge.source}-${edge.target}`) || 0;
-          const backwardFlow = flows.get(`${edge.target}-${edge.source}`) || 0;
-          return {
-            ...edge,
-            forwardCapacity: edge.capacity - forwardFlow,
-            backwardCapacity: forwardFlow,
-            highlight: isEdgeInPath(edge, path),
-          };
-        }),
         currentPath: path,
-        maxFlow,
-        showResidual: false,
+        maxFlow: steps[steps.length - 1].graphState.maxFlow,
       },
-      explanation: `Found augmenting path ${path.join(
-        "→"
-      )}:\n• Bottleneck capacity: ${bottleneck}\n• Current maximum flow: ${maxFlow} units`,
-      pseudoCodeLines: [2, "a", "b", "c"],
+      explanation: `Iteration ${iteration}: Found augmenting path ${path.join(
+        " → "
+      )} with bottleneck capacity ${bottleneck}`,
+      pseudoCodeLines: [2, "a"],
+    });
+
+    // Update flows
+    updateFlows(path, bottleneck, flows);
+
+    // Add step showing updated flows
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          highlight: path.includes(node.id),
+        })),
+        edges: edges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: isEdgeInPath(edge, path),
+          residualCapacity:
+            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+        })),
+        currentPath: path,
+        maxFlow: steps[steps.length - 1].graphState.maxFlow + bottleneck,
+      },
+      explanation: `Updated flows along path. Current maximum flow: ${
+        steps[steps.length - 1].graphState.maxFlow + bottleneck
+      }`,
+      pseudoCodeLines: [2, "c"],
     });
 
     path = findPath(source, sink, edges, flows);
+    iteration++;
   }
 
-  // Final state
-  steps.push({
-    graphState: {
-      nodes: initialNodes.map((node) => ({
-        ...node,
-        highlight: false,
-      })),
-      networkEdges: edges.map((edge) => ({
-        ...edge,
-        flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-        highlight: false,
-      })),
-      residualEdges: edges.map((edge) => {
-        const forwardFlow = flows.get(`${edge.source}-${edge.target}`) || 0;
-        return {
-          ...edge,
-          forwardCapacity: edge.capacity - forwardFlow,
-          backwardCapacity: forwardFlow,
-          highlight: false,
-        };
-      }),
-      currentPath: [],
-      maxFlow,
-      showResidual: false,
-    },
-    explanation: `Algorithm complete:\n• No more augmenting paths found\n• Maximum flow achieved: ${maxFlow} units`,
-    pseudoCodeLines: [3],
+  return steps;
+};
+
+const generateRandomNetworkGraph = (nodeCount = 6) => {
+  const nodes = [];
+  const layerWidth = 150;
+  const centerY = 300;
+
+  // Add source node
+  nodes.push({
+    id: "S",
+    x: 50,
+    y: centerY,
   });
 
-  return steps;
+  // Add middle layers (2 layers)
+  const nodesPerLayer = Math.max(2, Math.floor((nodeCount - 2) / 2));
+
+  for (let layer = 0; layer < 2; layer++) {
+    for (let i = 0; i < nodesPerLayer; i++) {
+      nodes.push({
+        id: `${String.fromCharCode(65 + layer * nodesPerLayer + i)}`,
+        x: layerWidth * (layer + 1) + 50,
+        y: 150 + (i * 300) / (nodesPerLayer - 1),
+      });
+    }
+  }
+
+  // Add sink node
+  nodes.push({
+    id: "T",
+    x: layerWidth * 3 + 50,
+    y: centerY,
+  });
+
+  // Generate edges
+  const edges = [];
+
+  // Connect source to first layer
+  nodes
+    .filter((n) => n.x === layerWidth + 50)
+    .forEach((node) => {
+      edges.push({
+        source: "S",
+        target: node.id,
+        capacity: Math.floor(Math.random() * 8) + 3,
+        flow: 0,
+      });
+    });
+
+  // Connect layers
+  for (let layer = 0; layer < 2; layer++) {
+    const currentLayerNodes = nodes.filter(
+      (n) => n.x === layerWidth * (layer + 1) + 50
+    );
+    const nextLayerNodes = nodes.filter(
+      (n) => n.x === layerWidth * (layer + 2) + 50
+    );
+
+    currentLayerNodes.forEach((source) => {
+      nextLayerNodes.forEach((target) => {
+        if (Math.random() < 0.7) {
+          edges.push({
+            source: source.id,
+            target: target.id,
+            capacity: Math.floor(Math.random() * 8) + 3,
+            flow: 0,
+          });
+        }
+      });
+    });
+  }
+
+  // Connect last layer to sink
+  nodes
+    .filter((n) => n.x === layerWidth * 2 + 50)
+    .forEach((node) => {
+      edges.push({
+        source: node.id,
+        target: "T",
+        capacity: Math.floor(Math.random() * 8) + 3,
+        flow: 0,
+      });
+    });
+
+  return { nodes, edges };
+};
+
+const NODE_TYPES = {
+  SOURCE: { color: "#90EE90" }, // Light green
+  SINK: { color: "#FFB6C1" }, // Light pink
+  NORMAL: { color: "#FFFFFF" }, // White
+};
+
+const EDGE_TYPES = {
+  CURRENT_PATH: { color: "#4169E1" }, // Royal blue
+  NORMAL: { color: "#000000" }, // Black
 };
 
 const FordFulkersonEducationPage = () => {
@@ -243,7 +323,8 @@ The key distinction is that while Ford-Fulkerson can use any valid path-finding 
       title="Ford-Fulkerson Algorithm"
       conceptText={conceptText}
       pseudocode={pseudocode}
-      generateSteps={(nodes, edges) => generateSteps(nodes, edges, "S", "T")}
+      generateSteps={(nodes, edges) => generateSteps(nodes, edges)}
+      generateGraph={() => generateRandomNetworkGraph(5)}
     />
   );
 };

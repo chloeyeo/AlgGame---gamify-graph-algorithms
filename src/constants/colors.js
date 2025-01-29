@@ -17,4 +17,6 @@ export const COLORS = {
   RESIDUAL_EDGE: "#dc2626",
   SOURCE_NODE: "#bbf7d0",
   SINK_NODE: "#fecaca",
+  FLOW_TEXT: "#1e293b",
+  HIGHLIGHT_PATH: "#60a5fa",
 };
