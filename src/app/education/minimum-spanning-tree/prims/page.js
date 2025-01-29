@@ -95,8 +95,6 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
   });
 
   visited.add(startNodeId);
-
-  // Add initial edges to frontier
   edges.forEach((edge) => {
     if (edge.source === startNodeId || edge.target === startNodeId) {
       frontier.add(edge);
@@ -104,14 +102,119 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
   });
 
   while (frontier.size > 0) {
+    // Step 1: Finding minimum edge
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : frontier.has(e)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation: `Looking for the minimum weight edge in the frontier.`,
+      pseudoCodeLines: [6], // Only highlight finding minEdge
+    });
+
     let minEdge = Array.from(frontier).reduce((min, edge) =>
       edge.weight < min.weight ? edge : min
     );
 
+    // Step 2: Removing from frontier
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : frontier.has(e)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation: `Removing edge ${minEdge.source}-${minEdge.target} from frontier.`,
+      pseudoCodeLines: [7], // Explicitly highlight remove step
+    });
+
     frontier.delete(minEdge);
+
+    // Step 3: Identify unvisited node
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : e === minEdge
+            ? EDGE_STATES.CONSIDERING
+            : frontier.has(e)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation: `Identifying the unvisited node from edge ${minEdge.source}-${minEdge.target}.`,
+      pseudoCodeLines: [8], // Explicitly highlight the newNode line
+    });
+
     const newNode = !visited.has(minEdge.source)
       ? minEdge.source
       : minEdge.target;
+
+    // Step 4: Check for cycle
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : e === minEdge
+            ? EDGE_STATES.CONSIDERING
+            : frontier.has(e)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation: `Checking if edge ${minEdge.source}-${minEdge.target} would create a cycle.`,
+      pseudoCodeLines: [9], // Explicitly highlight the cycle check line
+    });
 
     if (visited.has(minEdge.source) && visited.has(minEdge.target)) {
       steps.push({
@@ -137,15 +240,68 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
           mstEdges: [...mstEdges],
         },
         explanation: `Skipping edge ${minEdge.source}-${minEdge.target} as it would create a cycle.`,
-        pseudoCodeLines: [9, 10],
+        pseudoCodeLines: [10], // continue line
       });
       continue;
     }
 
+    // Step 5: Add edge to MST
     mstEdges.push(minEdge);
-    visited.add(newNode);
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : e === minEdge
+            ? EDGE_STATES.CONSIDERING
+            : frontier.has(e)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation: `Adding edge ${minEdge.source}-${minEdge.target} to MST.`,
+      pseudoCodeLines: [11], // add to MST line
+    });
 
-    // Add new edges to frontier
+    // Step 6: Mark node as visited
+    visited.add(newNode);
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : e === minEdge
+            ? EDGE_STATES.CONSIDERING
+            : frontier.has(e)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation: `Marking node ${newNode} as visited.`,
+      pseudoCodeLines: [12], // add to visited line
+    });
+
+    // Step 7: Update frontier
     edges.forEach((edge) => {
       if (
         (edge.source === newNode || edge.target === newNode) &&
@@ -177,8 +333,8 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
         })),
         mstEdges: [...mstEdges],
       },
-      explanation: `Added edge ${minEdge.source}-${minEdge.target} (weight ${minEdge.weight}) to MST. Connected node ${newNode} to the tree.`,
-      pseudoCodeLines: [11, 12, 13],
+      explanation: `Updated frontier with edges connected to node ${newNode}.`,
+      pseudoCodeLines: [13], // update frontier line
     });
   }
 
