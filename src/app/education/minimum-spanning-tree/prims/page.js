@@ -3,432 +3,217 @@
 import React from "react";
 import EducationPageStructure from "@/components/EducationPageStructure";
 
-const primStepsGraphA = [
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B" },
-        { id: "C" },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "A", target: "F", weight: 14 },
-        { source: "B", target: "C", weight: 10 },
-        { source: "B", target: "D", weight: 15 },
-        { source: "C", target: "D", weight: 11 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "D", target: "E", weight: 6 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-      mstEdges: [],
-    },
-    explanation:
-      "Initial state: We start with node A. No edges are in the Minimum Spanning Tree (MST) yet. All edges connected to A are considered: A-B (7), A-C (9), A-F (14).",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C" },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "A", target: "F", weight: 14 },
-        { source: "B", target: "C", weight: 10 },
-        { source: "B", target: "D", weight: 15 },
-        { source: "C", target: "D", weight: 11 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "D", target: "E", weight: 6 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-      mstEdges: [{ source: "A", target: "B", weight: 7 }],
-    },
-    explanation:
-      "Add edge A-B (weight 7) to the MST. It's the lowest weight edge connected to A. Now we consider edges connected to B as well: B-C (10), B-D (15).",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "A", target: "F", weight: 14 },
-        { source: "B", target: "C", weight: 10 },
-        { source: "B", target: "D", weight: 15 },
-        { source: "C", target: "D", weight: 11 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "D", target: "E", weight: 6 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-      mstEdges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-      ],
-    },
-    explanation:
-      "Add edge A-C (weight 9) to the MST. It's the next lowest weight edge connected to A or B that doesn't create a cycle. Now we consider edges connected to C: C-D (11), C-F (2).",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E" },
-        { id: "F", visited: true },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "A", target: "F", weight: 14 },
-        { source: "B", target: "C", weight: 10 },
-        { source: "B", target: "D", weight: 15 },
-        { source: "C", target: "D", weight: 11 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "D", target: "E", weight: 6 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-      mstEdges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "C", target: "F", weight: 2 },
-      ],
-    },
-    explanation:
-      "Add edge C-F (weight 2) to the MST. It's the lowest weight edge connected to A, B, or C that doesn't create a cycle. Now we consider edges connected to F: E-F (9).",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E", visited: true },
-        { id: "F", visited: true },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "A", target: "F", weight: 14 },
-        { source: "B", target: "C", weight: 10 },
-        { source: "B", target: "D", weight: 15 },
-        { source: "C", target: "D", weight: 11 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "D", target: "E", weight: 6 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-      mstEdges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-    },
-    explanation:
-      "Add edge E-F (weight 9) to the MST. It's the lowest weight edge that connects a new node to our existing MST without creating a cycle. Now we need to connect D to our MST.",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D", visited: true },
-        { id: "E", visited: true },
-        { id: "F", visited: true },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "A", target: "F", weight: 14 },
-        { source: "B", target: "C", weight: 10 },
-        { source: "B", target: "D", weight: 15 },
-        { source: "C", target: "D", weight: 11 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "D", target: "E", weight: 6 },
-        { source: "E", target: "F", weight: 9 },
-      ],
-      mstEdges: [
-        { source: "A", target: "B", weight: 7 },
-        { source: "A", target: "C", weight: 9 },
-        { source: "C", target: "F", weight: 2 },
-        { source: "E", target: "F", weight: 9 },
-        { source: "D", target: "E", weight: 6 },
-      ],
-    },
-    explanation:
-      "Add edge D-E (weight 6) to the MST. This is the final edge needed to connect all nodes in the graph. Our Minimum Spanning Tree is now complete with a total weight of 33.",
-  },
-];
+const EDGE_STATES = {
+  NORMAL: "normal", // gray
+  CONSIDERING: "checking", // green
+  MST: "mst", // red
+  FRONTIER: "frontier", // yellow - edges connected to MST
+};
 
-const primStepsGraphB = [
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B" },
-        { id: "C" },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-        { id: "G" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [],
-    },
-    explanation:
-      "Initial state: We start with node A. No edges are in the Minimum Spanning Tree (MST) yet.",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B" },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-        { id: "G" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [{ source: "A", target: "C", weight: 3 }],
-    },
-    explanation:
-      "Add edge A-C (weight 3) to the MST. It's the lowest weight edge connected to A.",
-  },
-
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E" },
-        { id: "F" },
-        { id: "G" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [
-        { source: "A", target: "C", weight: 3 },
-        { source: "A", target: "B", weight: 4 },
-      ],
-    },
-    explanation:
-      "Add edge A-B (weight 4) to the MST. It's the lowest weight edge connecting a new node to the MST.",
-  },
-
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E", visited: true },
-        { id: "F" },
-        { id: "G" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [
-        { source: "A", target: "C", weight: 3 },
-        { source: "A", target: "B", weight: 4 },
-        { source: "B", target: "E", weight: 2 },
-      ],
-    },
-    explanation:
-      "Add edge B-E (weight 2) to the MST. It's the lowest weight edge connecting a new node to the MST.",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E", visited: true },
-        { id: "F", visited: true },
-        { id: "G" },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [
-        { source: "A", target: "C", weight: 3 },
-        { source: "A", target: "B", weight: 4 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-      ],
-    },
-    explanation:
-      "Add edge C-F (weight 4) to the MST. It's the lowest weight edge connecting a new node to the MST.",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D" },
-        { id: "E", visited: true },
-        { id: "F", visited: true },
-        { id: "G", visited: true },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [
-        { source: "A", target: "C", weight: 3 },
-        { source: "A", target: "B", weight: 4 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-    },
-    explanation:
-      "Add edge F-G (weight 2) to the MST. It's the lowest weight edge connecting a new node to the MST.",
-  },
-  {
-    graphState: {
-      nodes: [
-        { id: "A", visited: true },
-        { id: "B", visited: true },
-        { id: "C", visited: true },
-        { id: "D", visited: true },
-        { id: "E", visited: true },
-        { id: "F", visited: true },
-        { id: "G", visited: true },
-      ],
-      edges: [
-        { source: "A", target: "B", weight: 4 },
-        { source: "A", target: "C", weight: 3 },
-        { source: "B", target: "D", weight: 5 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "D", target: "G", weight: 3 },
-        { source: "E", target: "G", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-      ],
-      mstEdges: [
-        { source: "A", target: "C", weight: 3 },
-        { source: "A", target: "B", weight: 4 },
-        { source: "B", target: "E", weight: 2 },
-        { source: "C", target: "F", weight: 4 },
-        { source: "F", target: "G", weight: 2 },
-        { source: "D", target: "G", weight: 3 },
-      ],
-    },
-    explanation:
-      "Add edge D-G (weight 3) to the MST. This completes the Minimum Spanning Tree, connecting all nodes with the minimum total weight of 18.",
-  },
-];
+const primPseudocode = `function Prim(graph, startNode):
+    visited = {startNode}
+    mstEdges = []
+    frontier = all edges connected to startNode
+    while frontier is not empty:
+        minEdge = edge with minimum weight in frontier
+        newNode = unvisited node of minEdge
+        if both nodes of minEdge are visited:
+            continue
+        add minEdge to mstEdges
+        add newNode to visited
+        add edges connected to newNode to frontier
+    return mstEdges`;
 
 const primConceptText = {
-  introduction:
-    "Prim's algorithm is a greedy algorithm that finds a minimum spanning tree for a weighted undirected graph. It builds the MST by iteratively adding the smallest edge that connects a vertex in the partially constructed MST to a vertex outside it.",
+  introduction: `Prim's algorithm finds the minimum spanning tree (MST) of a weighted graph. Unlike Kruskal's algorithm which considers edges globally, Prim's grows a tree from a starting node by repeatedly adding the lowest-weight edge that connects a new node to the growing tree.`,
+
   keyCharacteristics: [
-    "Greedy approach: Always selects the edge with the smallest weight that connects a vertex in the MST to a vertex outside of it.",
-    "Works with both directed and undirected graphs, but typically applied to undirected graphs.",
-    "The algorithm runs in O(E log V) time using a priority queue, where E is the number of edges and V is the number of vertices.",
-    "Guarantees a minimum spanning tree if the graph is connected.",
+    "• Starts from a single node and grows the MST one edge at a time",
+    "• Maintains a frontier of edges that could be added next",
+    "• Always chooses the lowest-weight edge that connects a new node",
+    "• Automatically avoids cycles by only connecting new nodes",
+    "• Runs until all nodes are connected",
   ],
-  applications: [
-    "Network design: To minimize the cost of connecting different points in a network (e.g., telecommunications, transportation).",
-    "Cluster analysis: To create clusters by connecting points with the smallest distances.",
-    "Image segmentation: In computer vision, to separate different regions of an image.",
-    "Approximation algorithms: Used as a subroutine in algorithms for NP-hard problems like the traveling salesman problem.",
+
+  visualization: `The visualization uses the following color coding:
+• Blue: Nodes in the current MST
+• Green: Edge being considered
+• Red: Edges in the MST
+• Yellow: Frontier edges (connected to MST but not yet chosen)
+• Gray: Unvisited edges
+• Numbers on edges: Edge weights`,
+
+  timeComplexity: `Time Complexity: O(E log V) with a binary heap, where E is the number of edges and V is the number of vertices.`,
+
+  spaceComplexity: `Space Complexity: O(V + E) to store the graph and priority queue.`,
+
+  realWorldApplications: [
+    "• Network design (minimizing cable length)",
+    "• Circuit design (minimizing wire length)",
+    "• Transportation planning (minimizing road construction costs)",
+    "• Cluster analysis in machine learning",
+    "• Network routing protocols",
+  ],
+
+  comparisonWithKruskal: `While both Prim's and Kruskal's algorithms find the MST, they work differently:
+• Prim's grows a single tree from a start node
+• Kruskal's can grow multiple trees that eventually merge
+• Prim's is often better for dense graphs
+• Kruskal's is often better for sparse graphs`,
+
+  tips: [
+    "• The choice of starting node doesn't affect the final MST",
+    "• Keep track of the frontier edges to quickly find the next edge to add",
+    "• Only consider edges that connect to unvisited nodes",
+    "• The algorithm naturally avoids cycles",
+    "• The MST will have exactly (V-1) edges when complete",
   ],
 };
 
-const primPseudocode = `function prim(graph):
-    let mst = empty set
-    let visited = {arbitrary start node}
-    let edges = all edges connected to start node
+const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
+  const steps = [];
+  const mstEdges = [];
+  const visited = new Set();
+  const frontier = new Set();
 
-    while visited does not include all nodes:
-        let (u, v) = cheapest edge from edges where u is in visited and v is not
-        add v to visited
-        add (u, v) to mst
-        add to edges all edges connected to v that aren't in visited
+  // Initial state
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: node.id === startNodeId,
+      })),
+      edges: edges.map((edge) => ({
+        ...edge,
+        state: EDGE_STATES.NORMAL,
+      })),
+      mstEdges: [],
+    },
+    explanation: `Starting Prim's algorithm from node ${startNodeId}. No edges in MST yet.`,
+    pseudoCodeLines: [1, 2, 3],
+  });
 
-    return mst`;
+  visited.add(startNodeId);
 
-export default function PrimsEducationPage() {
+  // Add initial edges to frontier
+  edges.forEach((edge) => {
+    if (edge.source === startNodeId || edge.target === startNodeId) {
+      frontier.add(edge);
+    }
+  });
+
+  while (frontier.size > 0) {
+    // Find minimum weight edge in frontier
+    let minEdge = Array.from(frontier).reduce((min, edge) =>
+      edge.weight < min.weight ? edge : min
+    );
+
+    // Remove chosen edge from frontier
+    frontier.delete(minEdge);
+
+    // Get the new node to be added
+    const newNode = !visited.has(minEdge.source)
+      ? minEdge.source
+      : minEdge.target;
+
+    // Skip if both nodes are already visited
+    if (visited.has(minEdge.source) && visited.has(minEdge.target)) {
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+          })),
+          edges: edges.map((edge) => ({
+            ...edge,
+            state: mstEdges.includes(edge)
+              ? EDGE_STATES.MST
+              : frontier.has(edge)
+              ? EDGE_STATES.FRONTIER
+              : edge === minEdge
+              ? EDGE_STATES.CONSIDERING
+              : EDGE_STATES.NORMAL,
+          })),
+          mstEdges: [...mstEdges],
+        },
+        explanation: `Skipping edge ${minEdge.source}-${minEdge.target} as it would create a cycle.`,
+        pseudoCodeLines: [7, 8],
+      });
+      continue;
+    }
+
+    // Add edge to MST
+    mstEdges.push(minEdge);
+    visited.add(newNode);
+
+    // Add new edges to frontier
+    edges.forEach((edge) => {
+      if (
+        (edge.source === newNode || edge.target === newNode) &&
+        !(visited.has(edge.source) && visited.has(edge.target))
+      ) {
+        frontier.add(edge);
+      }
+    });
+
+    // Create step
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+        })),
+        edges: edges.map((edge) => ({
+          ...edge,
+          state: mstEdges.includes(edge)
+            ? EDGE_STATES.MST
+            : frontier.has(edge)
+            ? EDGE_STATES.FRONTIER
+            : EDGE_STATES.NORMAL,
+        })),
+        mstEdges: [...mstEdges],
+      },
+      explanation:
+        `Added edge ${minEdge.source}-${minEdge.target} (weight ${minEdge.weight}) to MST. ` +
+        `Connected node ${newNode} to the tree.`,
+      pseudoCodeLines: [9, 10, 11],
+    });
+  }
+
+  return steps;
+};
+
+const generateRandomGraph = (numNodes) => {
+  const nodes = Array.from({ length: numNodes }, (_, i) => ({
+    id: String.fromCharCode(65 + i), // A, B, C, ...
+  }));
+
+  const edges = [];
+  // Generate random edges with weights
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      // Add edge with 70% probability
+      if (Math.random() < 0.7) {
+        edges.push({
+          source: nodes[i].id,
+          target: nodes[j].id,
+          weight: Math.floor(Math.random() * 15) + 1, // weights 1-15
+        });
+      }
+    }
+  }
+
+  return { nodes, edges };
+};
+
+export default function PrimEducationPage() {
   return (
     <EducationPageStructure
       title="Prim's Algorithm"
-      graphStates={[primStepsGraphA, primStepsGraphB]}
       conceptText={primConceptText}
       pseudocode={primPseudocode}
+      generateSteps={generatePrimSteps}
+      generateNewGraph={generateRandomGraph}
     />
   );
 }
