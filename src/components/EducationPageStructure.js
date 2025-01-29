@@ -788,6 +788,8 @@ export default function EducationPageStructure({
         ? [2, 3]
         : title.includes("Dijkstra")
         ? [2, 3, 4, 5, 6]
+        : title.includes("A*")
+        ? [2, 3, 4, 5, 6, 7]
         : [2, 3]
     );
 
