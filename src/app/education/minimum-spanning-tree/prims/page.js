@@ -29,11 +29,11 @@ const primConceptText = {
   introduction: `Prim's algorithm finds the minimum spanning tree (MST) of a weighted graph. Unlike Kruskal's algorithm which considers edges globally, Prim's grows a tree from a starting node by repeatedly adding the lowest-weight edge that connects a new node to the growing tree.`,
 
   keyCharacteristics: [
-    "• Starts from a single node and grows the MST one edge at a time",
-    "• Maintains a frontier of edges that could be added next",
-    "• Always chooses the lowest-weight edge that connects a new node",
-    "• Automatically avoids cycles by only connecting new nodes",
-    "• Runs until all nodes are connected",
+    "Starts from a single node and grows the MST one edge at a time",
+    "Maintains a frontier of edges that could be added next",
+    "Always chooses the lowest-weight edge that connects a new node",
+    "Automatically avoids cycles by only connecting new nodes",
+    "Runs until all nodes are connected",
   ],
 
   visualization: `The visualization uses the following color coding:
@@ -49,11 +49,11 @@ const primConceptText = {
   spaceComplexity: `Space Complexity: O(V + E) to store the graph and priority queue.`,
 
   realWorldApplications: [
-    "• Network design (minimizing cable length)",
-    "• Circuit design (minimizing wire length)",
-    "• Transportation planning (minimizing road construction costs)",
-    "• Cluster analysis in machine learning",
-    "• Network routing protocols",
+    "Network Design: Planning efficient computer networks",
+    "Circuit Design: Minimizing wire length in electronic circuits",
+    "Transportation: Planning road networks between cities",
+    "Utilities: Designing power and water distribution networks",
+    "Clustering: Used in some clustering algorithms",
   ],
 
   comparisonWithKruskal: `While both Prim's and Kruskal's algorithms find the MST, they work differently:
