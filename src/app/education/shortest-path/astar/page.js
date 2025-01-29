@@ -86,11 +86,29 @@ const generateAStarSteps = (initialNodes, edges) => {
     },
     explanation:
       "Initial state: Start node initialized with g=0, others with Infinity",
-    pseudoCodeLines: [2, 3, 4, 5, 6, 7],
+    pseudoCodeLines: [2],
+  });
+
+  // Initialize maps
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: false,
+        g: roundToTwo(gScore.get(node.id)),
+        h: roundToTwo(calculateHeuristic(node)),
+        f: roundToTwo(fScore.get(node.id)),
+        recentlyUpdated: false,
+      })),
+      edges,
+      currentNode: null,
+    },
+    explanation: "Initializing distance maps",
+    pseudoCodeLines: [4, 5, 6, 7],
   });
 
   while (openSet.size > 0) {
-    // Find node with lowest fScore in openSet
+    // Finding current node
     let current = null;
     let lowestFScore = Infinity;
 
@@ -149,10 +167,27 @@ const generateAStarSteps = (initialNodes, edges) => {
         edges,
         currentNode: current,
       },
-      explanation: `Processing node ${current} (f=${roundToTwo(
-        fScore.get(current)
-      )}, g=${roundToTwo(gScore.get(current))})`,
-      pseudoCodeLines: [9, 13],
+      explanation: `Removing node ${current} from open set and adding to closed set`,
+      pseudoCodeLines: [12, 13],
+    });
+
+    // Before processing neighbors
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          g: roundToTwo(gScore.get(node.id)),
+          h: roundToTwo(calculateHeuristic(node)),
+          f: roundToTwo(fScore.get(node.id)),
+          recentlyUpdated: false,
+          current: node.id === current,
+        })),
+        edges,
+        currentNode: current,
+      },
+      explanation: `Finding neighbors of node ${current}`,
+      pseudoCodeLines: [14],
     });
 
     // Process neighbors
@@ -189,12 +224,81 @@ const generateAStarSteps = (initialNodes, edges) => {
             edges,
             currentNode: current,
           },
+          explanation: `Calculating new path to ${neighbor.id} through ${current}`,
+          pseudoCodeLines: [15],
+        });
+
+        steps.push({
+          graphState: {
+            nodes: initialNodes.map((node) => ({
+              ...node,
+              visited: visited.has(node.id),
+              g: roundToTwo(gScore.get(node.id)),
+              h: roundToTwo(calculateHeuristic(node)),
+              f: roundToTwo(fScore.get(node.id)),
+              recentlyUpdated: node.id === neighbor.id,
+              current: node.id === current,
+            })),
+            edges,
+            currentNode: current,
+          },
           explanation: `Updated node ${neighbor.id}: g=${roundToTwo(
             tentativeGScore
           )}, f=${roundToTwo(fScore.get(neighbor.id))}`,
-          pseudoCodeLines: [15, 16, 17, 18, 19, 20],
+          pseudoCodeLines: [16, 17, 18, 19, 20],
         });
+
+        // When adding new node to openSet
+        if (!openSet.has(neighbor.id)) {
+          steps.push({
+            graphState: {
+              nodes: initialNodes.map((node) => ({
+                ...node,
+                visited: visited.has(node.id),
+                g: roundToTwo(gScore.get(node.id)),
+                h: roundToTwo(calculateHeuristic(node)),
+                f: roundToTwo(fScore.get(node.id)),
+                recentlyUpdated: node.id === neighbor.id,
+                current: node.id === current,
+              })),
+              edges,
+              currentNode: current,
+            },
+            explanation: `Adding new node ${neighbor.id} to open set`,
+            pseudoCodeLines: [21],
+          });
+        }
       }
+    }
+
+    // At the end, before returning steps
+    if (current === goalNode.id) {
+      // Reconstruct and highlight path
+      const path = [];
+      let currentPath = current;
+      while (currentPath) {
+        path.unshift(currentPath);
+        currentPath = cameFrom.get(currentPath);
+      }
+
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            g: roundToTwo(gScore.get(node.id)),
+            h: roundToTwo(calculateHeuristic(node)),
+            f: roundToTwo(fScore.get(node.id)),
+            recentlyUpdated: false,
+            current: node.id === current,
+            inPath: path.includes(node.id),
+          })),
+          edges,
+          currentNode: current,
+        },
+        explanation: "Reconstructing shortest path from start to goal",
+        pseudoCodeLines: [22, 23],
+      });
     }
   }
 
