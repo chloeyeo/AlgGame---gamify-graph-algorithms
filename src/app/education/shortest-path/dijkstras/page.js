@@ -34,18 +34,17 @@ const dijkstraPseudocode = `function DijkstraShortestPath(Graph, source):
         previous[v] := undefined
         add v to unvisited
     distance[source] := 0
-    
     while unvisited is not empty:
         current := node in unvisited with minimum distance
         if distance[current] = infinity:
-            break
+            break  // All remaining nodes are unreachable
         remove current from unvisited
-        
         for each neighbor v of current:
             newDistance := distance[current] + weight(current, v)
             if newDistance < distance[v]:
                 distance[v] := newDistance
-                previous[v] := current`;
+                previous[v] := current
+    return distance, previous  // Return shortest paths tree`;
 
 const generateDijkstraSteps = (initialNodes, edges) => {
   const steps = [];
@@ -59,7 +58,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
     previous.set(node.id, null);
   });
 
-  // Initial state
+  // Initial state - initialization steps
   steps.push({
     graphState: {
       nodes: initialNodes.map((node) => ({
@@ -91,6 +90,22 @@ const generateDijkstraSteps = (initialNodes, edges) => {
   });
 
   while (visited.size < initialNodes.length) {
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          distance: distances.get(node.id),
+          recentlyUpdated: false,
+          current: false,
+        })),
+        edges,
+        currentNode: null,
+      },
+      explanation: "Starting new iteration of main loop",
+      pseudoCodeLines: [7],
+    });
+
     // Find unvisited node with minimum distance
     let minDistance = Infinity;
     let current = null;
@@ -100,6 +115,22 @@ const generateDijkstraSteps = (initialNodes, edges) => {
         minDistance = distances.get(node.id);
         current = node.id;
       }
+    });
+
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          distance: distances.get(node.id),
+          recentlyUpdated: false,
+          current: node.id === current,
+        })),
+        edges,
+        currentNode: current,
+      },
+      explanation: `Finding unvisited node with minimum distance`,
+      pseudoCodeLines: [8],
     });
 
     if (!current || distances.get(current) === Infinity) {
@@ -116,27 +147,10 @@ const generateDijkstraSteps = (initialNodes, edges) => {
           currentNode: null,
         },
         explanation: "No more reachable nodes. Algorithm complete.",
-        pseudoCodeLines: [10, 11],
+        pseudoCodeLines: [9, 10],
       });
       break;
     }
-
-    // Finding minimum distance node
-    steps.push({
-      graphState: {
-        nodes: initialNodes.map((node) => ({
-          ...node,
-          visited: visited.has(node.id),
-          distance: distances.get(node.id),
-          recentlyUpdated: false,
-          current: node.id === current,
-        })),
-        edges,
-        currentNode: current,
-      },
-      explanation: `Finding unvisited node with minimum distance`,
-      pseudoCodeLines: [8, 9],
-    });
 
     // Mark as visited
     visited.add(current);
@@ -153,7 +167,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
         currentNode: current,
       },
       explanation: `Marking node ${current} as visited`,
-      pseudoCodeLines: [12],
+      pseudoCodeLines: [11],
     });
 
     // Process neighbors
@@ -177,7 +191,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
         currentNode: current,
       },
       explanation: `Looking at neighbors of node ${current}`,
-      pseudoCodeLines: [14],
+      pseudoCodeLines: [12],
     });
 
     for (const neighbor of neighbors) {
@@ -197,7 +211,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
             currentNode: current,
           },
           explanation: `Calculating new distance to ${neighbor.id}`,
-          pseudoCodeLines: [15],
+          pseudoCodeLines: [13],
         });
 
         if (newDistance < distances.get(neighbor.id)) {
@@ -214,7 +228,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
               currentNode: current,
             },
             explanation: `Found shorter path to ${neighbor.id}`,
-            pseudoCodeLines: [16],
+            pseudoCodeLines: [14],
           });
 
           distances.set(neighbor.id, newDistance);
@@ -233,7 +247,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
               currentNode: current,
             },
             explanation: `Updated distance to ${neighbor.id}: ${newDistance} through node ${current}`,
-            pseudoCodeLines: [17, 18],
+            pseudoCodeLines: [15, 16],
           });
         }
       }
