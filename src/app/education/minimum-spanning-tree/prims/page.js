@@ -16,6 +16,7 @@ const primPseudocode = `function Prim(graph, startNode):
     frontier = all edges connected to startNode
     while frontier is not empty:
         minEdge = edge with minimum weight in frontier
+        remove minEdge from frontier
         newNode = unvisited node of minEdge
         if both nodes of minEdge are visited:
             continue
@@ -90,7 +91,7 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
       mstEdges: [],
     },
     explanation: `Starting Prim's algorithm from node ${startNodeId}. No edges in MST yet.`,
-    pseudoCodeLines: [1, 2, 3],
+    pseudoCodeLines: [1, 2, 3, 4],
   });
 
   visited.add(startNodeId);
@@ -103,20 +104,15 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
   });
 
   while (frontier.size > 0) {
-    // Find minimum weight edge in frontier
     let minEdge = Array.from(frontier).reduce((min, edge) =>
       edge.weight < min.weight ? edge : min
     );
 
-    // Remove chosen edge from frontier
     frontier.delete(minEdge);
-
-    // Get the new node to be added
     const newNode = !visited.has(minEdge.source)
       ? minEdge.source
       : minEdge.target;
 
-    // Skip if both nodes are already visited
     if (visited.has(minEdge.source) && visited.has(minEdge.target)) {
       steps.push({
         graphState: {
@@ -124,25 +120,28 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
             ...node,
             visited: visited.has(node.id),
           })),
-          edges: edges.map((edge) => ({
-            ...edge,
-            state: mstEdges.includes(edge)
+          edges: edges.map((e) => ({
+            ...e,
+            state: mstEdges.some(
+              (mstEdge) =>
+                (mstEdge.source === e.source && mstEdge.target === e.target) ||
+                (mstEdge.source === e.target && mstEdge.target === e.source)
+            )
               ? EDGE_STATES.MST
-              : frontier.has(edge)
-              ? EDGE_STATES.FRONTIER
-              : edge === minEdge
+              : e === minEdge
               ? EDGE_STATES.CONSIDERING
+              : frontier.has(e)
+              ? EDGE_STATES.FRONTIER
               : EDGE_STATES.NORMAL,
           })),
           mstEdges: [...mstEdges],
         },
         explanation: `Skipping edge ${minEdge.source}-${minEdge.target} as it would create a cycle.`,
-        pseudoCodeLines: [7, 8],
+        pseudoCodeLines: [9, 10],
       });
       continue;
     }
 
-    // Add edge to MST
     mstEdges.push(minEdge);
     visited.add(newNode);
 
@@ -156,27 +155,30 @@ const generatePrimSteps = (initialNodes, edges, startNodeId = "A") => {
       }
     });
 
-    // Create step
     steps.push({
       graphState: {
         nodes: initialNodes.map((node) => ({
           ...node,
           visited: visited.has(node.id),
         })),
-        edges: edges.map((edge) => ({
-          ...edge,
-          state: mstEdges.includes(edge)
+        edges: edges.map((e) => ({
+          ...e,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
             ? EDGE_STATES.MST
-            : frontier.has(edge)
+            : e === minEdge
+            ? EDGE_STATES.CONSIDERING
+            : frontier.has(e)
             ? EDGE_STATES.FRONTIER
             : EDGE_STATES.NORMAL,
         })),
         mstEdges: [...mstEdges],
       },
-      explanation:
-        `Added edge ${minEdge.source}-${minEdge.target} (weight ${minEdge.weight}) to MST. ` +
-        `Connected node ${newNode} to the tree.`,
-      pseudoCodeLines: [9, 10, 11],
+      explanation: `Added edge ${minEdge.source}-${minEdge.target} (weight ${minEdge.weight}) to MST. Connected node ${newNode} to the tree.`,
+      pseudoCodeLines: [11, 12, 13],
     });
   }
 

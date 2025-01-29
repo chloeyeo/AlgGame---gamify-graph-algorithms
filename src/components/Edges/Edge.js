@@ -46,8 +46,14 @@ const Edges = {
       return false;
     };
 
-    const getEdgeColor = (d, graphState, COLORS, isKruskalsPage) => {
-      if (isKruskalsPage) {
+    const getEdgeColor = (
+      d,
+      graphState,
+      COLORS,
+      isKruskalsPage,
+      isPrimsPage
+    ) => {
+      if (isKruskalsPage || isPrimsPage) {
         switch (d.state) {
           case "considering":
             return COLORS.CURRENT_NODE; // Green color for edges being considered
@@ -55,6 +61,8 @@ const Edges = {
             return COLORS.EDGE_MST; // Red color for edges in MST
           case "cycle":
             return COLORS.EDGE_PATH; // Yellow/Orange color for cycle-creating edges
+          case "frontier":
+            return COLORS.EDGE_PATH; // Yellow color for frontier edges in Prim's
           default:
             return COLORS.EDGE_NORMAL; // Gray color for normal edges
         }
@@ -96,7 +104,7 @@ const Edges = {
           )
           .attr("fill", "none")
           .attr("stroke", (d) =>
-            getEdgeColor(d, graphState, COLORS, isKruskalsPage)
+            getEdgeColor(d, graphState, COLORS, isKruskalsPage, isPrimsPage)
           )
           .attr("stroke-width", (d) =>
             d.state === "considering" ||
@@ -123,7 +131,7 @@ const Edges = {
         if (!isFordFulkersonPage && !isEdmondsKarpPage) {
           elem
             .attr("stroke", (d) =>
-              getEdgeColor(d, graphState, COLORS, isKruskalsPage)
+              getEdgeColor(d, graphState, COLORS, isKruskalsPage, isPrimsPage)
             )
             .attr("stroke-width", (d) =>
               d.state === "considering" ||
