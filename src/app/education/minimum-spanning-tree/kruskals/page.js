@@ -2,6 +2,13 @@
 
 import EducationPageStructure from "@/components/EducationPageStructure";
 
+const EDGE_STATES = {
+  NORMAL: "normal", // gray
+  CONSIDERING: "checking", // green
+  MST: "mst", // red
+  CYCLE: "cycle", // orange/yellow
+};
+
 const kruskalStepsGraphA = [
   {
     graphState: {
@@ -880,8 +887,7 @@ const generateKruskalSteps = (initialNodes, edges) => {
       })),
       edges: edges.map((edge) => ({
         ...edge,
-        highlight: false,
-        cycleEdge: false,
+        state: EDGE_STATES.NORMAL,
       })),
       mstEdges: [],
     },
@@ -903,10 +909,18 @@ const generateKruskalSteps = (initialNodes, edges) => {
         })),
         edges: edges.map((e) => ({
           ...e,
-          highlight: e.source === edge.source && e.target === edge.target,
-          cycleEdge: false,
+          state: mstEdges.some(
+            (mstEdge) =>
+              (mstEdge.source === e.source && mstEdge.target === e.target) ||
+              (mstEdge.source === e.target && mstEdge.target === e.source)
+          )
+            ? EDGE_STATES.MST
+            : e.source === edge.source && e.target === edge.target
+            ? EDGE_STATES.CONSIDERING
+            : EDGE_STATES.NORMAL,
         })),
         mstEdges,
+        currentEdge: edge,
       },
       explanation: `Considering edge ${edge.source}-${edge.target} with weight ${edge.weight}`,
       pseudoCodeLines: [5, 6],
@@ -916,7 +930,7 @@ const generateKruskalSteps = (initialNodes, edges) => {
     const targetRoot = ds.find(edge.target);
 
     if (sourceRoot === targetRoot) {
-      // Would create cycle - show this edge in red
+      // Would create cycle
       steps.push({
         graphState: {
           nodes: initialNodes.map((node) => ({
@@ -927,13 +941,21 @@ const generateKruskalSteps = (initialNodes, edges) => {
           })),
           edges: edges.map((e) => ({
             ...e,
-            highlight: false,
-            cycleEdge: e.source === edge.source && e.target === edge.target,
+            state: mstEdges.some(
+              (mstEdge) =>
+                (mstEdge.source === e.source && mstEdge.target === e.target) ||
+                (mstEdge.source === e.target && mstEdge.target === e.source)
+            )
+              ? EDGE_STATES.MST
+              : e.source === edge.source && e.target === edge.target
+              ? EDGE_STATES.CYCLE
+              : EDGE_STATES.NORMAL,
           })),
           mstEdges,
+          cycleEdges: [edge.source, edge.target], // Add this to show the cycle
         },
         explanation: `Cannot add edge ${edge.source}-${edge.target} as it would create a cycle`,
-        pseudoCodeLines: [6],
+        pseudoCodeLines: [7],
       });
     } else {
       // Add edge to MST
@@ -950,13 +972,18 @@ const generateKruskalSteps = (initialNodes, edges) => {
           })),
           edges: edges.map((e) => ({
             ...e,
-            highlight: false,
-            cycleEdge: false,
+            state: mstEdges.some(
+              (mstEdge) =>
+                (mstEdge.source === e.source && mstEdge.target === e.target) ||
+                (mstEdge.source === e.target && mstEdge.target === e.source)
+            )
+              ? EDGE_STATES.MST
+              : EDGE_STATES.NORMAL,
           })),
           mstEdges: [...mstEdges],
         },
         explanation: `Added edge ${edge.source}-${edge.target} to MST. Total edges: ${mstEdges.length}`,
-        pseudoCodeLines: [7, 8],
+        pseudoCodeLines: [8, 9],
       });
     }
   }

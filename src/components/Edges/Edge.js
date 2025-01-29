@@ -46,6 +46,23 @@ const Edges = {
       return false;
     };
 
+    const getEdgeColor = (d, graphState, COLORS, isKruskalsPage) => {
+      if (isKruskalsPage) {
+        switch (d.state) {
+          case "considering":
+            return COLORS.CURRENT_NODE; // Green color for edges being considered
+          case "mst":
+            return COLORS.EDGE_MST; // Red color for edges in MST
+          case "cycle":
+            return COLORS.EDGE_PATH; // Yellow/Orange color for cycle-creating edges
+          default:
+            return COLORS.EDGE_NORMAL; // Gray color for normal edges
+        }
+      }
+
+      return COLORS.EDGE_NORMAL;
+    };
+
     edgeGroups.each(function (d, i) {
       const elem = d3.select(this);
       const sourceNode = nodes.find((n) => n.id === d.source);
@@ -79,10 +96,22 @@ const Edges = {
           )
           .attr("fill", "none")
           .attr("stroke", (d) =>
-            isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
+            getEdgeColor(d, graphState, COLORS, isKruskalsPage)
           )
-          .attr("stroke-width", (d) => (isActiveEdge(d) ? 4 : 1))
-          .attr("opacity", (d) => (isActiveEdge(d) ? 1 : 0.3));
+          .attr("stroke-width", (d) =>
+            d.state === "considering" ||
+            d.state === "mst" ||
+            d.state === "cycle"
+              ? 6.5
+              : 4
+          )
+          .attr("opacity", (d) =>
+            d.state === "considering" ||
+            d.state === "mst" ||
+            d.state === "cycle"
+              ? 1
+              : 0.7
+          );
       } else {
         // Straight lines for other edges
         elem
@@ -94,10 +123,22 @@ const Edges = {
         if (!isFordFulkersonPage && !isEdmondsKarpPage) {
           elem
             .attr("stroke", (d) =>
-              isActiveEdge(d) ? COLORS.EDGE_MST : COLORS.EDGE_NORMAL
+              getEdgeColor(d, graphState, COLORS, isKruskalsPage)
             )
-            .attr("stroke-width", (d) => (isActiveEdge(d) ? 6.5 : 4))
-            .attr("opacity", (d) => (isActiveEdge(d) ? 1 : 0.7));
+            .attr("stroke-width", (d) =>
+              d.state === "considering" ||
+              d.state === "mst" ||
+              d.state === "cycle"
+                ? 6.5
+                : 4
+            )
+            .attr("opacity", (d) =>
+              d.state === "considering" ||
+              d.state === "mst" ||
+              d.state === "cycle"
+                ? 1
+                : 0.7
+            );
         }
       }
     });
@@ -199,11 +240,7 @@ const Edges = {
 
       // Create edge items
       sortedEdges.forEach((edge, index) => {
-        const isUsed = graphState.mstEdges.some(
-          (e) =>
-            (e.source === edge.source && e.target === edge.target) ||
-            (e.source === edge.target && e.target === edge.source)
-        );
+        const isInMST = edge.state === "mst";
 
         const edgeGroup = edgesList
           .append("g")
@@ -216,9 +253,9 @@ const Edges = {
           .attr("y1", 0)
           .attr("x2", 50)
           .attr("y2", 0)
-          .attr("stroke", isUsed ? "#ccc" : COLORS.EDGE_NORMAL)
+          .attr("stroke", isInMST ? "#ccc" : COLORS.EDGE_NORMAL)
           .attr("stroke-width", 3)
-          .attr("opacity", isUsed ? 0.3 : 1);
+          .attr("opacity", isInMST ? 0.3 : 1);
 
         // Edge label
         const edgeLabel = edgeGroup
@@ -226,7 +263,7 @@ const Edges = {
           .attr("x", 60)
           .attr("y", 5)
           .attr("font-size", "14px")
-          .attr("opacity", isUsed ? 0.3 : 1);
+          .attr("opacity", isInMST ? 0.3 : 1);
 
         // Edge vertices
         edgeLabel.append("tspan").text(`${edge.source}-${edge.target}`);
@@ -235,7 +272,7 @@ const Edges = {
         edgeLabel.append("tspan").attr("x", 110).text(`(${edge.weight})`);
 
         // Strike-through line for used edges
-        if (isUsed) {
+        if (isInMST) {
           const textWidth = 80; // Approximate width of the text
           edgeGroup
             .append("line")
