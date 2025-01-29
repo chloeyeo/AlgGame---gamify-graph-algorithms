@@ -33,8 +33,6 @@ export default function LayoutContent({ children }) {
     "/game/minimum-spanning-tree/prims",
     "/education/network-flow/ford-fulkerson",
     "/game/network-flow/ford-fulkerson",
-    "/education/network-flow/edmonds-karp",
-    "/game/network-flow/edmonds-karp",
     "/education/matching/hungarian-kuhn-munkres",
     "/game/matching/hungarian-kuhn-munkres",
     "/auth",

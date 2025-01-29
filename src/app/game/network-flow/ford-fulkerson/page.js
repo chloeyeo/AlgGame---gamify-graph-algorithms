@@ -249,7 +249,10 @@ const FordFulkersonGamePage = () => {
           <div className="bg-white border border-gray-300 rounded-lg shadow-sm">
             <div className="flex items-center justify-center h-[27rem] relative">
               <GraphVisualisation
-                graphState={graphState}
+                graphState={{
+                  ...graphState,
+                  links: graphState.edges,
+                }}
                 onNodeClick={handleNodeClick}
                 mode="game"
               />

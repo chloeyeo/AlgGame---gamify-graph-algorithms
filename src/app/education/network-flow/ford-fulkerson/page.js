@@ -3,306 +3,244 @@
 import React from "react";
 import EducationPageStructure from "@/components/EducationPageStructure";
 
-const FordFulkersonEducationPage = () => {
-  const conceptText = {
-    introduction: `Ford-Fulkerson is a method for computing the maximum flow in a flow network. A flow network is simply a graph whose edges have a capacity for flow. Maximum flow is the maximum amount of anything that you can move from a starting node (source) to an ending node (sink).`,
-    keyCharacteristics: [
-      "Flow Equilibrium: At each node (except source and sink), inflow must equal outflow",
-      "Augmenting Paths: Can use either non-full forward edges or non-empty backward edges",
-      "Bottleneck Capacity: Determined by the edge with smallest remaining capacity in path",
-      "Residual Graph: Shows remaining capacity and possible flow reversals",
-    ],
-    applications: [
-      "Network routing and bandwidth allocation",
-      "Supply chain optimization",
-      "Pipeline systems",
-      "Traffic flow management",
-    ],
-  };
+// Helper functions
+const isEdgeInPath = (edge, path) => {
+  if (!path || path.length < 2) return false;
+  for (let i = 0; i < path.length - 1; i++) {
+    if (
+      (edge.source === path[i] && edge.target === path[i + 1]) ||
+      (edge.source === path[i + 1] && edge.target === path[i])
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
 
-  const pseudocode = `FORD-FULKERSON Algorithm Steps:
-1. Start by setting all flows to zero
-2. While there exists an augmenting path from source to sink:
-   a. Find an augmenting path
-   b. Compute the bottleneck capacity
-   c. Update flows along the path
-3. Repeat until no augmenting path exists`;
+const findPath = (source, sink, edges, flows) => {
+  const visited = new Set();
+  const path = [];
 
-  // Helper function to determine if an edge is part of current path
-  const isEdgeInPath = (edge, path) => {
-    if (!path || path.length < 2) return false;
-    for (let i = 0; i < path.length - 1; i++) {
-      if (
-        (edge.source === path[i] && edge.target === path[i + 1]) ||
-        (edge.source === path[i + 1] && edge.target === path[i]) // Check for reverse edges
-      ) {
-        return true;
+  const dfs = (node) => {
+    if (node === sink) return true;
+    visited.add(node);
+
+    for (const edge of edges) {
+      const neighbor =
+        edge.source === node
+          ? edge.target
+          : edge.target === node
+          ? edge.source
+          : null;
+
+      if (!neighbor || visited.has(neighbor)) continue;
+
+      const residualCapacity =
+        edge.source === node
+          ? edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0)
+          : flows.get(`${edge.target}-${edge.source}`) || 0;
+
+      if (residualCapacity > 0) {
+        path.push(neighbor);
+        if (dfs(neighbor)) return true;
+        path.pop();
       }
     }
     return false;
   };
 
-  const steps = [
-    // Step 1: Initial State
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ],
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 0 },
-          { source: "S", target: "C", capacity: 10, flow: 0 },
-          { source: "A", target: "B", capacity: 4, flow: 0 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 0 },
-          { source: "B", target: "T", capacity: 10, flow: 0 },
-          { source: "C", target: "D", capacity: 9, flow: 0 },
-          { source: "D", target: "B", capacity: 6, flow: 0 },
-          { source: "D", target: "T", capacity: 10, flow: 0 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: false,
-        })),
-        currentPath: [],
-        maxFlow: 0,
-      },
-      explanation: `Initial state of the network:
-• All edges show current flow/capacity (0/capacity for all edges)
-• Flow equilibrium must be maintained at each node
-• Look for first augmenting path from S to T`,
-    },
-    // Step 2: First Path (S→A→D→T)
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ].map((node) => ({
-          ...node,
-          highlight: ["S", "A", "D", "T"].includes(node.id),
-        })),
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 8 },
-          { source: "S", target: "C", capacity: 10, flow: 0 },
-          { source: "A", target: "B", capacity: 4, flow: 0 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 8 },
-          { source: "B", target: "T", capacity: 10, flow: 0 },
-          { source: "C", target: "D", capacity: 9, flow: 0 },
-          { source: "D", target: "B", capacity: 6, flow: 0 },
-          { source: "D", target: "T", capacity: 10, flow: 8 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: isEdgeInPath(edge, ["S", "A", "D", "T"]),
-        })),
-        currentPath: ["S", "A", "D", "T"],
-        maxFlow: 8,
-      },
-      explanation: `Found path S→A→D→T:
-• Bottleneck capacity = min(10, 8, 10) = 8
-• Updated flows: S→A: 8/10, A→D: 8/8, D→T: 8/10
-• Current maximum flow: 8 units`,
-    },
-    // Step 3: Second Path (S→C→D→T)
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ].map((node) => ({
-          ...node,
-          highlight: ["S", "C", "D", "T"].includes(node.id),
-        })),
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 8 },
-          { source: "S", target: "C", capacity: 10, flow: 2 },
-          { source: "A", target: "B", capacity: 4, flow: 0 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 8 },
-          { source: "B", target: "T", capacity: 10, flow: 0 },
-          { source: "C", target: "D", capacity: 9, flow: 2 },
-          { source: "D", target: "B", capacity: 6, flow: 0 },
-          { source: "D", target: "T", capacity: 10, flow: 10 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: isEdgeInPath(edge, ["S", "C", "D", "T"]),
-        })),
-        currentPath: ["S", "C", "D", "T"],
-        maxFlow: 10,
-      },
-      explanation: `Found path S→C→D→T:
-• Bottleneck capacity = 2 (due to remaining capacities)
-• Updated flows: S→C: 2/10, C→D: 2/9, D→T: 10/10
-• Note: D→T is now saturated at 10/10
-• Current maximum flow: 10 units`,
-    },
-    // Step 4: Third Path (S→C→D→A→B→T)
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ].map((node) => ({
-          ...node,
-          highlight: ["S", "C", "D", "A", "B", "T"].includes(node.id),
-        })),
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 8 },
-          { source: "S", target: "C", capacity: 10, flow: 6 },
-          { source: "A", target: "B", capacity: 4, flow: 4 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 4 },
-          { source: "B", target: "T", capacity: 10, flow: 4 },
-          { source: "C", target: "D", capacity: 9, flow: 6 },
-          { source: "D", target: "B", capacity: 6, flow: 0 },
-          { source: "D", target: "T", capacity: 10, flow: 10 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: isEdgeInPath(edge, ["S", "C", "D", "A", "B", "T"]),
-        })),
-        currentPath: ["S", "C", "D", "A", "B", "T"],
-        maxFlow: 14,
-      },
-      explanation: `Found path using backward edge (D→A):
-• Path includes backward flow from D to A
-• Bottleneck capacity = 2 from remaining capacities
-• Updated flows match diagram values
-• Current maximum flow: 14 units
-• Flow equilibrium maintained at all nodes`,
-    },
-    // Step 5: Fourth Path (S→A→D→B→T)
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ].map((node) => ({
-          ...node,
-          highlight: ["S", "A", "D", "B", "T"].includes(node.id),
-        })),
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 10 },
-          { source: "S", target: "C", capacity: 10, flow: 6 },
-          { source: "A", target: "B", capacity: 4, flow: 4 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 6 },
-          { source: "B", target: "T", capacity: 10, flow: 6 },
-          { source: "C", target: "D", capacity: 9, flow: 6 },
-          { source: "D", target: "B", capacity: 6, flow: 2 },
-          { source: "D", target: "T", capacity: 10, flow: 10 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: isEdgeInPath(edge, ["S", "A", "D", "B", "T"]),
-        })),
-        currentPath: ["S", "A", "D", "B", "T"],
-        maxFlow: 16,
-      },
-      explanation: `Found path S→A→D→B→T:
-• Bottleneck capacity = min(10-8, 8-6, 6-0, 10-4) = 2
-• Updated flows: S→A: 10/10, A→D: 6/8, D→B: 2/6, B→T: 6/10
-• Current maximum flow: 16 units`,
-    },
-    // Step 6: Fifth Path (S→C→D→B→T)
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ].map((node) => ({
-          ...node,
-          highlight: ["S", "C", "D", "B", "T"].includes(node.id),
-        })),
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 10 },
-          { source: "S", target: "C", capacity: 10, flow: 9 },
-          { source: "A", target: "B", capacity: 4, flow: 4 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 6 },
-          { source: "B", target: "T", capacity: 10, flow: 9 },
-          { source: "C", target: "D", capacity: 9, flow: 9 },
-          { source: "D", target: "B", capacity: 6, flow: 5 },
-          { source: "D", target: "T", capacity: 10, flow: 10 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: isEdgeInPath(edge, ["S", "C", "D", "B", "T"]),
-        })),
-        currentPath: ["S", "C", "D", "B", "T"],
-        maxFlow: 19,
-      },
-      explanation: `Found path S→C→D→B→T:
-• Bottleneck capacity = min(10-9, 9-9, 6-5, 10-9) = 1
-• Updated flows: S→C: 9/10, C→D: 9/9, D→B: 5/6, B→T: 9/10
-• Current maximum flow: 19 units`,
-    },
-    // Step 7: Final State
-    {
-      graphState: {
-        nodes: [
-          { id: "S" },
-          { id: "A" },
-          { id: "B" },
-          { id: "C" },
-          { id: "D" },
-          { id: "T" },
-        ],
-        edges: [
-          { source: "S", target: "A", capacity: 10, flow: 10 },
-          { source: "S", target: "C", capacity: 10, flow: 9 },
-          { source: "A", target: "B", capacity: 4, flow: 4 },
-          { source: "A", target: "C", capacity: 2, flow: 0 },
-          { source: "A", target: "D", capacity: 8, flow: 6 },
-          { source: "B", target: "T", capacity: 10, flow: 9 },
-          { source: "C", target: "D", capacity: 9, flow: 9 },
-          { source: "D", target: "B", capacity: 6, flow: 5 },
-          { source: "D", target: "T", capacity: 10, flow: 10 },
-        ].map((edge) => ({
-          ...edge,
-          highlight: false,
-        })),
-        currentPath: [],
-        maxFlow: 19,
-      },
-      explanation: `Final state - no more augmenting paths possible:
-• S→C has 1 unit remaining capacity but C→D is full
-• Backward edge C→A is empty
-• No valid path from S to T exists
-• Final maximum flow: 19 units
+  path.push(source);
+  if (dfs(source)) return path;
+  return null;
+};
 
-Note: Different path choices are valid as long as they result in the same maximum flow of 19 units.`,
+const calculateBottleneck = (path, edges, flows) => {
+  let bottleneck = Infinity;
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const current = path[i];
+    const next = path[i + 1];
+
+    const edge = edges.find(
+      (e) =>
+        (e.source === current && e.target === next) ||
+        (e.source === next && e.target === current)
+    );
+
+    if (edge) {
+      let residualCapacity;
+      if (edge.source === current) {
+        residualCapacity =
+          edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0);
+      } else {
+        residualCapacity = flows.get(`${edge.target}-${edge.source}`) || 0;
+      }
+      bottleneck = Math.min(bottleneck, residualCapacity);
+    }
+  }
+
+  return bottleneck;
+};
+
+const updateFlows = (path, bottleneck, flows) => {
+  for (let i = 0; i < path.length - 1; i++) {
+    const current = path[i];
+    const next = path[i + 1];
+
+    const forwardKey = `${current}-${next}`;
+    const backwardKey = `${next}-${current}`;
+
+    const existingForwardFlow = flows.get(forwardKey) || 0;
+    const existingBackwardFlow = flows.get(backwardKey) || 0;
+
+    if (existingBackwardFlow > 0) {
+      flows.set(backwardKey, existingBackwardFlow - bottleneck);
+    } else {
+      flows.set(forwardKey, existingForwardFlow + bottleneck);
+    }
+  }
+};
+
+const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
+  const steps = [];
+  const flows = new Map();
+  edges.forEach((e) => flows.set(`${e.source}-${e.target}`, 0));
+
+  // Initial state with both graphs
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        highlight: false,
+      })),
+      networkEdges: edges.map((edge) => ({
+        ...edge,
+        flow: 0,
+        highlight: false,
+      })),
+      residualEdges: edges.map((edge) => ({
+        ...edge,
+        flow: 0,
+        capacity: edge.capacity,
+        highlight: false,
+      })),
+      currentPath: [],
+      maxFlow: 0,
+      showResidual: false, // Toggle between network and residual views
     },
-  ];
+    explanation: `Initial state of the network:\n• Left: Network Graph shows current flows\n• Right: Residual Graph shows available capacities\n• Looking for augmenting path from ${source} to ${sink}\n• Current flow: 0 units`,
+    pseudoCodeLines: [1],
+  });
+
+  let maxFlow = 0;
+  let path = findPath(source, sink, edges, flows);
+
+  while (path) {
+    const bottleneck = calculateBottleneck(path, edges, flows);
+    maxFlow += bottleneck;
+    updateFlows(path, bottleneck, flows);
+
+    // Add step showing both graphs
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          highlight: path.includes(node.id),
+        })),
+        networkEdges: edges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: isEdgeInPath(edge, path),
+        })),
+        residualEdges: edges.map((edge) => {
+          const forwardFlow = flows.get(`${edge.source}-${edge.target}`) || 0;
+          const backwardFlow = flows.get(`${edge.target}-${edge.source}`) || 0;
+          return {
+            ...edge,
+            forwardCapacity: edge.capacity - forwardFlow,
+            backwardCapacity: forwardFlow,
+            highlight: isEdgeInPath(edge, path),
+          };
+        }),
+        currentPath: path,
+        maxFlow,
+        showResidual: false,
+      },
+      explanation: `Found augmenting path ${path.join(
+        "→"
+      )}:\n• Bottleneck capacity: ${bottleneck}\n• Current maximum flow: ${maxFlow} units`,
+      pseudoCodeLines: [2, "a", "b", "c"],
+    });
+
+    path = findPath(source, sink, edges, flows);
+  }
+
+  // Final state
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        highlight: false,
+      })),
+      networkEdges: edges.map((edge) => ({
+        ...edge,
+        flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+        highlight: false,
+      })),
+      residualEdges: edges.map((edge) => {
+        const forwardFlow = flows.get(`${edge.source}-${edge.target}`) || 0;
+        return {
+          ...edge,
+          forwardCapacity: edge.capacity - forwardFlow,
+          backwardCapacity: forwardFlow,
+          highlight: false,
+        };
+      }),
+      currentPath: [],
+      maxFlow,
+      showResidual: false,
+    },
+    explanation: `Algorithm complete:\n• No more augmenting paths found\n• Maximum flow achieved: ${maxFlow} units`,
+    pseudoCodeLines: [3],
+  });
+
+  return steps;
+};
+
+const FordFulkersonEducationPage = () => {
+  const conceptText = {
+    introduction: `The Ford-Fulkerson method is a fundamental algorithm for solving the maximum flow problem in a flow network. This implementation uses the Edmonds-Karp heuristic, which means we always find the shortest augmenting path using Breadth-First Search (BFS). This guarantees a polynomial time complexity of O(VE²) and prevents pathological cases that could occur with arbitrary path selection.`,
+    keyCharacteristics: [
+      "Uses BFS to find shortest augmenting paths",
+      "Maintains both network and residual graphs",
+      "Path length measured by number of edges",
+      "O(VE²) runtime guarantee",
+      "Flow Equilibrium: At each node (except source and sink), inflow equals outflow",
+      "Can use non-full forward edges or non-empty backward edges",
+    ],
+    applications: [
+      "Network routing optimization",
+      "Bandwidth allocation in telecommunications",
+      "Supply chain management",
+      "Traffic flow systems",
+      "Pipeline distribution networks",
+    ],
+  };
+
+  const pseudocode = `FORD-FULKERSON Algorithm:
+1. Initialize all flows to zero
+2. While there exists an augmenting path:
+   a. Find any augmenting path
+   b. Calculate bottleneck capacity
+   c. Update flows along the path
+3. Return total flow when no path exists`;
 
   return (
     <EducationPageStructure
       title="Ford-Fulkerson Algorithm"
-      graphStates={[steps]}
       conceptText={conceptText}
       pseudocode={pseudocode}
+      generateSteps={(nodes, edges) => generateSteps(nodes, edges, "S", "T")}
     />
   );
 };

@@ -20,6 +20,12 @@ const Edges = {
       onNodeClick,
     }
   ) => {
+    // Add early validation
+    if (!Array.isArray(links)) {
+      console.warn("Links must be an array");
+      return;
+    }
+
     // Get network flow positions if needed
     const networkFlowNodePositions =
       isFordFulkersonPage || isEdmondsKarpPage
@@ -71,18 +77,66 @@ const Edges = {
       return COLORS.EDGE_NORMAL;
     };
 
+    const getNodePositions = (
+      sourceNode,
+      targetNode,
+      networkFlowNodePositions,
+      isFordFulkersonPage,
+      isEdmondsKarpPage
+    ) => {
+      // For network flow pages, use predefined positions
+      if (
+        (isFordFulkersonPage || isEdmondsKarpPage) &&
+        networkFlowNodePositions
+      ) {
+        const sourcePos = networkFlowNodePositions[sourceNode.id];
+        const targetPos = networkFlowNodePositions[targetNode.id];
+
+        if (sourcePos && targetPos) {
+          return { sourcePos, targetPos };
+        }
+      }
+
+      // Default to using node positions directly
+      return {
+        sourcePos: { x: sourceNode.x, y: sourceNode.y },
+        targetPos: { x: targetNode.x, y: targetNode.y },
+      };
+    };
+
     edgeGroups.each(function (d, i) {
       const elem = d3.select(this);
       const sourceNode = nodes.find((n) => n.id === d.source);
       const targetNode = nodes.find((n) => n.id === d.target);
 
-      if (!sourceNode || !targetNode) return;
+      // Add early return if nodes are not found
+      if (!sourceNode || !targetNode) {
+        console.warn(
+          `Missing nodes for edge: source=${d.source}, target=${d.target}`
+        );
+        return;
+      }
+
+      // For network flow pages, use network flow positions if they exist
+      const { sourcePos, targetPos } = getNodePositions(
+        sourceNode,
+        targetNode,
+        networkFlowNodePositions,
+        isFordFulkersonPage,
+        isEdmondsKarpPage
+      );
+
+      // Verify positions exist before using them
+      if (!sourcePos?.x || !sourcePos?.y || !targetPos?.x || !targetPos?.y) {
+        console.warn(`Missing position data for edge: ${d.source}-${d.target}`);
+        return;
+      }
 
       // For Kruskal's and Prim's make edges clickable
       if (isKruskalsPage || isPrimsPage) {
         elem.style("cursor", "pointer").on("click", (event) => {
           if (onNodeClick) {
-            onNodeClick(i); // Pass the edge index instead of node id
+            onNodeClick(i);
           }
         });
       }
@@ -93,14 +147,14 @@ const Edges = {
           (d.source === "F" && d.target === "A"))
       ) {
         // Create a curved path for A-F edge in Prim's algorithm
-        const midX = (sourceNode.x + targetNode.x) / 2;
-        const midY = (sourceNode.y + targetNode.y) / 2 - 300;
+        const midX = (sourcePos.x + targetPos.x) / 2;
+        const midY = (sourcePos.y + targetPos.y) / 2 - 300;
 
         elem
           .append("path")
           .attr(
             "d",
-            `M${sourceNode.x},${sourceNode.y} Q${midX},${midY} ${targetNode.x},${targetNode.y}`
+            `M${sourcePos.x},${sourcePos.y} Q${midX},${midY} ${targetPos.x},${targetPos.y}`
           )
           .attr("fill", "none")
           .attr("stroke", (d) =>
@@ -124,10 +178,10 @@ const Edges = {
         // Straight lines for other edges
         elem
           .append("line")
-          .attr("x1", sourceNode.x)
-          .attr("y1", sourceNode.y)
-          .attr("x2", targetNode.x)
-          .attr("y2", targetNode.y);
+          .attr("x1", sourcePos.x)
+          .attr("y1", sourcePos.y)
+          .attr("x2", targetPos.x)
+          .attr("y2", targetPos.y);
         if (!isFordFulkersonPage && !isEdmondsKarpPage) {
           elem
             .attr("stroke", (d) =>
@@ -317,17 +371,30 @@ const Edges = {
 
       edgeGroups.each(function (d) {
         const elem = d3.select(this);
-        const sourceNode = networkFlowNodePositions[d.source];
-        const targetNode = networkFlowNodePositions[d.target];
+        const sourceNode = nodes.find((n) => n.id === d.source);
+        const targetNode = nodes.find((n) => n.id === d.target);
 
         // Calculate control points for smoother curves
-        const dx = targetNode.x - sourceNode.x;
-        const dy = targetNode.y - sourceNode.y;
+        const { sourcePos, targetPos } = getNodePositions(
+          sourceNode,
+          targetNode,
+          networkFlowNodePositions,
+          isFordFulkersonPage,
+          isEdmondsKarpPage
+        );
+
+        if (!sourcePos?.x || !sourcePos?.y || !targetPos?.x || !targetPos?.y) {
+          console.warn(
+            `Missing position data for edge: ${d.source}-${d.target}`
+          );
+          return;
+        }
+
+        const dx = targetPos.x - sourcePos.x;
+        const dy = targetPos.y - sourcePos.y;
         const controlPoint = {
-          x: (sourceNode.x + targetNode.x) / 2,
-          y:
-            (sourceNode.y + targetNode.y) / 2 +
-            (Math.abs(dx) > Math.abs(dy) ? -30 : 0),
+          x: (sourcePos.x + targetPos.x) / 2,
+          y: (sourcePos.y + targetPos.y) / 2,
         };
 
         // Check if this is a backward flow in the current path
@@ -343,7 +410,7 @@ const Edges = {
           .append("path")
           .attr(
             "d",
-            `M ${sourceNode.x} ${sourceNode.y} Q ${controlPoint.x} ${controlPoint.y} ${targetNode.x} ${targetNode.y}`
+            `M ${sourcePos.x} ${sourcePos.y} Q ${controlPoint.x} ${controlPoint.y} ${targetPos.x} ${targetPos.y}`
           )
           .attr("fill", "none")
           .attr(
@@ -376,8 +443,6 @@ const Edges = {
         if (isBackwardFlow) {
           // Calculate offset control point for backward flow
           // This creates the bend effect by moving the control point perpendicular to the edge
-          const dx = targetNode.x - sourceNode.x;
-          const dy = targetNode.y - sourceNode.y;
           const length = Math.sqrt(dx * dx + dy * dy);
 
           // Calculate perpendicular offset for the control point
@@ -386,17 +451,17 @@ const Edges = {
           const offsetY = (dx / length) * 50; // Controls how far the curve bends out
 
           const backwardControlPoint = {
-            x: (sourceNode.x + targetNode.x) / 2 + offsetX,
-            y: (sourceNode.y + targetNode.y) / 2 + offsetY,
+            x: (sourcePos.x + targetPos.x) / 2 + offsetX,
+            y: (sourcePos.y + targetPos.y) / 2 + offsetY,
           };
 
           elem
             .append("path")
             .attr(
               "d",
-              `M ${targetNode.x} ${targetNode.y} ` +
+              `M ${targetPos.x} ${targetPos.y} ` +
                 `Q ${backwardControlPoint.x} ${backwardControlPoint.y} ` +
-                `${sourceNode.x} ${sourceNode.y}`
+                `${sourcePos.x} ${sourcePos.y}`
             )
             .attr("fill", "none")
             .attr("stroke", COLORS.FLOW_PATH)

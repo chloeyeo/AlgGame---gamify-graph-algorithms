@@ -11,7 +11,7 @@ const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
       Traversal: ["Depth-First Search (DFS)", "Breadth-First Search (BFS)"],
       "Shortest Path": ["Dijkstra's", "A*"],
       "Minimum Spanning Tree": ["Kruskal's", "Prim's"],
-      "Network Flow": ["Ford-Fulkerson", "Edmonds-Karp"],
+      "Network Flow": ["Ford-Fulkerson"],
       Matching: ["Hungarian (Kuhn-Munkres)"],
     }),
     []
@@ -56,8 +56,6 @@ const Sidebar = ({ isOpen, onClose, onAlgorithmSelect, selectedAlgorithm }) => {
       path += "/minimum-spanning-tree/prims";
     } else if (algorithm.includes("Ford-Fulkerson")) {
       path += "/network-flow/ford-fulkerson";
-    } else if (algorithm.includes("Edmonds-Karp")) {
-      path += "/network-flow/edmonds-karp";
     } else if (algorithm.includes("Hungarian (Kuhn-Munkres)")) {
       path += "/matching/hungarian-kuhn-munkres";
     }
