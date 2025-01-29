@@ -29,27 +29,20 @@ The visualization uses the following color coding:
 };
 
 const dijkstraPseudocode = `function DijkstraShortestPath(Graph, source):
-    // Initialize distances
     for each vertex v in Graph:
         distance[v] := infinity
         previous[v] := undefined
         add v to unvisited
     distance[source] := 0
-
+    
     while unvisited is not empty:
-        // Select unvisited node with minimum distance
         current := node in unvisited with minimum distance
-        
         if distance[current] = infinity:
-            break // All remaining vertices are inaccessible
-            
+            break
         remove current from unvisited
         
         for each neighbor v of current:
-            // Calculate potential new distance
             newDistance := distance[current] + weight(current, v)
-            
-            // Update if new path is shorter
             if newDistance < distance[v]:
                 distance[v] := newDistance
                 previous[v] := current`;
@@ -78,9 +71,23 @@ const generateDijkstraSteps = (initialNodes, edges) => {
       edges,
       currentNode: null,
     },
-    explanation:
-      "Initial state: All nodes have infinite distance except the start node",
-    pseudoCodeLines: [2, 3, 4, 5, 6],
+    explanation: "Initializing distances and previous pointers for all nodes",
+    pseudoCodeLines: [2, 3, 4, 5],
+  });
+
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: false,
+        distance: distances.get(node.id),
+        recentlyUpdated: false,
+      })),
+      edges,
+      currentNode: null,
+    },
+    explanation: "Setting start node distance to 0",
+    pseudoCodeLines: [6],
   });
 
   while (visited.size < initialNodes.length) {
@@ -96,11 +103,66 @@ const generateDijkstraSteps = (initialNodes, edges) => {
     });
 
     if (!current || distances.get(current) === Infinity) {
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: visited.has(node.id),
+            distance: distances.get(node.id),
+            recentlyUpdated: false,
+            current: false,
+          })),
+          edges,
+          currentNode: null,
+        },
+        explanation: "No more reachable nodes. Algorithm complete.",
+        pseudoCodeLines: [10, 11],
+      });
       break;
     }
 
-    // Mark current node as visited
+    // Finding minimum distance node
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          distance: distances.get(node.id),
+          recentlyUpdated: false,
+          current: node.id === current,
+        })),
+        edges,
+        currentNode: current,
+      },
+      explanation: `Finding unvisited node with minimum distance`,
+      pseudoCodeLines: [8, 9],
+    });
+
+    // Mark as visited
     visited.add(current);
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          distance: distances.get(node.id),
+          recentlyUpdated: false,
+          current: node.id === current,
+        })),
+        edges,
+        currentNode: current,
+      },
+      explanation: `Marking node ${current} as visited`,
+      pseudoCodeLines: [12],
+    });
+
+    // Process neighbors
+    const neighbors = edges
+      .filter((edge) => edge.source === current || edge.target === current)
+      .map((edge) => ({
+        id: edge.source === current ? edge.target : edge.source,
+        weight: edge.weight,
+      }));
 
     steps.push({
       graphState: {
@@ -114,25 +176,47 @@ const generateDijkstraSteps = (initialNodes, edges) => {
         edges,
         currentNode: current,
       },
-      explanation: `Processing node ${current} (current shortest distance: ${distances.get(
-        current
-      )})`,
-      pseudoCodeLines: [8, 9, 12],
+      explanation: `Looking at neighbors of node ${current}`,
+      pseudoCodeLines: [14],
     });
-
-    // Process neighbors
-    const neighbors = edges
-      .filter((edge) => edge.source === current || edge.target === current)
-      .map((edge) => ({
-        id: edge.source === current ? edge.target : edge.source,
-        weight: edge.weight,
-      }));
 
     for (const neighbor of neighbors) {
       if (!visited.has(neighbor.id)) {
         const newDistance = distances.get(current) + neighbor.weight;
 
+        steps.push({
+          graphState: {
+            nodes: initialNodes.map((node) => ({
+              ...node,
+              visited: visited.has(node.id),
+              distance: distances.get(node.id),
+              recentlyUpdated: false,
+              current: node.id === current,
+            })),
+            edges,
+            currentNode: current,
+          },
+          explanation: `Calculating new distance to ${neighbor.id}`,
+          pseudoCodeLines: [15],
+        });
+
         if (newDistance < distances.get(neighbor.id)) {
+          steps.push({
+            graphState: {
+              nodes: initialNodes.map((node) => ({
+                ...node,
+                visited: visited.has(node.id),
+                distance: distances.get(node.id),
+                recentlyUpdated: false,
+                current: node.id === current,
+              })),
+              edges,
+              currentNode: current,
+            },
+            explanation: `Found shorter path to ${neighbor.id}`,
+            pseudoCodeLines: [16],
+          });
+
           distances.set(neighbor.id, newDistance);
           previous.set(neighbor.id, current);
 
@@ -149,7 +233,7 @@ const generateDijkstraSteps = (initialNodes, edges) => {
               currentNode: current,
             },
             explanation: `Updated distance to ${neighbor.id}: ${newDistance} through node ${current}`,
-            pseudoCodeLines: [15, 16, 17, 18],
+            pseudoCodeLines: [17, 18],
           });
         }
       }
