@@ -791,63 +791,186 @@ const kruskalStepsGraphD = [
 ];
 
 const kruskalConceptText = {
-  introduction:
-    "Kruskal's algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a weighted, undirected graph. It works by sorting all edges by weight and then adding them to the MST one by one, as long as they don't create a cycle.",
+  introduction: `Kruskal's algorithm finds the minimum spanning tree (MST) of a weighted graph. It works by repeatedly selecting the lowest weight edge that doesn't create a cycle.
+
+The visualization uses the following color coding:
+• Blue: Nodes connected in the current MST
+• Green: Edge being considered
+• Red: Edge that would create a cycle
+• Black: Regular edges
+• Numbers on edges: Edge weights`,
   keyCharacteristics: [
-    "Greedy approach: Always selects the edge with the lowest weight",
-    "Uses a disjoint-set data structure to detect cycles",
-    "Produces a minimum spanning tree that connects all vertices",
-    "Time complexity: O(E log E) or O(E log V), where E is the number of edges and V is the number of vertices",
+    "Processes edges in order of increasing weight",
+    "Uses disjoint sets to detect cycles",
+    "Builds MST by adding edges that don't create cycles",
+    "Guarantees minimum total weight",
+    "Works well for sparse graphs",
   ],
   applications: [
-    "Network design (e.g., laying cable for computer networks)",
-    "Approximation algorithms for NP-hard problems",
+    "Network design and cable routing",
     "Cluster analysis in data mining",
-    "Image segmentation in computer vision",
+    "Circuit design in electronics",
+    "Water supply network design",
+    "Transportation network planning",
   ],
 };
 
-// Updated pseudocode that matches the educational steps better
-const kruskalPseudocode = `
-# Kruskal's Algorithm for Minimum Spanning Tree
-function KruskalMST(graph):
-    mst = empty set of edges
+const kruskalPseudocode = `function KruskalMST(Graph):
+    MST = empty set of edges
+    DisjointSet = new DisjointSet(Graph.vertices)
+    sort Graph.edges by weight ascending
+    
+    for each edge (u,v) in sorted edges:
+        if DisjointSet.find(u) ≠ DisjointSet.find(v):
+            add edge (u,v) to MST
+            DisjointSet.union(u, v)
+    
+    return MST`;
 
-    # Sort edges by weight (lowest first)
-    edges = sort edges in graph by weight
+class DisjointSet {
+  constructor(vertices) {
+    this.parent = new Map();
+    this.rank = new Map();
+    vertices.forEach((v) => {
+      this.parent.set(v, v);
+      this.rank.set(v, 0);
+    });
+  }
 
-    # Track connected components
-    components = DisjointSet(all vertices)
+  find(vertex) {
+    if (this.parent.get(vertex) !== vertex) {
+      this.parent.set(vertex, this.find(this.parent.get(vertex)));
+    }
+    return this.parent.get(vertex);
+  }
 
-    for each edge (u,v) in edges:
-        # Key step: Skip if adding edge would create cycle
-        if components.find(u) != components.find(v):
-            add edge (u,v) to mst
-            components.union(u, v)
-        else:
-            # Edge would create cycle, skip it
-            continue
+  union(x, y) {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
 
-    return mst
+    if (rootX !== rootY) {
+      if (this.rank.get(rootX) < this.rank.get(rootY)) {
+        this.parent.set(rootX, rootY);
+      } else if (this.rank.get(rootX) > this.rank.get(rootY)) {
+        this.parent.set(rootY, rootX);
+      } else {
+        this.parent.set(rootY, rootX);
+        this.rank.set(rootX, this.rank.get(rootX) + 1);
+      }
+      return true;
+    }
+    return false;
+  }
+}
 
-# Example:
-# - Pick lowest weight edge if no cycle forms
-# - Use disjoint sets to detect cycles
-# - Continue until all vertices connected
-`;
+const generateKruskalSteps = (initialNodes, edges) => {
+  const steps = [];
+  const mstEdges = [];
+  const ds = new DisjointSet(initialNodes.map((node) => node.id));
 
-export default function KruskalsEducationPage() {
+  // Sort edges by weight
+  const sortedEdges = [...edges].sort((a, b) => a.weight - b.weight);
+
+  // Initial state
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: false,
+      })),
+      edges: edges.map((edge) => ({
+        ...edge,
+        highlight: false,
+        cycleEdge: false,
+      })),
+      mstEdges: [],
+    },
+    explanation:
+      "Starting Kruskal's algorithm. Edges will be processed in order of increasing weight.",
+    pseudoCodeLines: [1, 2, 3, 4],
+  });
+
+  // Process each edge
+  for (const edge of sortedEdges) {
+    // Step: Consider current edge
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: mstEdges.some(
+            (e) => e.source === node.id || e.target === node.id
+          ),
+        })),
+        edges: edges.map((e) => ({
+          ...e,
+          highlight: e.source === edge.source && e.target === edge.target,
+          cycleEdge: false,
+        })),
+        mstEdges,
+      },
+      explanation: `Considering edge ${edge.source}-${edge.target} with weight ${edge.weight}`,
+      pseudoCodeLines: [5, 6],
+    });
+
+    const sourceRoot = ds.find(edge.source);
+    const targetRoot = ds.find(edge.target);
+
+    if (sourceRoot === targetRoot) {
+      // Would create cycle - show this edge in red
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: mstEdges.some(
+              (e) => e.source === node.id || e.target === node.id
+            ),
+          })),
+          edges: edges.map((e) => ({
+            ...e,
+            highlight: false,
+            cycleEdge: e.source === edge.source && e.target === edge.target,
+          })),
+          mstEdges,
+        },
+        explanation: `Cannot add edge ${edge.source}-${edge.target} as it would create a cycle`,
+        pseudoCodeLines: [6],
+      });
+    } else {
+      // Add edge to MST
+      mstEdges.push(edge);
+      ds.union(edge.source, edge.target);
+
+      steps.push({
+        graphState: {
+          nodes: initialNodes.map((node) => ({
+            ...node,
+            visited: mstEdges.some(
+              (e) => e.source === node.id || e.target === node.id
+            ),
+          })),
+          edges: edges.map((e) => ({
+            ...e,
+            highlight: false,
+            cycleEdge: false,
+          })),
+          mstEdges: [...mstEdges],
+        },
+        explanation: `Added edge ${edge.source}-${edge.target} to MST. Total edges: ${mstEdges.length}`,
+        pseudoCodeLines: [7, 8],
+      });
+    }
+  }
+
+  return steps;
+};
+
+export default function KruskalEducationPage() {
   return (
     <EducationPageStructure
       title="Kruskal's Algorithm"
-      graphStates={[
-        kruskalStepsGraphA,
-        kruskalStepsGraphB,
-        kruskalStepsGraphC,
-        kruskalStepsGraphD,
-      ]}
       conceptText={kruskalConceptText}
       pseudocode={kruskalPseudocode}
+      generateSteps={generateKruskalSteps}
     />
   );
 }
