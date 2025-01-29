@@ -209,14 +209,17 @@ const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
 
 const FordFulkersonEducationPage = () => {
   const conceptText = {
-    introduction: `The Ford-Fulkerson method is a fundamental algorithm for solving the maximum flow problem in a flow network. This implementation uses the Edmonds-Karp heuristic, which means we always find the shortest augmenting path using Breadth-First Search (BFS). This guarantees a polynomial time complexity of O(VE²) and prevents pathological cases that could occur with arbitrary path selection.`,
+    introduction: `The Ford-Fulkerson method is a fundamental algorithm for solving the maximum flow problem in a flow network. It works by repeatedly finding augmenting paths from source to sink through any available path-finding strategy. While the basic Ford-Fulkerson method allows for any path-finding approach, a notable improvement called the Edmonds-Karp algorithm specifically uses Breadth-First Search (BFS) to find the shortest augmenting paths.
+
+The key distinction is that while Ford-Fulkerson can use any valid path-finding strategy (like DFS or random selection), Edmonds-Karp's use of BFS guarantees a polynomial time complexity of O(VE²). This makes Edmonds-Karp more efficient and prevents pathological cases where Ford-Fulkerson might take exponential time with poor path selections.`,
     keyCharacteristics: [
-      "Uses BFS to find shortest augmenting paths",
+      "Can use any strategy to find augmenting paths (DFS, random, etc.)",
       "Maintains both network and residual graphs",
-      "Path length measured by number of edges",
-      "O(VE²) runtime guarantee",
+      "Iteratively increases flow along found paths",
+      "Terminates when no augmenting path exists",
+      "Runtime varies based on path selection strategy",
+      "Edmonds-Karp variation uses BFS for O(VE²) complexity guarantee",
       "Flow Equilibrium: At each node (except source and sink), inflow equals outflow",
-      "Can use non-full forward edges or non-empty backward edges",
     ],
     applications: [
       "Network routing optimization",
