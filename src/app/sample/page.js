@@ -24,11 +24,147 @@ const initialGraphState = {
   ],
   currentPath: [],
   maxFlow: 0,
+  isRunning: false,
+  stepDelay: 1000, // 1 second delay between steps
 };
 
 const FordFulkersonPage = () => {
   const [graphState, setGraphState] = useState(initialGraphState);
   const svgRef = useRef();
+
+  // Helper function to find augmenting path using DFS
+  const findPath = (source, sink, edges) => {
+    const visited = new Set();
+    const path = [];
+
+    const dfs = (node) => {
+      if (node === sink) return true;
+      visited.add(node);
+
+      for (const edge of edges) {
+        if (edge.source === node && !visited.has(edge.target)) {
+          const residualCapacity = edge.capacity - edge.flow;
+          if (residualCapacity > 0) {
+            path.push(edge.target);
+            if (dfs(edge.target)) return true;
+            path.pop();
+          }
+        }
+        // Check reverse edges for residual capacity
+        if (edge.target === node && !visited.has(edge.source)) {
+          if (edge.flow > 0) {
+            path.push(edge.source);
+            if (dfs(edge.source)) return true;
+            path.pop();
+          }
+        }
+      }
+      return false;
+    };
+
+    path.push(source);
+    if (dfs(source)) return path;
+    return null;
+  };
+
+  // Function to find minimum residual capacity along path
+  const findMinResidualCapacity = (path, edges) => {
+    let minCapacity = Infinity;
+
+    for (let i = 0; i < path.length - 1; i++) {
+      const current = path[i];
+      const next = path[i + 1];
+
+      const edge = edges.find(
+        (e) =>
+          (e.source === current && e.target === next) ||
+          (e.source === next && e.target === current)
+      );
+
+      if (edge) {
+        if (edge.source === current) {
+          minCapacity = Math.min(minCapacity, edge.capacity - edge.flow);
+        } else {
+          minCapacity = Math.min(minCapacity, edge.flow);
+        }
+      }
+    }
+
+    return minCapacity;
+  };
+
+  // Function to update flow along path
+  const augmentFlow = (path, minCapacity, edges) => {
+    const newEdges = [...edges];
+
+    for (let i = 0; i < path.length - 1; i++) {
+      const current = path[i];
+      const next = path[i + 1];
+
+      const edge = newEdges.find(
+        (e) =>
+          (e.source === current && e.target === next) ||
+          (e.source === next && e.target === current)
+      );
+
+      if (edge) {
+        if (edge.source === current) {
+          edge.flow += minCapacity;
+        } else {
+          edge.flow -= minCapacity;
+        }
+      }
+    }
+
+    return newEdges;
+  };
+
+  // Function to run one step of Ford-Fulkerson
+  const runStep = async () => {
+    const path = findPath("S", "T", graphState.edges);
+
+    if (!path) {
+      setGraphState((prev) => ({ ...prev, isRunning: false }));
+      return false;
+    }
+
+    const minCapacity = findMinResidualCapacity(path, graphState.edges);
+    const newEdges = augmentFlow(path, minCapacity, graphState.edges);
+
+    const newMaxFlow = graphState.maxFlow + minCapacity;
+
+    setGraphState((prev) => ({
+      ...prev,
+      edges: newEdges,
+      currentPath: path,
+      maxFlow: newMaxFlow,
+    }));
+
+    return true;
+  };
+
+  // Function to run the complete algorithm
+  const runAlgorithm = async () => {
+    setGraphState((prev) => ({ ...prev, isRunning: true }));
+
+    let hasPath = true;
+    while (hasPath) {
+      hasPath = await runStep();
+      if (hasPath) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, graphState.stepDelay)
+        );
+      }
+    }
+  };
+
+  // Reset function
+  const resetGraph = () => {
+    setGraphState({
+      ...initialGraphState,
+      edges: initialGraphState.edges.map((edge) => ({ ...edge, flow: 0 })),
+    });
+  };
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -176,6 +312,24 @@ const FordFulkersonPage = () => {
           <div className="bg-white border border-gray-300 rounded-lg shadow-sm">
             <svg ref={svgRef} />
           </div>
+        </div>
+
+        <div className="flex justify-center gap-4 mb-4">
+          <button
+            onClick={runAlgorithm}
+            disabled={graphState.isRunning}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {graphState.isRunning ? "Running..." : "Run Algorithm"}
+          </button>
+
+          <button
+            onClick={resetGraph}
+            disabled={graphState.isRunning}
+            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:bg-gray-400"
+          >
+            Reset
+          </button>
         </div>
 
         <div className="mt-4 text-center">
