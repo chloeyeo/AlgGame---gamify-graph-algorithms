@@ -200,42 +200,70 @@ const FordFulkersonPage = () => {
       const source = graphState.nodes.find((n) => n.id === edge.source);
       const target = graphState.nodes.find((n) => n.id === edge.target);
 
-      // Calculate the angle and distances for edge path
       const dx = target.x - source.x;
       const dy = target.y - source.y;
       const angle = Math.atan2(dy, dx);
 
-      // Calculate start and end points adjusted for node radius
       const startX = source.x + nodeRadius * Math.cos(angle);
       const startY = source.y + nodeRadius * Math.sin(angle);
       const endX = target.x - nodeRadius * Math.cos(angle);
       const endY = target.y - nodeRadius * Math.sin(angle);
 
-      // Draw edge line with adjusted points
-      svg
+      // Check if edge is in current path
+      const isInCurrentPath =
+        graphState.currentPath?.length > 1 &&
+        graphState.currentPath.some((node, i) => {
+          if (i === graphState.currentPath.length - 1) return false;
+          const nextNode = graphState.currentPath[i + 1];
+          return (
+            (edge.source === node && edge.target === nextNode) ||
+            (edge.target === node && edge.source === nextNode)
+          );
+        });
+
+      // Create edge group
+      const edgeGroup = svg.append("g");
+
+      // Draw the edge line - only yellow for current path, gray for everything else
+      edgeGroup
         .append("path")
         .attr("d", `M${startX},${startY} L${endX},${endY}`)
-        .attr("stroke", "#64748b")
-        .attr("stroke-width", 2)
+        .attr("stroke", isInCurrentPath ? "#fbbf24" : "#64748b") // Yellow if in path, gray otherwise
+        .attr("stroke-width", isInCurrentPath ? 3 : 2)
         .attr("fill", "none")
-        .attr("marker-end", "url(#arrowhead)");
+        .attr("marker-end", "url(#arrowhead)")
+        .style("transition", "all 0.3s ease");
 
-      // Add edge label (capacity/flow) - adjust label position
+      // Add label group
       const midX = (startX + endX) / 2;
       const midY = (startY + endY) / 2;
-
-      // Offset label perpendicular to the edge
       const offset = 15;
       const labelX = midX + offset * Math.cos(angle - Math.PI / 2);
       const labelY = midY + offset * Math.sin(angle - Math.PI / 2);
 
-      svg
+      const labelGroup = edgeGroup
+        .append("g")
+        .attr("transform", `translate(${labelX},${labelY})`);
+
+      // Semi-transparent background for label
+      labelGroup
+        .append("rect")
+        .attr("x", -15)
+        .attr("y", -10)
+        .attr("width", 30)
+        .attr("height", 20)
+        .attr("fill", "white")
+        .attr("fill-opacity", 0.7)
+        .attr("rx", 4);
+
+      // Label text
+      labelGroup
         .append("text")
-        .attr("x", labelX)
-        .attr("y", labelY)
         .attr("text-anchor", "middle")
-        .attr("fill", "#1e293b")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", isInCurrentPath ? "#854d0e" : "#1e293b") // Darker yellow for text if in path
         .attr("font-size", "14px")
+        .attr("font-weight", isInCurrentPath ? "bold" : "normal")
         .text(`${edge.flow}/${edge.capacity}`);
     });
 
@@ -254,12 +282,16 @@ const FordFulkersonPage = () => {
       .attr("cy", (d) => d.y)
       .attr("r", nodeRadius)
       .attr("fill", (d) => {
-        if (d.id === "S") return "#22c55e"; // Source: green
-        if (d.id === "T") return "#ef4444"; // Sink: red
-        return "#ffffff"; // Other nodes: white
+        if (d.id === "S") return "#22c55e";
+        if (d.id === "T") return "#ef4444";
+        return "#ffffff";
       })
-      .attr("stroke", "#64748b")
-      .attr("stroke-width", 2);
+      .attr("stroke", (d) =>
+        graphState.currentPath?.includes(d.id) ? "#fbbf24" : "#64748b"
+      )
+      .attr("stroke-width", (d) =>
+        graphState.currentPath?.includes(d.id) ? 3 : 2
+      );
 
     // Node labels
     nodeGroups
@@ -273,15 +305,16 @@ const FordFulkersonPage = () => {
       .attr("font-weight", "bold")
       .text((d) => d.id);
 
-    // Add legend
-    const legend = svg.append("g").attr("transform", "translate(20, 20)");
-
-    // Legend boxes
+    // Update legend with simplified scheme
     const legendItems = [
       { color: "#22c55e", label: "Source Node" },
       { color: "#ef4444", label: "Sink Node" },
       { color: "#ffffff", label: "Internal Node" },
+      { color: "#fbbf24", label: "Current Path" },
     ];
+
+    // Draw legend
+    const legend = svg.append("g").attr("transform", "translate(20, 20)");
 
     legendItems.forEach((item, i) => {
       const g = legend.append("g").attr("transform", `translate(0, ${i * 25})`);
