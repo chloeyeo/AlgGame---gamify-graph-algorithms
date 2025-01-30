@@ -39,6 +39,7 @@ export default function LayoutContent({ children }) {
     "/myaccount",
     "/leaderboard",
     "/examples/node-graph",
+    "/sample",
   ];
 
   const pageExists = validPaths.includes(pathname);
