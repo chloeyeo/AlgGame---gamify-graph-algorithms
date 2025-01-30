@@ -36,6 +36,7 @@ const FordFulkersonPage = () => {
 
     const width = 800;
     const height = 600;
+    const nodeRadius = 25; // Define node radius for calculations
 
     // Set up SVG
     svg
@@ -49,10 +50,10 @@ const FordFulkersonPage = () => {
       .append("marker")
       .attr("id", "arrowhead")
       .attr("viewBox", "-10 -10 20 20")
-      .attr("refX", 20)
+      .attr("refX", nodeRadius + 9) // Adjusted refX to account for node radius
       .attr("refY", 0)
-      .attr("markerWidth", 10)
-      .attr("markerHeight", 10)
+      .attr("markerWidth", 12)
+      .attr("markerHeight", 12)
       .attr("orient", "auto")
       .append("path")
       .attr("d", "M-6.75,-6.75 L 0,0 L -6.75,6.75")
@@ -63,30 +64,46 @@ const FordFulkersonPage = () => {
       const source = graphState.nodes.find((n) => n.id === edge.source);
       const target = graphState.nodes.find((n) => n.id === edge.target);
 
-      // Draw edge line
+      // Calculate the angle and distances for edge path
+      const dx = target.x - source.x;
+      const dy = target.y - source.y;
+      const angle = Math.atan2(dy, dx);
+
+      // Calculate start and end points adjusted for node radius
+      const startX = source.x + nodeRadius * Math.cos(angle);
+      const startY = source.y + nodeRadius * Math.sin(angle);
+      const endX = target.x - nodeRadius * Math.cos(angle);
+      const endY = target.y - nodeRadius * Math.sin(angle);
+
+      // Draw edge line with adjusted points
       svg
         .append("path")
-        .attr("d", `M${source.x},${source.y} L${target.x},${target.y}`)
+        .attr("d", `M${startX},${startY} L${endX},${endY}`)
         .attr("stroke", "#64748b")
         .attr("stroke-width", 2)
         .attr("fill", "none")
         .attr("marker-end", "url(#arrowhead)");
 
-      // Add edge label (capacity/flow)
-      const midX = (source.x + target.x) / 2;
-      const midY = (source.y + target.y) / 2;
+      // Add edge label (capacity/flow) - adjust label position
+      const midX = (startX + endX) / 2;
+      const midY = (startY + endY) / 2;
+
+      // Offset label perpendicular to the edge
+      const offset = 15;
+      const labelX = midX + offset * Math.cos(angle - Math.PI / 2);
+      const labelY = midY + offset * Math.sin(angle - Math.PI / 2);
 
       svg
         .append("text")
-        .attr("x", midX)
-        .attr("y", midY - 10)
+        .attr("x", labelX)
+        .attr("y", labelY)
         .attr("text-anchor", "middle")
         .attr("fill", "#1e293b")
         .attr("font-size", "14px")
         .text(`${edge.flow}/${edge.capacity}`);
     });
 
-    // Draw nodes
+    // Draw nodes (on top of edges)
     const nodeGroups = svg
       .selectAll(".node")
       .data(graphState.nodes)
@@ -99,7 +116,7 @@ const FordFulkersonPage = () => {
       .append("circle")
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
-      .attr("r", 25)
+      .attr("r", nodeRadius)
       .attr("fill", (d) => {
         if (d.id === "S") return "#22c55e"; // Source: green
         if (d.id === "T") return "#ef4444"; // Sink: red
