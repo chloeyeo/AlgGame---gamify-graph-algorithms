@@ -22,7 +22,8 @@ const initialGraphState = {
     { source: "D", target: "B", capacity: 5, flow: 0 },
     { source: "D", target: "T", capacity: 10, flow: 0 },
   ],
-  currentPath: [],
+  currentPath: null,
+  currentEdgeIndex: -1,
   maxFlow: 0,
   isRunning: false,
   stepDelay: 1000, // 1 second delay between steps
@@ -128,17 +129,51 @@ const FordFulkersonPage = () => {
       return false;
     }
 
-    const minCapacity = findMinResidualCapacity(path, graphState.edges);
-    const newEdges = augmentFlow(path, minCapacity, graphState.edges);
-
-    const newMaxFlow = graphState.maxFlow + minCapacity;
-
+    // First highlight the full path
     setGraphState((prev) => ({
       ...prev,
-      edges: newEdges,
       currentPath: path,
-      maxFlow: newMaxFlow,
+      currentEdgeIndex: -1,
     }));
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, graphState.stepDelay / 2)
+    );
+
+    const minCapacity = findMinResidualCapacity(path, graphState.edges);
+
+    // Update edges one by one
+    for (let i = 0; i < path.length - 1; i++) {
+      const newEdges = [...graphState.edges];
+      const current = path[i];
+      const next = path[i + 1];
+
+      const edge = newEdges.find(
+        (e) =>
+          (e.source === current && e.target === next) ||
+          (e.source === next && e.target === current)
+      );
+
+      if (edge) {
+        if (edge.source === current) {
+          edge.flow += minCapacity;
+        } else {
+          edge.flow -= minCapacity;
+        }
+      }
+
+      setGraphState((prev) => ({
+        ...prev,
+        edges: newEdges,
+        currentEdgeIndex: i,
+        maxFlow:
+          i === path.length - 2 ? prev.maxFlow + minCapacity : prev.maxFlow,
+      }));
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, graphState.stepDelay / 2)
+      );
+    }
 
     return true;
   };
@@ -209,27 +244,41 @@ const FordFulkersonPage = () => {
       const endX = target.x - nodeRadius * Math.cos(angle);
       const endY = target.y - nodeRadius * Math.sin(angle);
 
-      // Check if edge is in current path
-      const isInCurrentPath =
-        graphState.currentPath?.length > 1 &&
-        graphState.currentPath.some((node, i) => {
-          if (i === graphState.currentPath.length - 1) return false;
-          const nextNode = graphState.currentPath[i + 1];
-          return (
-            (edge.source === node && edge.target === nextNode) ||
-            (edge.target === node && edge.source === nextNode)
-          );
-        });
+      // Check if edge is in current path and get its index
+      const pathIndex = graphState.currentPath
+        ? graphState.currentPath.findIndex((node, i) => {
+            if (i === graphState.currentPath.length - 1) return false;
+            const nextNode = graphState.currentPath[i + 1];
+            return (
+              (edge.source === node && edge.target === nextNode) ||
+              (edge.target === node && edge.source === nextNode)
+            );
+          })
+        : -1;
+
+      // Simplified edge color logic
+      let edgeColor = "#64748b"; // Default gray
+      let edgeWidth = 2;
+
+      if (pathIndex !== -1) {
+        // Edge is in current path
+        if (pathIndex === graphState.currentEdgeIndex) {
+          edgeColor = "#ec4899"; // Pink for current edge
+        } else {
+          edgeColor = "#fbbf24"; // Yellow for path edges
+        }
+        edgeWidth = 3;
+      }
 
       // Create edge group
       const edgeGroup = svg.append("g");
 
-      // Draw the edge line - only yellow for current path, gray for everything else
+      // Draw the edge line
       edgeGroup
         .append("path")
         .attr("d", `M${startX},${startY} L${endX},${endY}`)
-        .attr("stroke", isInCurrentPath ? "#fbbf24" : "#64748b") // Yellow if in path, gray otherwise
-        .attr("stroke-width", isInCurrentPath ? 3 : 2)
+        .attr("stroke", edgeColor)
+        .attr("stroke-width", edgeWidth)
         .attr("fill", "none")
         .attr("marker-end", "url(#arrowhead)")
         .style("transition", "all 0.3s ease");
@@ -256,14 +305,24 @@ const FordFulkersonPage = () => {
         .attr("fill-opacity", 0.7)
         .attr("rx", 4);
 
+      // Simplified text color logic
+      let textColor = "#1e293b"; // Default dark gray
+      if (pathIndex !== -1) {
+        if (pathIndex === graphState.currentEdgeIndex) {
+          textColor = "#be185d"; // Dark pink for current edge
+        } else {
+          textColor = "#854d0e"; // Dark yellow for path edges
+        }
+      }
+
       // Label text
       labelGroup
         .append("text")
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .attr("fill", isInCurrentPath ? "#854d0e" : "#1e293b") // Darker yellow for text if in path
+        .attr("fill", textColor)
         .attr("font-size", "14px")
-        .attr("font-weight", isInCurrentPath ? "bold" : "normal")
+        .attr("font-weight", pathIndex !== -1 ? "bold" : "normal")
         .text(`${edge.flow}/${edge.capacity}`);
     });
 
@@ -311,6 +370,7 @@ const FordFulkersonPage = () => {
       { color: "#ef4444", label: "Sink Node" },
       { color: "#ffffff", label: "Internal Node" },
       { color: "#fbbf24", label: "Current Path" },
+      { color: "#ec4899", label: "Current Edge", isLine: true },
     ];
 
     // Draw legend
