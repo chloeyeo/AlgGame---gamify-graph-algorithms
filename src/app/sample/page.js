@@ -3,34 +3,88 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-const initialGraphState = {
-  nodes: [
-    { id: "S", x: 100, y: 300 }, // Source
-    { id: "A", x: 300, y: 200 },
-    { id: "B", x: 500, y: 200 },
-    { id: "C", x: 300, y: 400 },
-    { id: "D", x: 500, y: 400 },
-    { id: "T", x: 700, y: 300 }, // Sink
-  ],
-  edges: [
-    { source: "S", target: "A", capacity: 10, flow: 0 },
-    { source: "S", target: "C", capacity: 8, flow: 0 },
-    { source: "A", target: "B", capacity: 6, flow: 0 },
-    { source: "A", target: "C", capacity: 4, flow: 0 },
-    { source: "B", target: "T", capacity: 8, flow: 0 },
-    { source: "C", target: "D", capacity: 9, flow: 0 },
-    { source: "D", target: "B", capacity: 5, flow: 0 },
-    { source: "D", target: "T", capacity: 10, flow: 0 },
-  ],
-  currentPath: null,
-  currentEdgeIndex: -1,
-  maxFlow: 0,
-  isRunning: false,
-  stepDelay: 1000, // 1 second delay between steps
+const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
+  // Create nodes
+  const nodes = [];
+  const width = 800;
+  const height = 600;
+  const padding = 100; // Padding from edges
+
+  // Always include source (S) and sink (T)
+  nodes.push({ id: "S", x: padding, y: height / 2 });
+  nodes.push({ id: "T", x: width - padding, y: height / 2 });
+
+  // Generate other nodes with letters (A, B, C, ...)
+  for (let i = 0; i < nodeCount - 2; i++) {
+    nodes.push({
+      id: String.fromCharCode(65 + i), // A, B, C, ...
+      x: padding + ((width - 2 * padding) / (nodeCount - 1)) * (i + 1),
+      y: padding + Math.random() * (height - 2 * padding),
+    });
+  }
+
+  // Generate edges
+  const edges = [];
+  const maxCapacity = 15;
+
+  // Helper function to add edge if it doesn't exist
+  const addEdge = (source, target) => {
+    if (
+      !edges.some(
+        (e) =>
+          (e.source === source && e.target === target) ||
+          (e.source === target && e.target === source)
+      )
+    ) {
+      edges.push({
+        source,
+        target,
+        capacity: Math.floor(Math.random() * maxCapacity) + 1,
+        flow: 0,
+      });
+    }
+  };
+
+  // Ensure path from source to sink exists
+  let current = "S";
+  const visited = new Set([current]);
+
+  while (current !== "T") {
+    const availableNodes = nodes
+      .filter((n) => !visited.has(n.id) && n.id !== "S")
+      .sort(() => Math.random() - 0.5);
+
+    const next = availableNodes[0].id;
+    addEdge(current, next);
+    visited.add(next);
+    current = next;
+  }
+
+  // Add random additional edges based on density
+  nodes.forEach((node1) => {
+    nodes.forEach((node2) => {
+      if (node1.id !== node2.id && Math.random() < edgeDensity) {
+        // Prevent backwards flow to source and forward flow from sink
+        if (node2.id !== "S" && node1.id !== "T") {
+          addEdge(node1.id, node2.id);
+        }
+      }
+    });
+  });
+
+  return { nodes, edges };
 };
 
 const FordFulkersonPage = () => {
-  const [graphState, setGraphState] = useState(initialGraphState);
+  const [nodeCount, setNodeCount] = useState(6);
+  const [graphState, setGraphState] = useState(() => ({
+    ...generateRandomGraph(nodeCount),
+    currentPath: null,
+    currentEdgeIndex: -1,
+    maxFlow: 0,
+    isRunning: false,
+    stepDelay: 1000,
+  }));
   const svgRef = useRef();
 
   // Helper function to find augmenting path using DFS
@@ -195,10 +249,26 @@ const FordFulkersonPage = () => {
 
   // Reset function
   const resetGraph = () => {
-    setGraphState({
-      ...initialGraphState,
-      edges: initialGraphState.edges.map((edge) => ({ ...edge, flow: 0 })),
-    });
+    setGraphState((prev) => ({
+      ...generateRandomGraph(nodeCount),
+      currentPath: null,
+      currentEdgeIndex: -1,
+      maxFlow: 0,
+      isRunning: false,
+      stepDelay: prev.stepDelay,
+    }));
+  };
+
+  // Add new function to handle regeneration
+  const regenerateGraph = () => {
+    setGraphState((prev) => ({
+      ...generateRandomGraph(nodeCount),
+      currentPath: null,
+      currentEdgeIndex: -1,
+      maxFlow: 0,
+      isRunning: false,
+      stepDelay: prev.stepDelay,
+    }));
   };
 
   useEffect(() => {
@@ -401,6 +471,27 @@ const FordFulkersonPage = () => {
       </h1>
 
       <div className="w-full max-w-4xl">
+        <div className="mb-4 flex justify-center items-center gap-4">
+          <label className="flex items-center gap-2">
+            Number of Nodes:
+            <input
+              type="number"
+              min="3"
+              max="10"
+              value={nodeCount}
+              onChange={(e) => {
+                const value = Math.min(
+                  10,
+                  Math.max(3, parseInt(e.target.value) || 3)
+                );
+                setNodeCount(value);
+              }}
+              disabled={graphState.isRunning}
+              className="w-20 px-2 py-1 border border-gray-300 rounded-md"
+            />
+          </label>
+        </div>
+
         <div className="mb-6">
           <div className="bg-white border border-gray-300 rounded-lg shadow-sm">
             <svg ref={svgRef} />
@@ -422,6 +513,14 @@ const FordFulkersonPage = () => {
             className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:bg-gray-400"
           >
             Reset
+          </button>
+
+          <button
+            onClick={regenerateGraph}
+            disabled={graphState.isRunning}
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-400"
+          >
+            Generate New Graph
           </button>
         </div>
 
