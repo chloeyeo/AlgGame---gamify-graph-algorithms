@@ -270,12 +270,16 @@ const generateRandomGraph = (nodeCount = 5) => {
     { id: "E" },
   ];
 
-  // Fixed edges for this specific layout
+  // Updated edges to ensure all nodes connect to source (E) and sink (C)
   const edges = [
     { source: "E", target: "D", capacity: 10, flow: 0 },
     { source: "E", target: "A", capacity: 8, flow: 0 },
     { source: "E", target: "B", capacity: 12, flow: 0 },
     { source: "D", target: "C", capacity: 15, flow: 0 },
+    { source: "A", target: "C", capacity: 7, flow: 0 }, // New edge
+    { source: "B", target: "C", capacity: 9, flow: 0 }, // New edge
+    { source: "D", target: "B", capacity: 6, flow: 0 }, // New intermediate edge
+    { source: "A", target: "B", capacity: 5, flow: 0 }, // New intermediate edge
   ];
 
   return { nodes, edges };
@@ -328,13 +332,13 @@ const getEdgeStyle = (edge, graphState) => {
 };
 
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
-  // Adjusted positions to create more space between nodes
+  // Move legend higher up
   const nodePositions = {
-    E: { x: 400, y: 50 }, // Top center
-    D: { x: 200, y: 150 }, // Upper left
-    A: { x: 600, y: 150 }, // Upper right
-    B: { x: 400, y: 250 }, // Bottom center
-    C: { x: 200, y: 300 }, // Bottom left - moved lower
+    E: { x: 400, y: 100 }, // Adjusted y from 50 to 100
+    D: { x: 200, y: 200 }, // Adjusted y from 150 to 200
+    A: { x: 600, y: 200 }, // Adjusted y from 150 to 200
+    B: { x: 400, y: 300 }, // Adjusted y from 250 to 300
+    C: { x: 200, y: 350 }, // Adjusted y from 300 to 350
   };
 
   const getFlowLabel = (edge) => {
@@ -379,7 +383,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="350">
+    <svg width="800" height="400">
+      {" "}
+      {/* Increased height from 350 to 400 */}
       <defs>
         {/* Larger, more visible arrow markers */}
         <marker
@@ -416,9 +422,10 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           <path d="M 0 0 L 16 8 L 0 16 z" fill="#FF69B4" />
         </marker>
       </defs>
-
-      {/* Legend with arrows on the lines */}
-      <g transform="translate(50, 20)">
+      {/* Move legend higher up */}
+      <g transform="translate(20, 10)">
+        {" "}
+        {/* Adjusted from (50, 20) to (20, 10) */}
         {/* Node Types */}
         <g transform="translate(0, 0)">
           <circle
@@ -432,7 +439,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             source node
           </text>
         </g>
-
         <g transform="translate(0, 25)">
           <circle
             cx="10"
@@ -445,7 +451,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             sink node
           </text>
         </g>
-
         <g transform="translate(0, 50)">
           <circle
             cx="10"
@@ -458,7 +463,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             internal node
           </text>
         </g>
-
         {/* Edge Types with arrows */}
         <g transform="translate(0, 75)">
           <line
@@ -474,7 +478,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             current path
           </text>
         </g>
-
         <g transform="translate(0, 100)">
           <line
             x1="0"
@@ -489,7 +492,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             current edge
           </text>
         </g>
-
         {/* Flow Labels */}
         <g transform="translate(0, 125)">
           <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
@@ -497,7 +499,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
       </g>
-
       {/* Draw edges with arrows */}
       {(graphState?.edges || []).map((edge, idx) => {
         const source = nodePositions[edge.source];
