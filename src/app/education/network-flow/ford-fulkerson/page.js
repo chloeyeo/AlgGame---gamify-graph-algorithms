@@ -334,11 +334,11 @@ const getEdgeStyle = (edge, graphState) => {
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
   // Adjust node positions to be even more compact vertically
   const nodePositions = {
-    E: { x: 400, y: 60 }, // Moved up from y: 80
-    D: { x: 200, y: 140 }, // Moved up from y: 160
-    A: { x: 600, y: 140 }, // Moved up from y: 160
-    B: { x: 400, y: 220 }, // Moved up from y: 240
-    C: { x: 200, y: 260 }, // Moved up from y: 280
+    E: { x: 400, y: 40 }, // Moved up from y: 60
+    D: { x: 200, y: 120 }, // Moved up from y: 140
+    A: { x: 600, y: 120 }, // Moved up from y: 140
+    B: { x: 400, y: 200 }, // Moved up from y: 220
+    C: { x: 200, y: 240 }, // Moved up from y: 260
   };
 
   const getFlowLabel = (edge) => {
@@ -383,11 +383,8 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="300">
-      {" "}
-      {/* Reduced height from 320 to 300 */}
+    <svg width="800" height="380">
       <defs>
-        {/* Larger, more visible arrow markers */}
         <marker
           id="arrowhead"
           viewBox="0 0 16 16"
@@ -422,10 +419,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           <path d="M 0 0 L 16 8 L 0 16 z" fill="#FF69B4" />
         </marker>
       </defs>
-      {/* Move legend higher up */}
-      <g transform="translate(20, 10)">
-        {" "}
-        {/* Adjusted from (50, 20) to (20, 10) */} {/* Node Types */}
+      <g transform="translate(30, 12)">
         <g transform="translate(0, 0)">
           <circle
             cx="10"
@@ -462,7 +456,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             internal node
           </text>
         </g>
-        {/* Edge Types with arrows */}
         <g transform="translate(0, 75)">
           <line
             x1="0"
@@ -491,110 +484,104 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             current edge
           </text>
         </g>
-        {/* Flow Labels */}
         <g transform="translate(0, 125)">
           <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
             in/out: node flow
           </text>
         </g>
       </g>
-      {/* Draw edges with arrows */}
-      {(graphState?.edges || []).map((edge, idx) => {
-        const source = nodePositions[edge.source];
-        const target = nodePositions[edge.target];
-        const style = getEdgeStyle(edge, graphState);
-        const paths = drawArrowPath(source, target);
+      <g transform="translate(0, 15)">
+        {(graphState?.edges || []).map((edge, idx) => {
+          const source = nodePositions[edge.source];
+          const target = nodePositions[edge.target];
+          const style = getEdgeStyle(edge, graphState);
+          const paths = drawArrowPath(source, target);
 
-        return (
-          <g key={`edge-${idx}`}>
-            {/* Line */}
-            <path
-              d={paths.line}
-              stroke={style.color}
-              strokeWidth={style.width}
-              fill="none"
-            />
-            {/* Arrow head */}
-            <path d={paths.arrow} fill={style.color} stroke="none" />
-            {/* Flow/Capacity label - always horizontal */}
-            <g
-              transform={`translate(${(source.x + target.x) / 2}, ${
-                (source.y + target.y) / 2
-              })`}
-            >
-              <text
-                textAnchor="middle"
-                dominantBaseline="text-before-edge"
-                fill="#1a365d"
-                fontSize="18"
-                fontWeight="700"
-                dy="-12"
+          return (
+            <g key={`edge-${idx}`}>
+              <path
+                d={paths.line}
+                stroke={style.color}
+                strokeWidth={style.width}
+                fill="none"
+              />
+              <path d={paths.arrow} fill={style.color} stroke="none" />
+              <g
+                transform={`translate(${(source.x + target.x) / 2}, ${
+                  (source.y + target.y) / 2
+                })`}
               >
-                {getFlowLabel(edge)}
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="text-before-edge"
+                  fill="#1a365d"
+                  fontSize="18"
+                  fontWeight="700"
+                  dy="-12"
+                >
+                  {getFlowLabel(edge)}
+                </text>
+              </g>
+            </g>
+          );
+        })}
+        {Object.entries(nodePositions).map(([id, pos]) => {
+          const node = graphState?.nodes?.find((n) => n.id === id);
+          const isHighlighted = graphState?.currentPath?.includes(id);
+          const nodeType =
+            id === "E"
+              ? NODE_TYPES.SOURCE
+              : id === "C"
+              ? NODE_TYPES.SINK
+              : NODE_TYPES.NORMAL;
+
+          return (
+            <g key={`node-${id}`}>
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r="25"
+                fill={nodeType.color}
+                stroke={
+                  isHighlighted ? EDGE_TYPES.CURRENT_PATH.color : "#64748b"
+                }
+                strokeWidth={isHighlighted ? "3" : "2"}
+              />
+              <text
+                x={pos.x}
+                y={pos.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#000"
+                fontSize="16"
+                fontWeight="500"
+              >
+                {id}
+              </text>
+              <text
+                x={pos.x + 30}
+                y={pos.y - 10}
+                textAnchor="start"
+                fill="#2563eb"
+                fontSize="14"
+                fontWeight="600"
+              >
+                {`in: ${node?.inFlow || 0}`}
+              </text>
+              <text
+                x={pos.x + 30}
+                y={pos.y + 10}
+                textAnchor="start"
+                fill="#2563eb"
+                fontSize="14"
+                fontWeight="600"
+              >
+                {`out: ${node?.outFlow || 0}`}
               </text>
             </g>
-          </g>
-        );
-      })}
-      {/* Draw nodes with closer in/out labels */}
-      {Object.entries(nodePositions).map(([id, pos]) => {
-        const node = graphState?.nodes?.find((n) => n.id === id);
-        const isHighlighted = graphState?.currentPath?.includes(id);
-        const nodeType =
-          id === "E"
-            ? NODE_TYPES.SOURCE
-            : id === "C"
-            ? NODE_TYPES.SINK
-            : NODE_TYPES.NORMAL;
-
-        return (
-          <g key={`node-${id}`}>
-            <circle
-              cx={pos.x}
-              cy={pos.y}
-              r="25"
-              fill={nodeType.color}
-              stroke={isHighlighted ? EDGE_TYPES.CURRENT_PATH.color : "#64748b"}
-              strokeWidth={isHighlighted ? "3" : "2"}
-            />
-
-            {/* Node label */}
-            <text
-              x={pos.x}
-              y={pos.y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="#000"
-              fontSize="16"
-              fontWeight="500"
-            >
-              {id}
-            </text>
-
-            {/* Flow labels moved closer to node */}
-            <text
-              x={pos.x + 30} // Reduced from 45 to 30
-              y={pos.y - 10}
-              textAnchor="start"
-              fill="#2563eb"
-              fontSize="14"
-              fontWeight="600"
-            >
-              {`in: ${node?.inFlow || 0}`}
-            </text>
-            <text
-              x={pos.x + 30} // Reduced from 45 to 30
-              y={pos.y + 10}
-              textAnchor="start"
-              fill="#2563eb"
-              fontSize="14"
-              fontWeight="600"
-            >
-              {`out: ${node?.outFlow || 0}`}
-            </text>
-          </g>
-        );
-      })}
+          );
+        })}
+      </g>
     </svg>
   );
 };
