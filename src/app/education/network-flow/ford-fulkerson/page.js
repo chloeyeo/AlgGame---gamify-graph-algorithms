@@ -271,6 +271,7 @@ const NODE_TYPES = {
 
 const EDGE_TYPES = {
   CURRENT_PATH: { color: "#4169E1" }, // Royal blue
+  CURRENT_EDGE: { color: "#FF69B4" }, // Hot pink
   NORMAL: { color: "#000000" }, // Black
 };
 
@@ -293,7 +294,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   return (
     <svg width="800" height="450" viewBox="0 0 800 450">
       <defs>
-        {/* Arrow marker definition */}
+        {/* Arrow markers */}
         <marker
           id="arrowhead"
           markerWidth="10"
@@ -314,16 +315,22 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         >
           <polygon points="0 0, 10 3.5, 0 7" fill="#4169E1" />
         </marker>
+        <marker
+          id="arrowhead-current"
+          markerWidth="10"
+          markerHeight="7"
+          refX="9"
+          refY="3.5"
+          orient="auto"
+        >
+          <polygon points="0 0, 10 3.5, 0 7" fill="#FF69B4" />
+        </marker>
       </defs>
 
-      {/* Legend - with additional items */}
+      {/* Legend */}
       <g transform="translate(50, 20)">
-        <text x="0" y="0" fill="#1a365d" fontSize="16" fontWeight="700">
-          Legend
-        </text>
-
         {/* Node Types */}
-        <g transform="translate(0, 25)">
+        <g transform="translate(0, 0)">
           <circle
             cx="10"
             cy="0"
@@ -336,7 +343,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
 
-        <g transform="translate(0, 50)">
+        <g transform="translate(0, 25)">
           <circle
             cx="10"
             cy="0"
@@ -349,7 +356,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
 
-        <g transform="translate(0, 75)">
+        <g transform="translate(0, 50)">
           <circle
             cx="10"
             cy="0"
@@ -363,28 +370,13 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         </g>
 
         {/* Edge Types */}
-        <g transform="translate(0, 100)">
+        <g transform="translate(0, 75)">
           <line
             x1="0"
             y1="0"
             x2="40"
             y2="0"
-            stroke="#64748b"
-            strokeWidth="2"
-            markerEnd="url(#arrowhead)"
-          />
-          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
-            flow/capacity
-          </text>
-        </g>
-
-        <g transform="translate(0, 125)">
-          <line
-            x1="0"
-            y1="0"
-            x2="40"
-            y2="0"
-            stroke="#4169E1"
+            stroke={EDGE_TYPES.CURRENT_PATH.color}
             strokeWidth="3"
             markerEnd="url(#arrowhead-highlighted)"
           />
@@ -393,8 +385,23 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
 
+        <g transform="translate(0, 100)">
+          <line
+            x1="0"
+            y1="0"
+            x2="40"
+            y2="0"
+            stroke={EDGE_TYPES.CURRENT_EDGE.color}
+            strokeWidth="3"
+            markerEnd="url(#arrowhead-current)"
+          />
+          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            current edge
+          </text>
+        </g>
+
         {/* Flow Labels */}
-        <g transform="translate(0, 150)">
+        <g transform="translate(0, 125)">
           <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
             in/out: node flow
           </text>
