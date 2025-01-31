@@ -384,6 +384,36 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </g>
         );
       })}
+      {/* Legend */}
+      <g transform="translate(650, 20)">
+        {/* Legend Title */}
+        <text x="0" y="0" fill="#1a365d" fontSize="16" fontWeight="700">
+          Legend
+        </text>
+
+        {/* Edge Weight Example */}
+        <g transform="translate(0, 25)">
+          <line x1="0" y1="0" x2="40" y2="0" stroke="#64748b" strokeWidth="2" />
+          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            flow/capacity
+          </text>
+        </g>
+
+        {/* Highlighted Path Example */}
+        <g transform="translate(0, 50)">
+          <line x1="0" y1="0" x2="40" y2="0" stroke="#4169E1" strokeWidth="3" />
+          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            current path
+          </text>
+        </g>
+
+        {/* Node Flow Example */}
+        <g transform="translate(0, 75)">
+          <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
+            in/out: node flow
+          </text>
+        </g>
+      </g>
     </svg>
   );
 };
