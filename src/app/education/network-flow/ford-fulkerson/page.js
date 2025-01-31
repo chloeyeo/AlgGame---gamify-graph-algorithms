@@ -332,13 +332,13 @@ const getEdgeStyle = (edge, graphState) => {
 };
 
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
-  // Move legend higher up
+  // Adjust node positions to be more compact vertically
   const nodePositions = {
-    E: { x: 400, y: 100 }, // Adjusted y from 50 to 100
-    D: { x: 200, y: 200 }, // Adjusted y from 150 to 200
-    A: { x: 600, y: 200 }, // Adjusted y from 150 to 200
-    B: { x: 400, y: 300 }, // Adjusted y from 250 to 300
-    C: { x: 200, y: 350 }, // Adjusted y from 300 to 350
+    E: { x: 400, y: 80 }, // Moved up from y: 100
+    D: { x: 200, y: 160 }, // Moved up from y: 200
+    A: { x: 600, y: 160 }, // Moved up from y: 200
+    B: { x: 400, y: 240 }, // Moved up from y: 300
+    C: { x: 200, y: 280 }, // Moved up from y: 350
   };
 
   const getFlowLabel = (edge) => {
@@ -383,8 +383,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="400">
+    <svg width="800" height="320">
       {" "}
+      {/* Reduced height from 400 to 320 */}{" "}
       {/* Increased height from 350 to 400 */}
       <defs>
         {/* Larger, more visible arrow markers */}
