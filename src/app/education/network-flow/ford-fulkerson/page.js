@@ -344,42 +344,44 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="450" viewBox="0 0 800 450">
+    <svg width="800" height="350">
       <defs>
-        {/* Arrow markers */}
         <marker
           id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
+          viewBox="-10 -5 10 10"
+          refX="0"
+          refY="0"
+          markerWidth="6"
+          markerHeight="6"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          <path d="M-10,-5 L0,0 L-10,5" fill="#64748b" />
         </marker>
         <marker
           id="arrowhead-highlighted"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
+          viewBox="-10 -5 10 10"
+          refX="0"
+          refY="0"
+          markerWidth="6"
+          markerHeight="6"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#4169E1" />
+          <path d="M-10,-5 L0,0 L-10,5" fill="#4169E1" />
         </marker>
         <marker
           id="arrowhead-current"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
+          viewBox="-10 -5 10 10"
+          refX="0"
+          refY="0"
+          markerWidth="6"
+          markerHeight="6"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#FF69B4" />
+          <path d="M-10,-5 L0,0 L-10,5" fill="#FF69B4" />
         </marker>
       </defs>
 
-      {/* Legend */}
+      {/* Legend with arrows on the lines */}
       <g transform="translate(50, 20)">
         {/* Node Types */}
         <g transform="translate(0, 0)">
@@ -421,7 +423,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
 
-        {/* Edge Types */}
+        {/* Edge Types with arrows */}
         <g transform="translate(0, 75)">
           <line
             x1="0"
@@ -466,13 +468,21 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         const target = nodePositions[edge.target];
         const style = getEdgeStyle(edge, graphState);
 
+        // Calculate a slightly shorter end point to prevent arrow from overlapping with node
+        const dx = target.x - source.x;
+        const dy = target.y - source.y;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const shortenBy = 25; // Node radius
+        const endX = target.x - (dx * shortenBy) / length;
+        const endY = target.y - (dy * shortenBy) / length;
+
         return (
           <g key={`edge-${idx}`}>
             <line
               x1={source.x}
               y1={source.y}
-              x2={target.x}
-              y2={target.y}
+              x2={endX}
+              y2={endY}
               stroke={style.color}
               strokeWidth={style.width}
               markerEnd={style.marker}
@@ -602,6 +612,7 @@ const FordFulkersonEducationPage = () => {
       generateNewGraph={generateRandomGraph}
       GraphVisualisationComponent={FordFulkersonGraphVisualisation}
       initialGraphState={initialGraph}
+      explanationPosition="top"
     />
   );
 };
