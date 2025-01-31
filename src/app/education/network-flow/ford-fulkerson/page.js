@@ -300,6 +300,11 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         const angle =
           (Math.atan2(target.y - source.y, target.x - source.x) * 180) /
           Math.PI;
+        const textAngle = angle > 90 || angle < -90 ? angle + 180 : angle;
+
+        // Calculate offset for vertical edges to prevent overlapping
+        const isVertical = Math.abs(angle) > 75 && Math.abs(angle) < 105;
+        const labelOffset = isVertical ? -25 : -12;
 
         return (
           <g key={`edge-${idx}`}>
@@ -320,13 +325,13 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               })`}
             >
               <text
-                transform={`rotate(${angle})`}
+                transform={`rotate(${textAngle})`}
                 textAnchor="middle"
                 dominantBaseline="text-before-edge"
                 fill="#1a365d"
-                fontSize="16"
-                fontWeight="600"
-                dy="-5"
+                fontSize="18"
+                fontWeight="700"
+                dy={labelOffset}
               >
                 {getFlowLabel(edge)}
               </text>
@@ -365,22 +370,24 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               {id}
             </text>
 
-            {/* Small "in:" and "out:" labels */}
+            {/* Flow labels with more spacing and different styling */}
             <text
               x={pos.x}
-              y={pos.y + 35}
+              y={pos.y + 40}
               textAnchor="middle"
-              fill="#64748b"
-              fontSize="12"
+              fill="#2563eb"
+              fontSize="14"
+              fontWeight="600"
             >
               {`in: ${node?.inFlow || 0}`}
             </text>
             <text
               x={pos.x}
-              y={pos.y + 48}
+              y={pos.y + 58}
               textAnchor="middle"
-              fill="#64748b"
-              fontSize="12"
+              fill="#2563eb"
+              fontSize="14"
+              fontWeight="600"
             >
               {`out: ${node?.outFlow || 0}`}
             </text>
