@@ -304,25 +304,25 @@ const getEdgeStyle = (edge, graphState) => {
   const isInPath = edge.highlight;
 
   if (isCurrentEdge) {
-    // Current edge being considered - pink
+    // Current edge being considered - pink and bold
     return {
       color: EDGE_TYPES.CURRENT_EDGE.color,
       marker: "url(#arrowhead-current)",
       width: "3",
     };
   } else if (isInPath) {
-    // Part of current path but not being considered - blue
+    // Part of current path - blue and bold
     return {
       color: EDGE_TYPES.CURRENT_PATH.color,
       marker: "url(#arrowhead-highlighted)",
       width: "3",
     };
   } else {
-    // Not part of current path - black
+    // Not part of current path - black and thin
     return {
       color: EDGE_TYPES.NORMAL.color,
       marker: "url(#arrowhead)",
-      width: "2",
+      width: "1.5", // Reduced from 2 to 1.5
     };
   }
 };
