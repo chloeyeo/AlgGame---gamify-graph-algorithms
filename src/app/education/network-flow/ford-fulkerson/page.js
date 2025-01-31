@@ -275,13 +275,13 @@ const EDGE_TYPES = {
 };
 
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
-  // Adjusted positions to match your image
+  // Adjusted positions to create more space between nodes
   const nodePositions = {
     E: { x: 400, y: 50 }, // Top center
     D: { x: 200, y: 150 }, // Upper left
     A: { x: 600, y: 150 }, // Upper right
     B: { x: 400, y: 250 }, // Bottom center
-    C: { x: 200, y: 250 }, // Bottom left
+    C: { x: 200, y: 300 }, // Bottom left - moved lower
   };
 
   const getFlowLabel = (edge) => {
@@ -291,20 +291,17 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="400" viewBox="0 0 800 400">
+    <svg width="800" height="450" viewBox="0 0 800 450">
+      {" "}
+      {/* Increased height */}
       {/* Draw edges */}
       {(graphState?.edges || []).map((edge, idx) => {
         const source = nodePositions[edge.source];
         const target = nodePositions[edge.target];
 
-        const angle =
-          (Math.atan2(target.y - source.y, target.x - source.x) * 180) /
-          Math.PI;
-        const textAngle = angle > 90 || angle < -90 ? angle + 180 : angle;
-
-        // Calculate offset for vertical edges to prevent overlapping
-        const isVertical = Math.abs(angle) > 75 && Math.abs(angle) < 105;
-        const labelOffset = isVertical ? -25 : -12;
+        // Calculate midpoint of the edge
+        const midX = (source.x + target.x) / 2;
+        const midY = (source.y + target.y) / 2;
 
         return (
           <g key={`edge-${idx}`}>
@@ -318,20 +315,15 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               strokeWidth={edge.highlight ? "3" : "2"}
             />
 
-            {/* Flow/Capacity label */}
-            <g
-              transform={`translate(${(source.x + target.x) / 2},${
-                (source.y + target.y) / 2
-              })`}
-            >
+            {/* Flow/Capacity label - always horizontal */}
+            <g transform={`translate(${midX}, ${midY})`}>
               <text
-                transform={`rotate(${textAngle})`}
                 textAnchor="middle"
                 dominantBaseline="text-before-edge"
                 fill="#1a365d"
                 fontSize="18"
                 fontWeight="700"
-                dy={labelOffset}
+                dy="-12"
               >
                 {getFlowLabel(edge)}
               </text>
@@ -339,15 +331,13 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </g>
         );
       })}
-
-      {/* Draw nodes */}
+      {/* Draw nodes with adjusted flow label positions */}
       {Object.entries(nodePositions).map(([id, pos]) => {
         const node = graphState?.nodes?.find((n) => n.id === id);
         const isHighlighted = graphState?.currentPath?.includes(id);
 
         return (
           <g key={`node-${id}`}>
-            {/* Node circle */}
             <circle
               cx={pos.x}
               cy={pos.y}
@@ -370,11 +360,11 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               {id}
             </text>
 
-            {/* Flow labels with more spacing and different styling */}
+            {/* Flow labels with increased spacing */}
             <text
-              x={pos.x}
-              y={pos.y + 40}
-              textAnchor="middle"
+              x={pos.x + 45} // Moved to the right of node
+              y={pos.y - 10}
+              textAnchor="start"
               fill="#2563eb"
               fontSize="14"
               fontWeight="600"
@@ -382,9 +372,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               {`in: ${node?.inFlow || 0}`}
             </text>
             <text
-              x={pos.x}
-              y={pos.y + 58}
-              textAnchor="middle"
+              x={pos.x + 45} // Moved to the right of node
+              y={pos.y + 10}
+              textAnchor="start"
               fill="#2563eb"
               fontSize="14"
               fontWeight="600"
