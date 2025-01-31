@@ -292,60 +292,146 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
 
   return (
     <svg width="800" height="450" viewBox="0 0 800 450">
-      {/* Legend - moved to left side */}
+      <defs>
+        {/* Arrow marker definition */}
+        <marker
+          id="arrowhead"
+          markerWidth="10"
+          markerHeight="7"
+          refX="9"
+          refY="3.5"
+          orient="auto"
+        >
+          <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+        </marker>
+        <marker
+          id="arrowhead-highlighted"
+          markerWidth="10"
+          markerHeight="7"
+          refX="9"
+          refY="3.5"
+          orient="auto"
+        >
+          <polygon points="0 0, 10 3.5, 0 7" fill="#4169E1" />
+        </marker>
+      </defs>
+
+      {/* Legend - with additional items */}
       <g transform="translate(50, 20)">
-        {/* Legend Title */}
         <text x="0" y="0" fill="#1a365d" fontSize="16" fontWeight="700">
           Legend
         </text>
 
-        {/* Edge Weight Example */}
+        {/* Node Types */}
         <g transform="translate(0, 25)">
-          <line x1="0" y1="0" x2="40" y2="0" stroke="#64748b" strokeWidth="2" />
+          <circle
+            cx="10"
+            cy="0"
+            r="10"
+            fill={NODE_TYPES.SOURCE.color}
+            stroke="#64748b"
+          />
+          <text x="25" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            source node
+          </text>
+        </g>
+
+        <g transform="translate(0, 50)">
+          <circle
+            cx="10"
+            cy="0"
+            r="10"
+            fill={NODE_TYPES.SINK.color}
+            stroke="#64748b"
+          />
+          <text x="25" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            sink node
+          </text>
+        </g>
+
+        <g transform="translate(0, 75)">
+          <circle
+            cx="10"
+            cy="0"
+            r="10"
+            fill={NODE_TYPES.NORMAL.color}
+            stroke="#64748b"
+          />
+          <text x="25" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            internal node
+          </text>
+        </g>
+
+        {/* Edge Types */}
+        <g transform="translate(0, 100)">
+          <line
+            x1="0"
+            y1="0"
+            x2="40"
+            y2="0"
+            stroke="#64748b"
+            strokeWidth="2"
+            markerEnd="url(#arrowhead)"
+          />
           <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
             flow/capacity
           </text>
         </g>
 
-        {/* Highlighted Path Example */}
-        <g transform="translate(0, 50)">
-          <line x1="0" y1="0" x2="40" y2="0" stroke="#4169E1" strokeWidth="3" />
+        <g transform="translate(0, 125)">
+          <line
+            x1="0"
+            y1="0"
+            x2="40"
+            y2="0"
+            stroke="#4169E1"
+            strokeWidth="3"
+            markerEnd="url(#arrowhead-highlighted)"
+          />
           <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
             current path
           </text>
         </g>
 
-        {/* Node Flow Example */}
-        <g transform="translate(0, 75)">
+        {/* Flow Labels */}
+        <g transform="translate(0, 150)">
           <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
             in/out: node flow
           </text>
         </g>
       </g>
 
-      {/* Draw edges */}
+      {/* Draw edges with arrows */}
       {(graphState?.edges || []).map((edge, idx) => {
         const source = nodePositions[edge.source];
         const target = nodePositions[edge.target];
-
-        // Calculate midpoint of the edge
-        const midX = (source.x + target.x) / 2;
-        const midY = (source.y + target.y) / 2;
+        const isHighlighted = edge.highlight;
 
         return (
           <g key={`edge-${idx}`}>
-            {/* Edge line */}
             <line
               x1={source.x}
               y1={source.y}
               x2={target.x}
               y2={target.y}
-              stroke={edge.highlight ? "#4169E1" : "#64748b"}
-              strokeWidth={edge.highlight ? "3" : "2"}
+              stroke={
+                isHighlighted
+                  ? EDGE_TYPES.CURRENT_PATH.color
+                  : EDGE_TYPES.NORMAL.color
+              }
+              strokeWidth={isHighlighted ? "3" : "2"}
+              markerEnd={
+                isHighlighted
+                  ? "url(#arrowhead-highlighted)"
+                  : "url(#arrowhead)"
+              }
             />
-
             {/* Flow/Capacity label - always horizontal */}
-            <g transform={`translate(${midX}, ${midY})`}>
+            <g
+              transform={`translate(${(source.x + target.x) / 2}, ${
+                (source.y + target.y) / 2
+              })`}
+            >
               <text
                 textAnchor="middle"
                 dominantBaseline="text-before-edge"
@@ -364,6 +450,12 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
       {Object.entries(nodePositions).map(([id, pos]) => {
         const node = graphState?.nodes?.find((n) => n.id === id);
         const isHighlighted = graphState?.currentPath?.includes(id);
+        const nodeType =
+          id === "E"
+            ? NODE_TYPES.SOURCE
+            : id === "C"
+            ? NODE_TYPES.SINK
+            : NODE_TYPES.NORMAL;
 
         return (
           <g key={`node-${id}`}>
@@ -371,8 +463,8 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               cx={pos.x}
               cy={pos.y}
               r="25"
-              fill="#fff"
-              stroke={isHighlighted ? "#4169E1" : "#64748b"}
+              fill={nodeType.color}
+              stroke={isHighlighted ? EDGE_TYPES.CURRENT_PATH.color : "#64748b"}
               strokeWidth={isHighlighted ? "3" : "2"}
             />
 
