@@ -101,21 +101,36 @@ const updateFlows = (path, bottleneck, flows) => {
   }
 };
 
-const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
+const calculateNodeFlows = (nodes, edges) => {
+  return nodes.map((node) => {
+    const inFlow = edges
+      .filter((e) => e.target === node.id)
+      .reduce((sum, e) => sum + (e.flow || 0), 0);
+
+    const outFlow = edges
+      .filter((e) => e.source === node.id)
+      .reduce((sum, e) => sum + (e.flow || 0), 0);
+
+    return {
+      ...node,
+      inFlow,
+      outFlow,
+    };
+  });
+};
+
+const generateSteps = (initialNodes, initialEdges) => {
   const steps = [];
   const flows = new Map();
 
   // Initialize flows
-  edges.forEach((e) => flows.set(`${e.source}-${e.target}`, 0));
+  initialEdges.forEach((e) => flows.set(`${e.source}-${e.target}`, 0));
 
   // Initial state
   steps.push({
     graphState: {
-      nodes: initialNodes.map((node) => ({
-        ...node,
-        highlight: false,
-      })),
-      edges: edges.map((edge) => ({
+      nodes: calculateNodeFlows(initialNodes, initialEdges),
+      edges: initialEdges.map((edge) => ({
         ...edge,
         flow: 0,
         highlight: false,
@@ -125,30 +140,40 @@ const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
       maxFlow: 0,
     },
     explanation:
-      "Initial state: All flows are zero. Looking for augmenting path from source (S) to sink (T).",
+      "Initial state: All flows are zero. Looking for augmenting path.",
     pseudoCodeLines: [1],
   });
 
-  let path = findPath(source, sink, edges, flows);
+  // Find paths and update flows
   let iteration = 1;
+  let path = findPath("E", "C", initialEdges, flows); // Using E as source and C as sink
 
   while (path) {
-    const bottleneck = calculateBottleneck(path, edges, flows);
+    // Calculate bottleneck capacity for this path
+    let bottleneck = Infinity;
+    for (let i = 0; i < path.length - 1; i++) {
+      const edge = initialEdges.find(
+        (e) => e.source === path[i] && e.target === path[i + 1]
+      );
+      if (edge) {
+        const currentFlow = flows.get(`${edge.source}-${edge.target}`) || 0;
+        bottleneck = Math.min(bottleneck, edge.capacity - currentFlow);
+      }
+    }
 
-    // Add step showing current path
+    // Step showing found path
+    const currentEdges = initialEdges.map((edge) => ({
+      ...edge,
+      flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+      highlight: path.includes(edge.source) && path.includes(edge.target),
+      residualCapacity:
+        edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+    }));
+
     steps.push({
       graphState: {
-        nodes: initialNodes.map((node) => ({
-          ...node,
-          highlight: path.includes(node.id),
-        })),
-        edges: edges.map((edge) => ({
-          ...edge,
-          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-          highlight: isEdgeInPath(edge, path),
-          residualCapacity:
-            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-        })),
+        nodes: calculateNodeFlows(initialNodes, currentEdges),
+        edges: currentEdges,
         currentPath: path,
         maxFlow: steps[steps.length - 1].graphState.maxFlow,
       },
@@ -158,23 +183,26 @@ const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
       pseudoCodeLines: [2, "a"],
     });
 
-    // Update flows
-    updateFlows(path, bottleneck, flows);
+    // Update flows along the path
+    for (let i = 0; i < path.length - 1; i++) {
+      const edgeKey = `${path[i]}-${path[i + 1]}`;
+      const currentFlow = flows.get(edgeKey) || 0;
+      flows.set(edgeKey, currentFlow + bottleneck);
+    }
 
-    // Add step showing updated flows
+    // Step showing updated flows
+    const updatedEdges = initialEdges.map((edge) => ({
+      ...edge,
+      flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+      highlight: path.includes(edge.source) && path.includes(edge.target),
+      residualCapacity:
+        edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+    }));
+
     steps.push({
       graphState: {
-        nodes: initialNodes.map((node) => ({
-          ...node,
-          highlight: path.includes(node.id),
-        })),
-        edges: edges.map((edge) => ({
-          ...edge,
-          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-          highlight: isEdgeInPath(edge, path),
-          residualCapacity:
-            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-        })),
+        nodes: calculateNodeFlows(initialNodes, updatedEdges),
+        edges: updatedEdges,
         currentPath: path,
         maxFlow: steps[steps.length - 1].graphState.maxFlow + bottleneck,
       },
@@ -184,94 +212,53 @@ const generateSteps = (initialNodes, edges, source = "S", sink = "T") => {
       pseudoCodeLines: [2, "c"],
     });
 
-    path = findPath(source, sink, edges, flows);
+    // Find next path
+    path = findPath("E", "C", initialEdges, flows);
     iteration++;
   }
+
+  // Final state
+  const finalEdges = initialEdges.map((edge) => ({
+    ...edge,
+    flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+    highlight: false,
+    residualCapacity:
+      edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+  }));
+
+  steps.push({
+    graphState: {
+      nodes: calculateNodeFlows(initialNodes, finalEdges),
+      edges: finalEdges,
+      currentPath: [],
+      maxFlow: steps[steps.length - 1].graphState.maxFlow,
+    },
+    explanation: `Algorithm complete. Maximum flow: ${
+      steps[steps.length - 1].graphState.maxFlow
+    }`,
+    pseudoCodeLines: [3],
+  });
 
   return steps;
 };
 
-const generateRandomNetworkGraph = (nodeCount = 6) => {
-  const nodes = [];
-  const layerWidth = 150;
-  const centerY = 300;
+const generateRandomGraph = (nodeCount = 5) => {
+  // Fixed nodes for this specific layout
+  const nodes = [
+    { id: "A" },
+    { id: "B" },
+    { id: "C" },
+    { id: "D" },
+    { id: "E" },
+  ];
 
-  // Add source node
-  nodes.push({
-    id: "S",
-    x: 50,
-    y: centerY,
-  });
-
-  // Add middle layers (2 layers)
-  const nodesPerLayer = Math.max(2, Math.floor((nodeCount - 2) / 2));
-
-  for (let layer = 0; layer < 2; layer++) {
-    for (let i = 0; i < nodesPerLayer; i++) {
-      nodes.push({
-        id: `${String.fromCharCode(65 + layer * nodesPerLayer + i)}`,
-        x: layerWidth * (layer + 1) + 50,
-        y: 150 + (i * 300) / (nodesPerLayer - 1),
-      });
-    }
-  }
-
-  // Add sink node
-  nodes.push({
-    id: "T",
-    x: layerWidth * 3 + 50,
-    y: centerY,
-  });
-
-  // Generate edges
-  const edges = [];
-
-  // Connect source to first layer
-  nodes
-    .filter((n) => n.x === layerWidth + 50)
-    .forEach((node) => {
-      edges.push({
-        source: "S",
-        target: node.id,
-        capacity: Math.floor(Math.random() * 8) + 3,
-        flow: 0,
-      });
-    });
-
-  // Connect layers
-  for (let layer = 0; layer < 2; layer++) {
-    const currentLayerNodes = nodes.filter(
-      (n) => n.x === layerWidth * (layer + 1) + 50
-    );
-    const nextLayerNodes = nodes.filter(
-      (n) => n.x === layerWidth * (layer + 2) + 50
-    );
-
-    currentLayerNodes.forEach((source) => {
-      nextLayerNodes.forEach((target) => {
-        if (Math.random() < 0.7) {
-          edges.push({
-            source: source.id,
-            target: target.id,
-            capacity: Math.floor(Math.random() * 8) + 3,
-            flow: 0,
-          });
-        }
-      });
-    });
-  }
-
-  // Connect last layer to sink
-  nodes
-    .filter((n) => n.x === layerWidth * 2 + 50)
-    .forEach((node) => {
-      edges.push({
-        source: node.id,
-        target: "T",
-        capacity: Math.floor(Math.random() * 8) + 3,
-        flow: 0,
-      });
-    });
+  // Fixed edges for this specific layout
+  const edges = [
+    { source: "E", target: "D", capacity: 10, flow: 0 },
+    { source: "E", target: "A", capacity: 8, flow: 0 },
+    { source: "E", target: "B", capacity: 12, flow: 0 },
+    { source: "D", target: "C", capacity: 15, flow: 0 },
+  ];
 
   return { nodes, edges };
 };
@@ -287,11 +274,126 @@ const EDGE_TYPES = {
   NORMAL: { color: "#000000" }, // Black
 };
 
+const FordFulkersonGraphVisualisation = ({ graphState }) => {
+  // Adjusted positions to match your image
+  const nodePositions = {
+    E: { x: 400, y: 50 }, // Top center
+    D: { x: 200, y: 150 }, // Upper left
+    A: { x: 600, y: 150 }, // Upper right
+    B: { x: 400, y: 250 }, // Bottom center
+    C: { x: 200, y: 250 }, // Bottom left
+  };
+
+  const getFlowLabel = (edge) => {
+    const flow = edge.flow || 0;
+    const capacity = edge.capacity || "undefined";
+    return `${flow}/${capacity}`;
+  };
+
+  return (
+    <svg width="800" height="400" viewBox="0 0 800 400">
+      {/* Draw edges */}
+      {(graphState?.edges || []).map((edge, idx) => {
+        const source = nodePositions[edge.source];
+        const target = nodePositions[edge.target];
+
+        // Calculate the angle for proper text rotation
+        const angle =
+          (Math.atan2(target.y - source.y, target.x - source.x) * 180) /
+          Math.PI;
+
+        return (
+          <g key={`edge-${idx}`}>
+            {/* Edge line */}
+            <line
+              x1={source.x}
+              y1={source.y}
+              x2={target.x}
+              y2={target.y}
+              stroke={edge.highlight ? "#4169E1" : "#64748b"}
+              strokeWidth={edge.highlight ? "3" : "2"}
+            />
+
+            {/* Flow/Capacity label */}
+            <g
+              transform={`translate(${(source.x + target.x) / 2},${
+                (source.y + target.y) / 2
+              })`}
+            >
+              <text
+                transform={`rotate(${angle})`}
+                textAnchor="middle"
+                dominantBaseline="text-before-edge"
+                fill="#64748b"
+                fontSize="14"
+                dy="-5"
+              >
+                {getFlowLabel(edge)}
+              </text>
+            </g>
+          </g>
+        );
+      })}
+
+      {/* Draw nodes */}
+      {Object.entries(nodePositions).map(([id, pos]) => {
+        const node = graphState?.nodes?.find((n) => n.id === id);
+        const isHighlighted = graphState?.currentPath?.includes(id);
+
+        return (
+          <g key={`node-${id}`}>
+            {/* Node circle */}
+            <circle
+              cx={pos.x}
+              cy={pos.y}
+              r="25"
+              fill="#fff"
+              stroke={isHighlighted ? "#4169E1" : "#64748b"}
+              strokeWidth={isHighlighted ? "3" : "2"}
+            />
+
+            {/* Node label */}
+            <text
+              x={pos.x}
+              y={pos.y}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#000"
+              fontSize="16"
+              fontWeight="500"
+            >
+              {id}
+            </text>
+
+            {/* Small "in:" and "out:" labels */}
+            <text
+              x={pos.x}
+              y={pos.y + 35}
+              textAnchor="middle"
+              fill="#64748b"
+              fontSize="12"
+            >
+              {`in: ${node?.inFlow || 0}`}
+            </text>
+            <text
+              x={pos.x}
+              y={pos.y + 48}
+              textAnchor="middle"
+              fill="#64748b"
+              fontSize="12"
+            >
+              {`out: ${node?.outFlow || 0}`}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
 const FordFulkersonEducationPage = () => {
   const conceptText = {
-    introduction: `The Ford-Fulkerson method is a fundamental algorithm for solving the maximum flow problem in a flow network. It works by repeatedly finding augmenting paths from source to sink through any available path-finding strategy. While the basic Ford-Fulkerson method allows for any path-finding approach, a notable improvement called the Edmonds-Karp algorithm specifically uses Breadth-First Search (BFS) to find the shortest augmenting paths.
-
-The key distinction is that while Ford-Fulkerson can use any valid path-finding strategy (like DFS or random selection), Edmonds-Karp's use of BFS guarantees a polynomial time complexity of O(VE²). This makes Edmonds-Karp more efficient and prevents pathological cases where Ford-Fulkerson might take exponential time with poor path selections.`,
+    introduction: `The Ford-Fulkerson method is a fundamental algorithm for solving the maximum flow problem in a flow network. It works by repeatedly finding augmenting paths from source to sink through any available path-finding strategy. While the basic Ford-Fulkerson method allows for any path-finding approach, a notable improvement called the Edmonds-Karp algorithm specifically uses Breadth-First Search (BFS) to find the shortest augmenting paths.`,
     keyCharacteristics: [
       "Can use any strategy to find augmenting paths (DFS, random, etc.)",
       "Maintains both network and residual graphs",
@@ -312,19 +414,25 @@ The key distinction is that while Ford-Fulkerson can use any valid path-finding 
 
   const pseudocode = `FORD-FULKERSON Algorithm:
 1. Initialize all flows to zero
-2. While there exists an augmenting path:
-   a. Find any augmenting path
+2. While there exists an augmenting path from source to sink:
+   a. Find augmenting path
    b. Calculate bottleneck capacity
    c. Update flows along the path
 3. Return total flow when no path exists`;
+
+  // Create initial graph state
+  const initialGraph = generateRandomGraph();
+  const initialSteps = generateSteps(initialGraph.nodes, initialGraph.edges);
 
   return (
     <EducationPageStructure
       title="Ford-Fulkerson Algorithm"
       conceptText={conceptText}
       pseudocode={pseudocode}
-      generateSteps={(nodes, edges) => generateSteps(nodes, edges)}
-      generateGraph={() => generateRandomNetworkGraph(5)}
+      generateSteps={() => initialSteps}
+      generateNewGraph={generateRandomGraph}
+      GraphVisualisationComponent={FordFulkersonGraphVisualisation}
+      initialGraphState={initialGraph}
     />
   );
 };
