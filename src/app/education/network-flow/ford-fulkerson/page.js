@@ -297,7 +297,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         const source = nodePositions[edge.source];
         const target = nodePositions[edge.target];
 
-        // Calculate the angle for proper text rotation
         const angle =
           (Math.atan2(target.y - source.y, target.x - source.x) * 180) /
           Math.PI;
@@ -324,8 +323,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
                 transform={`rotate(${angle})`}
                 textAnchor="middle"
                 dominantBaseline="text-before-edge"
-                fill="#64748b"
-                fontSize="14"
+                fill="#1a365d"
+                fontSize="16"
+                fontWeight="600"
                 dy="-5"
               >
                 {getFlowLabel(edge)}
