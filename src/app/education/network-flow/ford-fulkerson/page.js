@@ -137,6 +137,7 @@ const generateSteps = (initialNodes, initialEdges) => {
         residualCapacity: edge.capacity,
       })),
       currentPath: [],
+      currentEdge: null,
       maxFlow: 0,
     },
     explanation:
@@ -144,57 +145,72 @@ const generateSteps = (initialNodes, initialEdges) => {
     pseudoCodeLines: [1],
   });
 
-  // Find paths and update flows
   let iteration = 1;
-  let path = findPath("E", "C", initialEdges, flows); // Using E as source and C as sink
+  let path = findPath("E", "C", initialEdges, flows);
 
   while (path) {
-    // Calculate bottleneck capacity for this path
-    let bottleneck = Infinity;
-    for (let i = 0; i < path.length - 1; i++) {
-      const edge = initialEdges.find(
-        (e) => e.source === path[i] && e.target === path[i + 1]
-      );
-      if (edge) {
-        const currentFlow = flows.get(`${edge.source}-${edge.target}`) || 0;
-        bottleneck = Math.min(bottleneck, edge.capacity - currentFlow);
-      }
-    }
-
-    // Step showing found path
-    const currentEdges = initialEdges.map((edge) => ({
+    // First show the found path with all edges in blue
+    const pathEdges = initialEdges.map((edge) => ({
       ...edge,
       flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-      highlight: path.includes(edge.source) && path.includes(edge.target),
+      highlight: isEdgeInPath(edge, path),
       residualCapacity:
         edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
     }));
 
     steps.push({
       graphState: {
-        nodes: calculateNodeFlows(initialNodes, currentEdges),
-        edges: currentEdges,
+        nodes: calculateNodeFlows(initialNodes, pathEdges),
+        edges: pathEdges,
         currentPath: path,
+        currentEdge: null,
         maxFlow: steps[steps.length - 1].graphState.maxFlow,
       },
       explanation: `Iteration ${iteration}: Found augmenting path ${path.join(
         " → "
-      )} with bottleneck capacity ${bottleneck}`,
+      )}`,
       pseudoCodeLines: [2, "a"],
     });
 
-    // Update flows along the path
+    // Calculate bottleneck for this path
+    const bottleneck = calculateBottleneck(path, initialEdges, flows);
+
+    // Then consider each edge in the path one by one
     for (let i = 0; i < path.length - 1; i++) {
-      const edgeKey = `${path[i]}-${path[i + 1]}`;
+      const current = path[i];
+      const next = path[i + 1];
+
+      const currentEdges = initialEdges.map((edge) => ({
+        ...edge,
+        flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+        highlight: isEdgeInPath(edge, path),
+        residualCapacity:
+          edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+      }));
+
+      steps.push({
+        graphState: {
+          nodes: calculateNodeFlows(initialNodes, currentEdges),
+          edges: currentEdges,
+          currentPath: path,
+          currentEdge: { source: current, target: next },
+          maxFlow: steps[steps.length - 1].graphState.maxFlow,
+        },
+        explanation: `Updating flow along edge ${current} → ${next}`,
+        pseudoCodeLines: [2, "c"],
+      });
+
+      // Update the flow for this edge
+      const edgeKey = `${current}-${next}`;
       const currentFlow = flows.get(edgeKey) || 0;
       flows.set(edgeKey, currentFlow + bottleneck);
     }
 
-    // Step showing updated flows
+    // Show final state after updating all edges in this path
     const updatedEdges = initialEdges.map((edge) => ({
       ...edge,
       flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-      highlight: path.includes(edge.source) && path.includes(edge.target),
+      highlight: isEdgeInPath(edge, path),
       residualCapacity:
         edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
     }));
@@ -204,12 +220,13 @@ const generateSteps = (initialNodes, initialEdges) => {
         nodes: calculateNodeFlows(initialNodes, updatedEdges),
         edges: updatedEdges,
         currentPath: path,
+        currentEdge: null,
         maxFlow: steps[steps.length - 1].graphState.maxFlow + bottleneck,
       },
-      explanation: `Updated flows along path. Current maximum flow: ${
+      explanation: `Updated all flows along path. Current maximum flow: ${
         steps[steps.length - 1].graphState.maxFlow + bottleneck
       }`,
-      pseudoCodeLines: [2, "c"],
+      pseudoCodeLines: [2],
     });
 
     // Find next path
@@ -231,6 +248,7 @@ const generateSteps = (initialNodes, initialEdges) => {
       nodes: calculateNodeFlows(initialNodes, finalEdges),
       edges: finalEdges,
       currentPath: [],
+      currentEdge: null,
       maxFlow: steps[steps.length - 1].graphState.maxFlow,
     },
     explanation: `Algorithm complete. Maximum flow: ${
@@ -273,6 +291,40 @@ const EDGE_TYPES = {
   CURRENT_PATH: { color: "#4169E1" }, // Royal blue
   CURRENT_EDGE: { color: "#FF69B4" }, // Hot pink
   NORMAL: { color: "#000000" }, // Black
+};
+
+const getEdgeStyle = (edge, graphState) => {
+  // Check if this specific edge is the current edge being considered
+  const isCurrentEdge =
+    graphState?.currentEdge &&
+    edge.source === graphState.currentEdge.source &&
+    edge.target === graphState.currentEdge.target;
+
+  // Check if this edge is part of the current path
+  const isInPath = edge.highlight;
+
+  if (isCurrentEdge) {
+    // Current edge being considered - pink
+    return {
+      color: EDGE_TYPES.CURRENT_EDGE.color,
+      marker: "url(#arrowhead-current)",
+      width: "3",
+    };
+  } else if (isInPath) {
+    // Part of current path but not being considered - blue
+    return {
+      color: EDGE_TYPES.CURRENT_PATH.color,
+      marker: "url(#arrowhead-highlighted)",
+      width: "3",
+    };
+  } else {
+    // Not part of current path - black
+    return {
+      color: EDGE_TYPES.NORMAL.color,
+      marker: "url(#arrowhead)",
+      width: "2",
+    };
+  }
 };
 
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
@@ -412,7 +464,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
       {(graphState?.edges || []).map((edge, idx) => {
         const source = nodePositions[edge.source];
         const target = nodePositions[edge.target];
-        const isHighlighted = edge.highlight;
+        const style = getEdgeStyle(edge, graphState);
 
         return (
           <g key={`edge-${idx}`}>
@@ -421,17 +473,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               y1={source.y}
               x2={target.x}
               y2={target.y}
-              stroke={
-                isHighlighted
-                  ? EDGE_TYPES.CURRENT_PATH.color
-                  : EDGE_TYPES.NORMAL.color
-              }
-              strokeWidth={isHighlighted ? "3" : "2"}
-              markerEnd={
-                isHighlighted
-                  ? "url(#arrowhead-highlighted)"
-                  : "url(#arrowhead)"
-              }
+              stroke={style.color}
+              strokeWidth={style.width}
+              markerEnd={style.marker}
             />
             {/* Flow/Capacity label - always horizontal */}
             <g
