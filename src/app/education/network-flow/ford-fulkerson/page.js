@@ -343,41 +343,77 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
     return `${flow}/${capacity}`;
   };
 
+  const drawArrowPath = (source, target) => {
+    // Calculate the direction vector
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+
+    // Normalize the vector
+    const unitX = dx / length;
+    const unitY = dy / length;
+
+    // Calculate start and end points (shortened to make room for arrow)
+    const shortenBy = 30;
+    const startX = source.x + shortenBy * unitX;
+    const startY = source.y + shortenBy * unitY;
+    const endX = target.x - shortenBy * unitX;
+    const endY = target.y - shortenBy * unitY;
+
+    // Calculate arrow points
+    const arrowLength = 10;
+    const arrowWidth = 6;
+
+    // Arrow head points
+    const tipX = endX;
+    const tipY = endY;
+    const leftX = endX - arrowLength * unitX + arrowWidth * unitY;
+    const leftY = endY - arrowLength * unitY - arrowWidth * unitX;
+    const rightX = endX - arrowLength * unitX - arrowWidth * unitY;
+    const rightY = endY - arrowLength * unitY + arrowWidth * unitX;
+
+    return {
+      line: `M ${startX} ${startY} L ${endX} ${endY}`,
+      arrow: `M ${leftX} ${leftY} L ${tipX} ${tipY} L ${rightX} ${rightY}`,
+    };
+  };
+
   return (
     <svg width="800" height="350">
       <defs>
+        {/* Larger, more visible arrow markers */}
         <marker
           id="arrowhead"
-          viewBox="-10 -5 10 10"
-          refX="0"
-          refY="0"
-          markerWidth="6"
-          markerHeight="6"
-          orient="auto"
+          viewBox="0 0 16 16"
+          refX="16"
+          refY="8"
+          markerWidth="12"
+          markerHeight="12"
+          orient="auto-start-reverse"
         >
-          <path d="M-10,-5 L0,0 L-10,5" fill="#64748b" />
+          <path d="M 0 0 L 16 8 L 0 16 z" fill="#64748b" />
         </marker>
         <marker
           id="arrowhead-highlighted"
-          viewBox="-10 -5 10 10"
-          refX="0"
-          refY="0"
-          markerWidth="6"
-          markerHeight="6"
-          orient="auto"
+          viewBox="0 0 16 16"
+          refX="16"
+          refY="8"
+          markerWidth="12"
+          markerHeight="12"
+          orient="auto-start-reverse"
         >
-          <path d="M-10,-5 L0,0 L-10,5" fill="#4169E1" />
+          <path d="M 0 0 L 16 8 L 0 16 z" fill="#4169E1" />
         </marker>
         <marker
           id="arrowhead-current"
-          viewBox="-10 -5 10 10"
-          refX="0"
-          refY="0"
-          markerWidth="6"
-          markerHeight="6"
-          orient="auto"
+          viewBox="0 0 16 16"
+          refX="16"
+          refY="8"
+          markerWidth="12"
+          markerHeight="12"
+          orient="auto-start-reverse"
         >
-          <path d="M-10,-5 L0,0 L-10,5" fill="#FF69B4" />
+          <path d="M 0 0 L 16 8 L 0 16 z" fill="#FF69B4" />
         </marker>
       </defs>
 
@@ -467,26 +503,19 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         const source = nodePositions[edge.source];
         const target = nodePositions[edge.target];
         const style = getEdgeStyle(edge, graphState);
-
-        // Calculate a slightly shorter end point to prevent arrow from overlapping with node
-        const dx = target.x - source.x;
-        const dy = target.y - source.y;
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const shortenBy = 25; // Node radius
-        const endX = target.x - (dx * shortenBy) / length;
-        const endY = target.y - (dy * shortenBy) / length;
+        const paths = drawArrowPath(source, target);
 
         return (
           <g key={`edge-${idx}`}>
-            <line
-              x1={source.x}
-              y1={source.y}
-              x2={endX}
-              y2={endY}
+            {/* Line */}
+            <path
+              d={paths.line}
               stroke={style.color}
               strokeWidth={style.width}
-              markerEnd={style.marker}
+              fill="none"
             />
+            {/* Arrow head */}
+            <path d={paths.arrow} fill={style.color} stroke="none" />
             {/* Flow/Capacity label - always horizontal */}
             <g
               transform={`translate(${(source.x + target.x) / 2}, ${
