@@ -292,8 +292,37 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
 
   return (
     <svg width="800" height="450" viewBox="0 0 800 450">
-      {" "}
-      {/* Increased height */}
+      {/* Legend - moved to left side */}
+      <g transform="translate(50, 20)">
+        {/* Legend Title */}
+        <text x="0" y="0" fill="#1a365d" fontSize="16" fontWeight="700">
+          Legend
+        </text>
+
+        {/* Edge Weight Example */}
+        <g transform="translate(0, 25)">
+          <line x1="0" y1="0" x2="40" y2="0" stroke="#64748b" strokeWidth="2" />
+          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            flow/capacity
+          </text>
+        </g>
+
+        {/* Highlighted Path Example */}
+        <g transform="translate(0, 50)">
+          <line x1="0" y1="0" x2="40" y2="0" stroke="#4169E1" strokeWidth="3" />
+          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+            current path
+          </text>
+        </g>
+
+        {/* Node Flow Example */}
+        <g transform="translate(0, 75)">
+          <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
+            in/out: node flow
+          </text>
+        </g>
+      </g>
+
       {/* Draw edges */}
       {(graphState?.edges || []).map((edge, idx) => {
         const source = nodePositions[edge.source];
@@ -331,7 +360,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </g>
         );
       })}
-      {/* Draw nodes with adjusted flow label positions */}
+      {/* Draw nodes with closer in/out labels */}
       {Object.entries(nodePositions).map(([id, pos]) => {
         const node = graphState?.nodes?.find((n) => n.id === id);
         const isHighlighted = graphState?.currentPath?.includes(id);
@@ -360,9 +389,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               {id}
             </text>
 
-            {/* Flow labels with increased spacing */}
+            {/* Flow labels moved closer to node */}
             <text
-              x={pos.x + 45} // Moved to the right of node
+              x={pos.x + 30} // Reduced from 45 to 30
               y={pos.y - 10}
               textAnchor="start"
               fill="#2563eb"
@@ -372,7 +401,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
               {`in: ${node?.inFlow || 0}`}
             </text>
             <text
-              x={pos.x + 45} // Moved to the right of node
+              x={pos.x + 30} // Reduced from 45 to 30
               y={pos.y + 10}
               textAnchor="start"
               fill="#2563eb"
@@ -384,36 +413,6 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </g>
         );
       })}
-      {/* Legend */}
-      <g transform="translate(650, 20)">
-        {/* Legend Title */}
-        <text x="0" y="0" fill="#1a365d" fontSize="16" fontWeight="700">
-          Legend
-        </text>
-
-        {/* Edge Weight Example */}
-        <g transform="translate(0, 25)">
-          <line x1="0" y1="0" x2="40" y2="0" stroke="#64748b" strokeWidth="2" />
-          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
-            flow/capacity
-          </text>
-        </g>
-
-        {/* Highlighted Path Example */}
-        <g transform="translate(0, 50)">
-          <line x1="0" y1="0" x2="40" y2="0" stroke="#4169E1" strokeWidth="3" />
-          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
-            current path
-          </text>
-        </g>
-
-        {/* Node Flow Example */}
-        <g transform="translate(0, 75)">
-          <text x="0" y="5" fill="#2563eb" fontSize="14" fontWeight="600">
-            in/out: node flow
-          </text>
-        </g>
-      </g>
     </svg>
   );
 };
