@@ -332,13 +332,13 @@ const getEdgeStyle = (edge, graphState) => {
 };
 
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
-  // Adjust node positions to be more compact vertically
+  // Adjust node positions to be even more compact vertically
   const nodePositions = {
-    E: { x: 400, y: 80 }, // Moved up from y: 100
-    D: { x: 200, y: 160 }, // Moved up from y: 200
-    A: { x: 600, y: 160 }, // Moved up from y: 200
-    B: { x: 400, y: 240 }, // Moved up from y: 300
-    C: { x: 200, y: 280 }, // Moved up from y: 350
+    E: { x: 400, y: 60 }, // Moved up from y: 80
+    D: { x: 200, y: 140 }, // Moved up from y: 160
+    A: { x: 600, y: 140 }, // Moved up from y: 160
+    B: { x: 400, y: 220 }, // Moved up from y: 240
+    C: { x: 200, y: 260 }, // Moved up from y: 280
   };
 
   const getFlowLabel = (edge) => {
@@ -383,10 +383,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="320">
+    <svg width="800" height="300">
       {" "}
-      {/* Reduced height from 400 to 320 */}{" "}
-      {/* Increased height from 350 to 400 */}
+      {/* Reduced height from 320 to 300 */}
       <defs>
         {/* Larger, more visible arrow markers */}
         <marker
@@ -426,8 +425,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
       {/* Move legend higher up */}
       <g transform="translate(20, 10)">
         {" "}
-        {/* Adjusted from (50, 20) to (20, 10) */}
-        {/* Node Types */}
+        {/* Adjusted from (50, 20) to (20, 10) */} {/* Node Types */}
         <g transform="translate(0, 0)">
           <circle
             cx="10"
