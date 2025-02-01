@@ -735,13 +735,12 @@ const FordFulkersonEducationPage = () => {
     ],
   };
 
-  const pseudocode = `FORD-FULKERSON Algorithm:
-1. Initialize all flows to zero
-2. While there exists an augmenting path from source to sink:
-   a. Find augmenting path
-   b. Calculate bottleneck capacity
-   c. Update flows along the path
-3. Return total flow when no path exists`;
+  const pseudocode = `Initialize residual graph
+While path exists from source to sink:
+  Find augmenting path
+  Find minimum residual capacity
+  Update flow along path
+Return maximum flow value`;
 
   const initialSteps = generateSteps(graphState.nodes, graphState.edges);
 
