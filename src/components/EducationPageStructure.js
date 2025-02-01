@@ -775,7 +775,7 @@ export default function EducationPageStructure({
                   nodeCount,
                   isFordFulkerson
                 );
-                const steps = generateSteps(nodes, edges); // !fix: generateSteps only return 2 steps for Ford-Fulkerson
+                const steps = generateSteps(nodes, edges);
                 setCurrentGraphStates([steps]);
                 setCurrentStep(0);
               }}

@@ -127,6 +127,7 @@ const generateSteps = (initialNodes, initialEdges) => {
   // Initialize flows
   initialEdges.forEach((e) => flows.set(`${e.source}-${e.target}`, 0));
 
+  // Initial state
   steps.push({
     graphState: {
       nodes: calculateNodeFlows(initialNodes, initialEdges),
@@ -141,14 +142,31 @@ const generateSteps = (initialNodes, initialEdges) => {
     },
     explanation:
       "Initial state: All flows are zero. Looking for augmenting path.",
-    pseudoCodeLines: [1],
+    pseudoCodeLines: [1], // Initialize residual graph
   });
 
   let iteration = 1;
   let path = findPath("S", "T", initialEdges, flows);
 
   while (path) {
-    // Step 1: Show found path
+    // First check if path exists (While condition)
+    steps.push({
+      graphState: {
+        nodes: calculateNodeFlows(initialNodes, initialEdges),
+        edges: initialEdges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: false,
+        })),
+        currentPath: [],
+        currentEdge: null,
+        maxFlow: steps[steps.length - 1].graphState.maxFlow,
+      },
+      explanation: `Iteration ${iteration}: Checking for augmenting path`,
+      pseudoCodeLines: [2], // While path exists
+    });
+
+    // Then show the found path
     steps.push({
       graphState: {
         nodes: calculateNodeFlows(initialNodes, initialEdges),
@@ -161,15 +179,29 @@ const generateSteps = (initialNodes, initialEdges) => {
         currentEdge: null,
         maxFlow: steps[steps.length - 1].graphState.maxFlow,
       },
-      explanation: `Iteration ${iteration}: Found augmenting path ${path.join(
-        " → "
-      )}`,
-      pseudoCodeLines: [2, "a"],
+      explanation: `Found augmenting path ${path.join(" → ")}`,
+      pseudoCodeLines: [3], // Find augmenting path
     });
 
+    // Step: Calculate bottleneck
     const bottleneck = calculateBottleneck(path, initialEdges, flows);
+    steps.push({
+      graphState: {
+        nodes: calculateNodeFlows(initialNodes, initialEdges),
+        edges: initialEdges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: isEdgeInPath(edge, path),
+        })),
+        currentPath: path,
+        currentEdge: null,
+        maxFlow: steps[steps.length - 1].graphState.maxFlow,
+      },
+      explanation: `Found minimum residual capacity: ${bottleneck}`,
+      pseudoCodeLines: [4], // Find minimum residual capacity
+    });
 
-    // Add steps for each edge update
+    // Steps: Update flows along the path
     for (let i = 0; i < path.length - 1; i++) {
       const current = path[i];
       const next = path[i + 1];
@@ -179,7 +211,6 @@ const generateSteps = (initialNodes, initialEdges) => {
           (e.source === next && e.target === current)
       );
 
-      // Create temporary flows map for this step
       const tempFlows = new Map(flows);
       const edgeKey = `${current}-${next}`;
       const reverseKey = `${next}-${current}`;
@@ -209,10 +240,9 @@ const generateSteps = (initialNodes, initialEdges) => {
               : steps[steps.length - 1].graphState.maxFlow,
         },
         explanation: `Updating flow along edge ${current} → ${next} by ${bottleneck}`,
-        pseudoCodeLines: ["c"],
+        pseudoCodeLines: [5], // Update flow along path
       });
 
-      // Update the actual flows map
       flows.set(edgeKey, tempFlows.get(edgeKey) || 0);
       flows.set(reverseKey, tempFlows.get(reverseKey) || 0);
     }
@@ -220,6 +250,23 @@ const generateSteps = (initialNodes, initialEdges) => {
     iteration++;
     path = findPath("S", "T", initialEdges, flows);
   }
+
+  // Final "while" condition check that fails
+  steps.push({
+    graphState: {
+      nodes: calculateNodeFlows(initialNodes, initialEdges),
+      edges: initialEdges.map((edge) => ({
+        ...edge,
+        flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+        highlight: false,
+      })),
+      currentPath: [],
+      currentEdge: null,
+      maxFlow: steps[steps.length - 1].graphState.maxFlow,
+    },
+    explanation: "No more augmenting paths found.",
+    pseudoCodeLines: [2], // While path exists (condition fails)
+  });
 
   // Final state
   steps.push({
@@ -237,7 +284,7 @@ const generateSteps = (initialNodes, initialEdges) => {
     explanation: `Algorithm complete. Maximum flow: ${
       steps[steps.length - 1].graphState.maxFlow
     }`,
-    pseudoCodeLines: [3],
+    pseudoCodeLines: [6], // Return maximum flow value
   });
 
   return steps;
