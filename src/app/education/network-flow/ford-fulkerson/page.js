@@ -699,7 +699,7 @@ const FordFulkersonEducationPage = () => {
   const generateGraphButtonClickedCounter = useSelector(
     (state) => state.graph.generateGraphCounter
   );
-  const [nodeCount, setNodeCount] = useState(6);
+  const [nodeCount, setNodeCount] = useState(5);
   const [graphState, setGraphState] = useState(() => {
     const initialGraph = generateRandomGraph(nodeCount);
     return {
