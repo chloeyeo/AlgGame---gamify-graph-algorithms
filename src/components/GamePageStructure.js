@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { BACKEND_URL } from "@/constants/constants";
 
-const API_URL = BACKEND_URL || "http://localhost:5000";
+const API_URL = BACKEND_URL;
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -192,55 +192,15 @@ export default function GamePageStructure({
         !submitAttempted.current
       ) {
         try {
-          submitAttempted.current = true;
-          const token = localStorage.getItem("token");
-          if (!token) {
-            setMessage("Please log in to save your score!");
-            return;
-          }
-
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/scores`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                algorithm: title.split(" ")[0].toLowerCase(),
-                score: score,
-                timeSpent: Date.now() - startTime,
-                movesCount: moves,
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to submit score");
-          }
-
-          setScoreSubmitted(true);
-          setMessage("Congratulations! Game completed and score submitted!");
+          await submitScore();
         } catch (error) {
           console.error("Score submission error:", error);
-          setMessage(
-            "Game completed but score submission failed. Please try again."
-          );
         }
       }
     };
 
     checkGameCompletion();
-  }, [
-    graphState,
-    isGameComplete,
-    score,
-    scoreSubmitted,
-    moves,
-    startTime,
-    title,
-  ]);
+  }, [graphState, isGameComplete, scoreSubmitted]);
 
   const isValidDFSMove = (graphState, nodeId) => {
     const newState = { ...graphState };
