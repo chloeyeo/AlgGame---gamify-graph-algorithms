@@ -303,32 +303,98 @@ const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
     }
   };
 
-  // Ensure path from source to sink exists
-  let current = "S";
-  const visited = new Set([current]);
+  /** to generate a graph with a guaranteed path from source to sink
+   * i.e. all nodes are connected to the source and the sink
+   */
 
-  while (current !== "T") {
-    const availableNodes = nodes
-      .filter((n) => !visited.has(n.id) && n.id !== "S")
-      .sort(() => Math.random() - 0.5);
+  // Step 1: Ensure every node is reachable from source
+  const nonSourceSinkNodes = nodes
+    .filter((n) => n.id !== "S" && n.id !== "T")
+    .map((n) => n.id);
 
-    const next = availableNodes[0].id;
-    addEdge(current, next);
-    visited.add(next);
-    current = next;
-  }
+  // Randomly connect source to some nodes
+  const numSourceConnections = Math.max(
+    2,
+    Math.floor(nonSourceSinkNodes.length / 2)
+  );
+  const shuffledForSource = [...nonSourceSinkNodes].sort(
+    () => Math.random() - 0.5
+  );
+  shuffledForSource.slice(0, numSourceConnections).forEach((nodeId) => {
+    addEdge("S", nodeId);
+  });
 
-  // Add random additional edges based on density
-  nodes.forEach((node1) => {
-    nodes.forEach((node2) => {
-      if (node1.id !== node2.id && Math.random() < edgeDensity) {
-        // Prevent backwards flow to source and forward flow from sink
-        if (node2.id !== "S" && node1.id !== "T") {
-          addEdge(node1.id, node2.id);
-        }
+  // Step 2: Ensure every node can reach sink
+  const numSinkConnections = Math.max(
+    2,
+    Math.floor(nonSourceSinkNodes.length / 2)
+  );
+  const shuffledForSink = [...nonSourceSinkNodes].sort(
+    () => Math.random() - 0.5
+  );
+  shuffledForSink.slice(0, numSinkConnections).forEach((nodeId) => {
+    addEdge(nodeId, "T");
+  });
+
+  // Step 3: Connect intermediate nodes
+  nonSourceSinkNodes.forEach((node1, i) => {
+    nonSourceSinkNodes.forEach((node2, j) => {
+      if (i !== j && Math.random() < edgeDensity) {
+        addEdge(node1, node2);
       }
     });
   });
+
+  // Step 4: Ensure connectivity by creating paths from source to sink
+  const unconnectedToSource = nonSourceSinkNodes.filter(
+    (id) => !edges.some((e) => e.source === "S" && e.target === id)
+  );
+
+  const unconnectedToSink = nonSourceSinkNodes.filter(
+    (id) => !edges.some((e) => e.source === id && e.target === "T")
+  );
+
+  // Connect any unconnected nodes through intermediate nodes
+  unconnectedToSource.forEach((id) => {
+    const connectedNode = nonSourceSinkNodes.find((n) =>
+      edges.some((e) => e.source === "S" && e.target === n)
+    );
+    if (connectedNode) addEdge(connectedNode, id);
+  });
+
+  unconnectedToSink.forEach((id) => {
+    const connectedNode = nonSourceSinkNodes.find((n) =>
+      edges.some((e) => e.source === n && e.target === "T")
+    );
+    if (connectedNode) addEdge(id, connectedNode);
+  });
+
+  // // Ensure path from source to sink exists
+  // let current = "S";
+  // const visited = new Set([current]);
+
+  // while (current !== "T") {
+  //   const availableNodes = nodes
+  //     .filter((n) => !visited.has(n.id) && n.id !== "S")
+  //     .sort(() => Math.random() - 0.5);
+
+  //   const next = availableNodes[0].id;
+  //   addEdge(current, next);
+  //   visited.add(next);
+  //   current = next;
+  // }
+
+  // // Add random additional edges based on density
+  // nodes.forEach((node1) => {
+  //   nodes.forEach((node2) => {
+  //     if (node1.id !== node2.id && Math.random() < edgeDensity) {
+  //       // Prevent backwards flow to source and forward flow from sink
+  //       if (node2.id !== "S" && node1.id !== "T") {
+  //         addEdge(node1.id, node2.id);
+  //       }
+  //     }
+  //   });
+  // });
 
   return { nodes, edges };
 };
@@ -568,10 +634,16 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
         {(graphState?.nodes || []).map(({ id, ...pos }) => {
           const node = graphState?.nodes?.find((n) => n.id === id);
           const isHighlighted = graphState?.currentPath?.includes(id);
+          // const nodeType =
+          //   id === "E"
+          //     ? NODE_TYPES.SOURCE
+          //     : id === "C"
+          //     ? NODE_TYPES.SINK
+          //     : NODE_TYPES.NORMAL;
           const nodeType =
-            id === "E"
+            id === "S"
               ? NODE_TYPES.SOURCE
-              : id === "C"
+              : id === "T"
               ? NODE_TYPES.SINK
               : NODE_TYPES.NORMAL;
 
