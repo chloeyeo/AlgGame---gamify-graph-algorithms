@@ -754,7 +754,7 @@ export default function EducationPageStructure({
               <input
                 type="range"
                 min="3"
-                max={isFordFulkerson ? "6" : "10"}
+                max={isFordFulkerson ? "6" : "7"}
                 value={isFordFulkerson ? nodeCountProp : nodeCount}
                 onChange={(e) =>
                   isFordFulkerson
