@@ -147,22 +147,20 @@ const generateSteps = (initialNodes, initialEdges) => {
   });
 
   let iteration = 1;
-  let path = findPath("E", "C", initialEdges, flows);
+  let path = findPath("S", "T", initialEdges, flows);
 
   while (path) {
-    // First show the found path with all edges in blue
-    const pathEdges = initialEdges.map((edge) => ({
-      ...edge,
-      flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-      highlight: isEdgeInPath(edge, path),
-      residualCapacity:
-        edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-    }));
-
+    // Step 1: Show found path
     steps.push({
       graphState: {
-        nodes: calculateNodeFlows(initialNodes, pathEdges),
-        edges: pathEdges,
+        nodes: calculateNodeFlows(initialNodes, initialEdges),
+        edges: initialEdges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: isEdgeInPath(edge, path),
+          residualCapacity:
+            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+        })),
         currentPath: path,
         currentEdge: null,
         maxFlow: steps[steps.length - 1].graphState.maxFlow,
@@ -173,81 +171,63 @@ const generateSteps = (initialNodes, initialEdges) => {
       pseudoCodeLines: [2, "a"],
     });
 
-    // Calculate bottleneck for this path
+    // Step 2: Calculate and show bottleneck
     const bottleneck = calculateBottleneck(path, initialEdges, flows);
+    steps.push({
+      graphState: {
+        nodes: calculateNodeFlows(initialNodes, initialEdges),
+        edges: initialEdges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: isEdgeInPath(edge, path),
+          residualCapacity:
+            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+        })),
+        currentPath: path,
+        currentEdge: null,
+        maxFlow: steps[steps.length - 1].graphState.maxFlow,
+      },
+      explanation: `Found bottleneck capacity: ${bottleneck}`,
+      pseudoCodeLines: ["b"],
+    });
 
-    // Then consider each edge in the path one by one
-    for (let i = 0; i < path.length - 1; i++) {
-      const current = path[i];
-      const next = path[i + 1];
-
-      const currentEdges = initialEdges.map((edge) => ({
-        ...edge,
-        flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-        highlight: isEdgeInPath(edge, path),
-        residualCapacity:
-          edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-      }));
-
-      steps.push({
-        graphState: {
-          nodes: calculateNodeFlows(initialNodes, currentEdges),
-          edges: currentEdges,
-          currentPath: path,
-          currentEdge: { source: current, target: next },
-          maxFlow: steps[steps.length - 1].graphState.maxFlow,
-        },
-        explanation: `Updating flow along edge ${current} → ${next}`,
-        pseudoCodeLines: [2, "c"],
-      });
-
-      // Update the flow for this edge
-      const edgeKey = `${current}-${next}`;
-      const currentFlow = flows.get(edgeKey) || 0;
-      flows.set(edgeKey, currentFlow + bottleneck);
-    }
-
-    // Show final state after updating all edges in this path
-    const updatedEdges = initialEdges.map((edge) => ({
-      ...edge,
-      flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-      highlight: isEdgeInPath(edge, path),
-      residualCapacity:
-        edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-    }));
+    // Step 3: Update flows
+    updateFlows(path, bottleneck, flows);
+    const newMaxFlow = steps[steps.length - 1].graphState.maxFlow + bottleneck;
 
     steps.push({
       graphState: {
-        nodes: calculateNodeFlows(initialNodes, updatedEdges),
-        edges: updatedEdges,
+        nodes: calculateNodeFlows(initialNodes, initialEdges),
+        edges: initialEdges.map((edge) => ({
+          ...edge,
+          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+          highlight: isEdgeInPath(edge, path),
+          residualCapacity:
+            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+        })),
         currentPath: path,
         currentEdge: null,
-        maxFlow: steps[steps.length - 1].graphState.maxFlow + bottleneck,
+        maxFlow: newMaxFlow,
       },
-      explanation: `Updated all flows along path. Current maximum flow: ${
-        steps[steps.length - 1].graphState.maxFlow + bottleneck
-      }`,
-      pseudoCodeLines: [2],
+      explanation: `Updated flows along path. Current maximum flow: ${newMaxFlow}`,
+      pseudoCodeLines: ["c"],
     });
 
-    // Find next path
-    path = findPath("E", "C", initialEdges, flows);
     iteration++;
+    path = findPath("S", "T", initialEdges, flows);
   }
 
-  // Final state
-  const finalEdges = initialEdges.map((edge) => ({
-    ...edge,
-    flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-    highlight: false,
-    residualCapacity:
-      edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-  }));
-
+  // Final state when no path exists
   steps.push({
     graphState: {
-      nodes: calculateNodeFlows(initialNodes, finalEdges),
-      edges: finalEdges,
+      nodes: calculateNodeFlows(initialNodes, initialEdges),
+      edges: initialEdges.map((edge) => ({
+        ...edge,
+        flow: flows.get(`${edge.source}-${edge.target}`) || 0,
+        highlight: false,
+        residualCapacity:
+          edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
+      })),
       currentPath: [],
       currentEdge: null,
       maxFlow: steps[steps.length - 1].graphState.maxFlow,
