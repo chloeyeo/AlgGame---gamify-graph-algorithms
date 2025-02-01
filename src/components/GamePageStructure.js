@@ -231,11 +231,11 @@ export default function GamePageStructure({
     );
 
   const renderMainContent = () => (
-    <main className="flex flex-col p-6 pt-8 items-center justify-center overflow-y-auto no-scrollbar">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">{title}</h1>
+    <main className="hidden lg:flex flex-col p-4 max-h-screen">
+      <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
 
-      <div className="w-full max-w-4xl">
-        <div className="mb-4 flex justify-between items-center">
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="mb-2 flex justify-between items-center">
           <div className="flex gap-4">
             <div>Score: {score}</div>
             <div>Moves: {moves}</div>
@@ -248,8 +248,7 @@ export default function GamePageStructure({
           </button>
         </div>
 
-        <div className="mb-6 relative">
-          <h2 className="text-xl mb-2 font-semibold">Graph Visualisation</h2>
+        <div className="mb-2 relative">
           <div className="bg-white border border-gray-300 rounded-lg">
             {renderGraphTabs()}
             <div className="flex items-center justify-center h-[27rem] relative">
@@ -278,14 +277,14 @@ export default function GamePageStructure({
         </div>
 
         {isFordFulkersonPage && (
-          <div className="w-full">
+          <div className="mb-2">
             {nodeCountProp &&
               nodeCountProp(getCurrentGraphState(), setCurrentGraphState)}
           </div>
         )}
 
-        <div className="mb-6">
-          <div className="flex items-center mb-2">
+        <div>
+          <div className="flex items-center mb-1">
             <h2 className="text-xl font-semibold">Feedback</h2>
             <button
               onClick={() => toggleSpeech(message)}
@@ -296,16 +295,10 @@ export default function GamePageStructure({
               🔊
             </button>
           </div>
-          <div className="bg-white border border-gray-300 rounded-lg p-4 text-center">
+          <div className="bg-white border border-gray-300 rounded-lg p-3 text-center">
             <p>{message}</p>
           </div>
         </div>
-
-        {!isGameComplete(graphState) && graphState.currentNode === null && (
-          <p className="text-red-800 text-center text-sm font-bold">
-            ! Please click on a node to visit it
-          </p>
-        )}
       </div>
     </main>
   );
