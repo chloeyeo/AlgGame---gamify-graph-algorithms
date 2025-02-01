@@ -585,7 +585,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
       </g>
-      <g transform="translate(40, -130)">
+      <g transform="translate(40, -100)">
         {(graphState?.edges || []).map((edge, idx) => {
           const source = graphState?.nodes?.find((n) => n.id === edge.source);
           const target = graphState?.nodes?.find((n) => n.id === edge.target);
