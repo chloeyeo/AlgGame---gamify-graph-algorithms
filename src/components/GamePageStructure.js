@@ -232,10 +232,12 @@ export default function GamePageStructure({
 
   const renderMainContent = () => (
     <main className="hidden lg:flex flex-col p-4 max-h-screen">
-      <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
+      <h1 className="text-2xl text-center md:text-3xl font-bold mt-2">
+        {title}
+      </h1>
 
       <div className="w-full max-w-4xl mx-auto">
-        <div className="mb-2 flex justify-between items-center">
+        <div className="flex justify-between items-center">
           <div className="flex gap-4">
             <div>Score: {score}</div>
             <div>Moves: {moves}</div>
@@ -284,7 +286,7 @@ export default function GamePageStructure({
         )}
 
         <div>
-          <div className="flex items-center mb-1">
+          <div className="flex items-center">
             <h2 className="text-xl font-semibold">Feedback</h2>
             <button
               onClick={() => toggleSpeech(message)}
