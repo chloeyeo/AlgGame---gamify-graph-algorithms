@@ -642,6 +642,19 @@ const FordFulkersonEducationPage = () => {
     };
   });
 
+  // Added this function to handle node count changes
+  const handleNodeCountChange = (newCount) => {
+    setNodeCount(newCount);
+    const newGraph = generateRandomGraph(newCount);
+    setGraphState({
+      ...newGraph,
+      currentPath: [],
+      currentEdge: null,
+      maxFlow: 0,
+      isRunning: false,
+    });
+  };
+
   useEffect(() => {
     const newGraph = generateRandomGraph(nodeCount);
     setGraphState({
@@ -691,6 +704,8 @@ const FordFulkersonEducationPage = () => {
       generateSteps={() => initialSteps}
       GraphVisualisationComponent={FordFulkersonGraphVisualisation}
       isFordFulkerson
+      nodeCountProp={nodeCount}
+      onNodeCountChange={handleNodeCountChange}
     />
   );
 };

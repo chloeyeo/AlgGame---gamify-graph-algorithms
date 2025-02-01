@@ -586,6 +586,8 @@ export default function EducationPageStructure({
   generateSteps = null,
   GraphVisualisationComponent = GraphVisualisation,
   isFordFulkerson = false,
+  nodeCountProp = null,
+  onNodeCountChange = null,
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
@@ -753,11 +755,17 @@ export default function EducationPageStructure({
                 type="range"
                 min="3"
                 max="10"
-                value={nodeCount}
-                onChange={(e) => setNodeCount(parseInt(e.target.value))}
+                value={isFordFulkerson ? nodeCountProp : nodeCount}
+                onChange={(e) =>
+                  isFordFulkerson
+                    ? onNodeCountChange(parseInt(e.target.value))
+                    : setNodeCount(parseInt(e.target.value))
+                }
                 className="w-48"
               />
-              <span className="ml-2">{nodeCount}</span>
+              <span className="ml-2">
+                {isFordFulkerson ? nodeCountProp : nodeCount}
+              </span>
             </div>
 
             <button
