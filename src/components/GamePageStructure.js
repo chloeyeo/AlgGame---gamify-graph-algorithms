@@ -237,7 +237,7 @@ export default function GamePageStructure({
       </h1>
 
       <div className="w-full max-w-4xl mx-auto">
-        <div className="flex justify-between items-center">
+        <div className="flex mb-2 justify-between items-center">
           <div className="flex gap-4">
             <div>Score: {score}</div>
             <div>Moves: {moves}</div>
