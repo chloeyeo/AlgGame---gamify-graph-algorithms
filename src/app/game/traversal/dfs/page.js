@@ -181,7 +181,14 @@ const DFSGamePage = () => {
   };
 
   const isGameComplete = (state) => {
-    return state.nodes.every((node) => node.visited);
+    // Game is complete when all nodes are visited AND backtracked
+    // (except the last node we end up at)
+    const allNodesVisited = state.nodes.every((node) => node.visited);
+    const allNodesBacktrackedExceptCurrent = state.nodes
+      .filter((node) => !node.current)
+      .every((node) => node.backtracked);
+
+    return allNodesVisited && allNodesBacktrackedExceptCurrent;
   };
 
   return (
