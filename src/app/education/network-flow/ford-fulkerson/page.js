@@ -244,22 +244,34 @@ const generateSteps = (initialNodes, initialEdges) => {
 };
 
 const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
-  // Create nodes
   const nodes = [];
-  const width = 600;
-  const height = 400;
-  const padding = 100; // Padding from edges
+  const width = 800; // Increased canvas size
+  const height = 600;
+  const padding = 150; // Increased padding
+  const centerX = width / 2;
+  const centerY = height / 2;
 
-  // Always include source (S) and sink (T)
-  nodes.push({ id: "S", x: padding, y: height / 2 });
-  nodes.push({ id: "T", x: width - padding, y: height / 2 });
+  // Place source and sink with more spacing
+  nodes.push({ id: "S", x: padding, y: centerY });
+  nodes.push({ id: "T", x: width - padding, y: centerY });
 
-  // Generate other nodes with letters (A, B, C, ...)
-  for (let i = 0; i < nodeCount - 2; i++) {
+  // Generate other nodes in a semi-random circular layout
+  const innerNodes = nodeCount - 2;
+  for (let i = 0; i < innerNodes; i++) {
+    // Base angle for even distribution + random offset
+    const baseAngle = (2 * Math.PI * i) / innerNodes;
+    const randomOffset = (Math.random() - 0.5) * (Math.PI / innerNodes);
+    const angle = baseAngle + randomOffset;
+
+    // Randomize radius within a range to prevent nodes from forming perfect circle
+    const minRadius = (height - 2 * padding) / 3;
+    const maxRadius = (height - 2 * padding) / 2;
+    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
     nodes.push({
       id: String.fromCharCode(65 + i),
-      x: padding + Math.random() * (width - 2 * padding),
-      y: padding + Math.random() * (height - 2 * padding),
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
     });
   }
 
@@ -573,7 +585,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
       </g>
-      <g transform="translate(50, -20)">
+      <g transform="translate(40, -130)">
         {(graphState?.edges || []).map((edge, idx) => {
           const source = graphState?.nodes?.find((n) => n.id === edge.source);
           const target = graphState?.nodes?.find((n) => n.id === edge.target);
@@ -594,15 +606,23 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
                   (source.y + target.y) / 2
                 })`}
               >
+                <rect
+                  x="-20"
+                  y="-20"
+                  width="40"
+                  height="25"
+                  fill="white"
+                  fillOpacity="0.7"
+                  rx="4"
+                />
                 <text
                   textAnchor="middle"
-                  dominantBaseline="text-before-edge"
+                  dominantBaseline="middle"
                   fill="#1a365d"
-                  fontSize="18"
+                  fontSize="16"
                   fontWeight="700"
-                  dy="-12"
                 >
-                  {getFlowLabel(edge)}
+                  {`${edge.flow}/${edge.capacity}`}
                 </text>
               </g>
             </g>
@@ -648,9 +668,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
                 {id}
               </text>
               <text
-                x={pos.x + 30}
-                y={pos.y - 10}
-                textAnchor="start"
+                x={pos.x}
+                y={pos.y - 35}
+                textAnchor="middle"
                 fill="#2563eb"
                 fontSize="14"
                 fontWeight="600"
@@ -658,9 +678,9 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
                 {`in: ${node?.inFlow || 0}`}
               </text>
               <text
-                x={pos.x + 30}
-                y={pos.y + 10}
-                textAnchor="start"
+                x={pos.x}
+                y={pos.y + 35}
+                textAnchor="middle"
                 fill="#2563eb"
                 fontSize="14"
                 fontWeight="600"
