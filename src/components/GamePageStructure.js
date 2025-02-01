@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { BACKEND_URL } from "@/constants/constants";
 
-const API_URL = BACKEND_URL;
+const API_URL = BACKEND_URL || "http://localhost:5000";
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -75,42 +75,43 @@ export default function GamePageStructure({
 
   const submitScore = async () => {
     if (submitAttempted.current) return;
-    submitAttempted.current = true;
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.info("Playing as guest - sign in to save your scores!", {
-        toastId: "guest-score",
-        position: "top-right",
-        autoClose: 3000,
-      });
-      setScoreSubmitted(true);
+      setMessage("Please log in to save your score!");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const response = await axios.post(
-        `${API_URL}/api/scores`,
-        {
-          algorithm: title.toLowerCase().split(" ")[0],
-          score: score,
+      const response = await fetch(`${BACKEND_URL}/api/scores`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithm: title.split(" ")[0].toLowerCase(),
+          score,
           timeSpent: Date.now() - startTime,
           movesCount: moves,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        }),
+      });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Score submission failed:", errorData);
+        throw new Error(errorData.message || "Failed to submit score");
+      }
+
+      const data = await response.json();
       setScoreSubmitted(true);
-      toast.success("Score submitted successfully!");
-      return response.data;
+      setMessage("Score submitted successfully!");
     } catch (error) {
-      console.error("Error submitting score:", error);
-      toast.error("Failed to submit score");
-      setScoreSubmitted(true);
-    } finally {
+      console.error("Score submission error:", error);
+      setMessage(
+        "Game completed but score submission failed. Please try again."
+      );
       setIsSubmitting(false);
     }
   };
@@ -190,20 +191,56 @@ export default function GamePageStructure({
         !scoreSubmitted &&
         !submitAttempted.current
       ) {
-        await submitScore();
-        setMessage("Congratulations! You've completed the game!");
-        setOverlayState({
-          show: true,
-          content: {
-            type: "correct",
-            text: "Congratulations! You've completed the game!",
-          },
-        });
+        try {
+          submitAttempted.current = true;
+          const token = localStorage.getItem("token");
+          if (!token) {
+            setMessage("Please log in to save your score!");
+            return;
+          }
+
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/scores`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                algorithm: title.split(" ")[0].toLowerCase(),
+                score: score,
+                timeSpent: Date.now() - startTime,
+                movesCount: moves,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to submit score");
+          }
+
+          setScoreSubmitted(true);
+          setMessage("Congratulations! Game completed and score submitted!");
+        } catch (error) {
+          console.error("Score submission error:", error);
+          setMessage(
+            "Game completed but score submission failed. Please try again."
+          );
+        }
       }
     };
 
     checkGameCompletion();
-  }, [graphState, isGameComplete, scoreSubmitted]);
+  }, [
+    graphState,
+    isGameComplete,
+    score,
+    scoreSubmitted,
+    moves,
+    startTime,
+    title,
+  ]);
 
   const isValidDFSMove = (graphState, nodeId) => {
     const newState = { ...graphState };
