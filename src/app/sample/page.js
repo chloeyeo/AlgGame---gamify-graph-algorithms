@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import * as d3 from "d3";
 
 const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
+  console.log("Generating new graph with nodeCount:", nodeCount);
   // Create nodes
   const nodes = [];
   const width = 800;

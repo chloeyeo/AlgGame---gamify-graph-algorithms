@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import GraphVisualisation from "./GraphVisualisation";
 import CodeEditorPseudocode from "./CodeEditorPseudocode";
 import { FaPlay, FaPause, FaRedo } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { incrementGraphCounter } from "@/store/slices/graphSlice";
 
 const ExplanationSection = ({ step }) => {
   if (!step) {
@@ -22,59 +24,143 @@ const ExplanationSection = ({ step }) => {
   );
 };
 
-const generateRandomGraph = (nodeCount) => {
-  // Generate nodes with randomized positions in a circular layout
-  const nodes = Array.from({ length: nodeCount }, (_, i) => {
-    // Random angle with some jitter
-    const baseAngle = (2 * Math.PI * i) / nodeCount;
-    const angleJitter = Math.random() * 0.5 - 0.25; // ±0.25 radians of jitter
-    const angle = baseAngle + angleJitter;
+const generateRandomGraph = (
+  nodeCount,
+  isFordFulkerson = false,
+  edgeDensity = 0.4
+) => {
+  console.log(
+    "isFordFulkerson (in education page structure):",
+    isFordFulkerson
+  );
+  if (!isFordFulkerson) {
+    // Generate nodes with randomized positions in a circular layout
+    const nodes = Array.from({ length: nodeCount }, (_, i) => {
+      // Random angle with some jitter
+      const baseAngle = (2 * Math.PI * i) / nodeCount;
+      const angleJitter = Math.random() * 0.5 - 0.25; // ±0.25 radians of jitter
+      const angle = baseAngle + angleJitter;
 
-    // Random radius with bounds
-    const minRadius = 100;
-    const maxRadius = 200;
-    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+      // Random radius with bounds
+      const minRadius = 100;
+      const maxRadius = 200;
+      const radius = minRadius + Math.random() * (maxRadius - minRadius);
 
-    return {
-      id: String.fromCharCode(65 + i),
-      visited: false,
-      x: 300 + radius * Math.cos(angle),
-      y: 300 + radius * Math.sin(angle),
-    };
-  });
-
-  const edges = [];
-  // Ensure graph is connected
-  for (let i = 1; i < nodes.length; i++) {
-    const parent = Math.floor(Math.random() * i);
-    edges.push({
-      source: nodes[parent].id,
-      target: nodes[i].id,
-      weight: Math.floor(Math.random() * 9) + 1, // Random weight between 1-9
+      return {
+        id: String.fromCharCode(65 + i),
+        visited: false,
+        x: 300 + radius * Math.cos(angle),
+        y: 300 + radius * Math.sin(angle),
+      };
     });
-  }
 
-  // Add random extra edges
-  const maxExtraEdges = Math.min(nodeCount - 1, 3);
-  for (let i = 0; i < maxExtraEdges; i++) {
-    const source = Math.floor(Math.random() * nodes.length);
-    const target = Math.floor(Math.random() * nodes.length);
+    // console.log(
+    //   "isFordFulkerson (in education page structure):",
+    //   isFordFulkerson
+    // );
 
-    if (
-      source !== target &&
-      !edges.some(
-        (e) =>
-          (e.source === nodes[source].id && e.target === nodes[target].id) ||
-          (e.source === nodes[target].id && e.target === nodes[source].id)
-      )
-    ) {
+    const edges = [];
+    // Ensure graph is connected
+    for (let i = 1; i < nodes.length; i++) {
+      const parent = Math.floor(Math.random() * i);
       edges.push({
-        source: nodes[source].id,
-        target: nodes[target].id,
+        source: nodes[parent].id,
+        target: nodes[i].id,
         weight: Math.floor(Math.random() * 9) + 1, // Random weight between 1-9
       });
     }
+
+    // Add random extra edges
+    const maxExtraEdges = Math.min(nodeCount - 1, 3);
+    for (let i = 0; i < maxExtraEdges; i++) {
+      const source = Math.floor(Math.random() * nodes.length);
+      const target = Math.floor(Math.random() * nodes.length);
+
+      if (
+        source !== target &&
+        !edges.some(
+          (e) =>
+            (e.source === nodes[source].id && e.target === nodes[target].id) ||
+            (e.source === nodes[target].id && e.target === nodes[source].id)
+        )
+      ) {
+        edges.push({
+          source: nodes[source].id,
+          target: nodes[target].id,
+          weight: Math.floor(Math.random() * 9) + 1, // Random weight between 1-9
+        });
+      }
+    }
+
+    return { nodes, edges };
   }
+  // Create nodes
+  const nodes = [];
+  const width = 800;
+  const height = 600;
+  const padding = 100; // Padding from edges
+
+  // Always include source (S) and sink (T)
+  nodes.push({ id: "S", x: padding, y: height / 2 });
+  nodes.push({ id: "T", x: width - padding, y: height / 2 });
+
+  // Generate other nodes with letters (A, B, C, ...)
+  for (let i = 0; i < nodeCount - 2; i++) {
+    nodes.push({
+      id: String.fromCharCode(65 + i), // A, B, C, ...
+      x: padding + ((width - 2 * padding) / (nodeCount - 1)) * (i + 1),
+      y: padding + Math.random() * (height - 2 * padding),
+    });
+  }
+
+  // Generate edges
+  const edges = [];
+  const maxCapacity = 15;
+
+  // Helper function to add edge if it doesn't exist
+  const addEdge = (source, target) => {
+    if (
+      !edges.some(
+        (e) =>
+          (e.source === source && e.target === target) ||
+          (e.source === target && e.target === source)
+      )
+    ) {
+      edges.push({
+        source,
+        target,
+        capacity: Math.floor(Math.random() * maxCapacity) + 1,
+        flow: 0,
+      });
+    }
+  };
+
+  // Ensure path from source to sink exists
+  let current = "S";
+  const visited = new Set([current]);
+
+  while (current !== "T") {
+    const availableNodes = nodes
+      .filter((n) => !visited.has(n.id) && n.id !== "S")
+      .sort(() => Math.random() - 0.5);
+
+    const next = availableNodes[0].id;
+    addEdge(current, next);
+    visited.add(next);
+    current = next;
+  }
+
+  // Add random additional edges based on density
+  nodes.forEach((node1) => {
+    nodes.forEach((node2) => {
+      if (node1.id !== node2.id && Math.random() < edgeDensity) {
+        // Prevent backwards flow to source and forward flow from sink
+        if (node2.id !== "S" && node1.id !== "T") {
+          addEdge(node1.id, node2.id);
+        }
+      }
+    });
+  });
 
   return { nodes, edges };
 };
@@ -497,8 +583,9 @@ export default function EducationPageStructure({
   title = "Graph Algorithm",
   conceptText = "",
   pseudocode = "",
-  generateSteps,
+  generateSteps = null,
   GraphVisualisationComponent = GraphVisualisation,
+  isFordFulkerson = false,
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
@@ -515,10 +602,11 @@ export default function EducationPageStructure({
   const isPausedRef = useRef(false);
   const [animationController, setAnimationController] = useState(null);
   const animationSpeedRef = useRef(animationSpeed);
+  const dispatch = useDispatch();
 
   // Generate initial graph on mount
   useEffect(() => {
-    const { nodes, edges } = generateRandomGraph(nodeCount);
+    const { nodes, edges } = generateRandomGraph(nodeCount, isFordFulkerson);
     const steps = generateSteps(nodes, edges);
     setCurrentGraphStates([steps]);
   }, []);
@@ -674,8 +762,12 @@ export default function EducationPageStructure({
 
             <button
               onClick={() => {
-                const { nodes, edges } = generateRandomGraph(nodeCount);
-                const steps = generateSteps(nodes, edges);
+                dispatch(incrementGraphCounter());
+                const { nodes, edges } = generateRandomGraph(
+                  nodeCount,
+                  isFordFulkerson
+                );
+                const steps = generateSteps(nodes, edges); // !fix: generateSteps only return 2 steps for Ford-Fulkerson
                 setCurrentGraphStates([steps]);
                 setCurrentStep(0);
               }}

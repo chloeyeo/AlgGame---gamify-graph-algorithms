@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import EducationPageStructure from "@/components/EducationPageStructure";
+import { useSelector } from "react-redux";
 
 // Helper functions
 const isEdgeInPath = (edge, path) => {
@@ -260,27 +261,74 @@ const generateSteps = (initialNodes, initialEdges) => {
   return steps;
 };
 
-const generateRandomGraph = (nodeCount = 5) => {
-  // Fixed nodes for this specific layout
-  const nodes = [
-    { id: "A" },
-    { id: "B" },
-    { id: "C" },
-    { id: "D" },
-    { id: "E" },
-  ];
+const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
+  // Create nodes
+  const nodes = [];
+  const width = 600;
+  const height = 400;
+  const padding = 100; // Padding from edges
 
-  // Updated edges to ensure all nodes connect to source (E) and sink (C)
-  const edges = [
-    { source: "E", target: "D", capacity: 10, flow: 0 },
-    { source: "E", target: "A", capacity: 8, flow: 0 },
-    { source: "E", target: "B", capacity: 12, flow: 0 },
-    { source: "D", target: "C", capacity: 15, flow: 0 },
-    { source: "A", target: "C", capacity: 7, flow: 0 }, // New edge
-    { source: "B", target: "C", capacity: 9, flow: 0 }, // New edge
-    { source: "D", target: "B", capacity: 6, flow: 0 }, // New intermediate edge
-    { source: "A", target: "B", capacity: 5, flow: 0 }, // New intermediate edge
-  ];
+  // Always include source (S) and sink (T)
+  nodes.push({ id: "S", x: padding, y: height / 2 });
+  nodes.push({ id: "T", x: width - padding, y: height / 2 });
+
+  // Generate other nodes with letters (A, B, C, ...)
+  for (let i = 0; i < nodeCount - 2; i++) {
+    nodes.push({
+      id: String.fromCharCode(65 + i),
+      x: padding + Math.random() * (width - 2 * padding),
+      y: padding + Math.random() * (height - 2 * padding),
+    });
+  }
+
+  // Generate edges
+  const edges = [];
+  const maxCapacity = 15;
+
+  // Helper function to add edge if it doesn't exist
+  const addEdge = (source, target) => {
+    if (
+      !edges.some(
+        (e) =>
+          (e.source === source && e.target === target) ||
+          (e.source === target && e.target === source)
+      )
+    ) {
+      edges.push({
+        source,
+        target,
+        capacity: Math.floor(Math.random() * maxCapacity) + 1,
+        flow: 0,
+      });
+    }
+  };
+
+  // Ensure path from source to sink exists
+  let current = "S";
+  const visited = new Set([current]);
+
+  while (current !== "T") {
+    const availableNodes = nodes
+      .filter((n) => !visited.has(n.id) && n.id !== "S")
+      .sort(() => Math.random() - 0.5);
+
+    const next = availableNodes[0].id;
+    addEdge(current, next);
+    visited.add(next);
+    current = next;
+  }
+
+  // Add random additional edges based on density
+  nodes.forEach((node1) => {
+    nodes.forEach((node2) => {
+      if (node1.id !== node2.id && Math.random() < edgeDensity) {
+        // Prevent backwards flow to source and forward flow from sink
+        if (node2.id !== "S" && node1.id !== "T") {
+          addEdge(node1.id, node2.id);
+        }
+      }
+    });
+  });
 
   return { nodes, edges };
 };
@@ -332,15 +380,6 @@ const getEdgeStyle = (edge, graphState) => {
 };
 
 const FordFulkersonGraphVisualisation = ({ graphState }) => {
-  // Adjust node positions to be even more compact vertically
-  const nodePositions = {
-    E: { x: 400, y: 40 }, // Moved up from y: 60
-    D: { x: 200, y: 120 }, // Moved up from y: 140
-    A: { x: 600, y: 120 }, // Moved up from y: 140
-    B: { x: 400, y: 200 }, // Moved up from y: 220
-    C: { x: 200, y: 240 }, // Moved up from y: 260
-  };
-
   const getFlowLabel = (edge) => {
     const flow = edge.flow || 0;
     const capacity = edge.capacity || "undefined";
@@ -349,6 +388,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
 
   const drawArrowPath = (source, target) => {
     // Calculate the direction vector
+    console.log("target:", target);
     const dx = target.x - source.x;
     const dy = target.y - source.y;
     const length = Math.sqrt(dx * dx + dy * dy);
@@ -490,10 +530,10 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
       </g>
-      <g transform="translate(0, 15)">
+      <g transform="translate(50, -20)">
         {(graphState?.edges || []).map((edge, idx) => {
-          const source = nodePositions[edge.source];
-          const target = nodePositions[edge.target];
+          const source = graphState?.nodes?.find((n) => n.id === edge.source);
+          const target = graphState?.nodes?.find((n) => n.id === edge.target);
           const style = getEdgeStyle(edge, graphState);
           const paths = drawArrowPath(source, target);
 
@@ -525,7 +565,7 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
             </g>
           );
         })}
-        {Object.entries(nodePositions).map(([id, pos]) => {
+        {(graphState?.nodes || []).map(({ id, ...pos }) => {
           const node = graphState?.nodes?.find((n) => n.id === id);
           const isHighlighted = graphState?.currentPath?.includes(id);
           const nodeType =
@@ -587,6 +627,32 @@ const FordFulkersonGraphVisualisation = ({ graphState }) => {
 };
 
 const FordFulkersonEducationPage = () => {
+  const generateGraphButtonClickedCounter = useSelector(
+    (state) => state.graph.generateGraphCounter
+  );
+  const [nodeCount, setNodeCount] = useState(6);
+  const [graphState, setGraphState] = useState(() => {
+    const initialGraph = generateRandomGraph(nodeCount);
+    return {
+      ...initialGraph,
+      currentPath: [],
+      currentEdge: null,
+      maxFlow: 0,
+      isRunning: false,
+    };
+  });
+
+  useEffect(() => {
+    const newGraph = generateRandomGraph(nodeCount);
+    setGraphState({
+      ...newGraph,
+      currentPath: [],
+      currentEdge: null,
+      maxFlow: 0,
+      isRunning: false,
+    });
+  }, [nodeCount, generateGraphButtonClickedCounter]);
+
   const conceptText = {
     introduction: `The Ford-Fulkerson method is a fundamental algorithm for solving the maximum flow problem in a flow network. It works by repeatedly finding augmenting paths from source to sink through any available path-finding strategy. While the basic Ford-Fulkerson method allows for any path-finding approach, a notable improvement called the Edmonds-Karp algorithm specifically uses Breadth-First Search (BFS) to find the shortest augmenting paths.`,
     keyCharacteristics: [
@@ -615,9 +681,7 @@ const FordFulkersonEducationPage = () => {
    c. Update flows along the path
 3. Return total flow when no path exists`;
 
-  // Create initial graph state
-  const initialGraph = generateRandomGraph();
-  const initialSteps = generateSteps(initialGraph.nodes, initialGraph.edges);
+  const initialSteps = generateSteps(graphState.nodes, graphState.edges);
 
   return (
     <EducationPageStructure
@@ -625,10 +689,8 @@ const FordFulkersonEducationPage = () => {
       conceptText={conceptText}
       pseudocode={pseudocode}
       generateSteps={() => initialSteps}
-      generateNewGraph={generateRandomGraph}
       GraphVisualisationComponent={FordFulkersonGraphVisualisation}
-      initialGraphState={initialGraph}
-      explanationPosition="top"
+      isFordFulkerson
     />
   );
 };
