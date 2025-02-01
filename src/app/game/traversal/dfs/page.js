@@ -1,7 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
+import {
+  generateDFSSteps,
+  generateDFSExplanation,
+} from "@/components/EducationPageStructure";
 
 const createGraphState = (graphId, nodes, edges) => ({
   graphId,
@@ -455,19 +459,169 @@ const getScore = (nodeStatus) => {
   }
 };
 
+const generateRandomGraph = (nodeCount = 6) => {
+  const nodes = [];
+  const width = 800;
+  const height = 600;
+  const padding = 100;
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  // Generate nodes in a circular layout with random offsets
+  for (let i = 0; i < nodeCount; i++) {
+    const baseAngle = (2 * Math.PI * i) / nodeCount;
+    const randomOffset = (Math.random() - 0.5) * (Math.PI / nodeCount);
+    const angle = baseAngle + randomOffset;
+
+    const minRadius = (height - 2 * padding) / 3;
+    const maxRadius = (height - 2 * padding) / 2;
+    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
+    nodes.push({
+      id: String.fromCharCode(65 + i),
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
+    });
+  }
+
+  // Generate edges (ensuring connected graph)
+  const edges = [];
+
+  // First ensure the graph is connected
+  for (let i = 0; i < nodes.length - 1; i++) {
+    edges.push(
+      { source: nodes[i].id, target: nodes[i + 1].id },
+      { source: nodes[i + 1].id, target: nodes[i].id }
+    );
+  }
+
+  // Add some random additional edges (max 3 extra edges)
+  const maxExtraEdges = Math.min(nodeCount - 1, 3);
+  for (let i = 0; i < maxExtraEdges; i++) {
+    const source = Math.floor(Math.random() * nodes.length);
+    const target = Math.floor(Math.random() * nodes.length);
+
+    if (
+      source !== target &&
+      !edges.some(
+        (e) =>
+          (e.source === nodes[source].id && e.target === nodes[target].id) ||
+          (e.source === nodes[target].id && e.target === nodes[source].id)
+      )
+    ) {
+      edges.push(
+        { source: nodes[source].id, target: nodes[target].id },
+        { source: nodes[target].id, target: nodes[source].id }
+      );
+    }
+  }
+
+  return { nodes, edges };
+};
+
 const DFSGamePage = () => {
+  const [nodeCount, setNodeCount] = useState(6);
+  const [graphState, setGraphState] = useState(() => {
+    const { nodes, edges } = generateRandomGraph(nodeCount);
+    const initialNodes = nodes.map((node) => ({
+      ...node,
+      visited: false,
+      backtracked: false,
+      current: false,
+    }));
+
+    // Generate all possible DFS steps
+    const steps = generateDFSSteps(initialNodes, edges);
+
+    return {
+      nodes: initialNodes,
+      edges,
+      currentNode: null,
+      stack: [],
+      expectedSteps: steps,
+      currentStep: 0,
+    };
+  });
+
+  const isValidMove = (state, nodeId, currentStep) => {
+    const expectedStep = state.expectedSteps[currentStep];
+    if (!expectedStep) return { validMove: false };
+
+    const isCorrectNode = expectedStep.graphState.currentNode === nodeId;
+
+    if (isCorrectNode) {
+      return {
+        validMove: true,
+        newState: {
+          ...state,
+          nodes: state.nodes.map((node) => ({
+            ...node,
+            visited: expectedStep.graphState.nodes.find((n) => n.id === node.id)
+              .visited,
+            backtracked: expectedStep.graphState.nodes.find(
+              (n) => n.id === node.id
+            ).backtracked,
+            current: node.id === nodeId,
+          })),
+          currentNode: nodeId,
+          stack: expectedStep.graphState.stack,
+          expectedSteps: state.expectedSteps,
+          currentStep: currentStep + 1,
+        },
+        nodeStatus: "correct",
+        message: expectedStep.explanation,
+      };
+    }
+
+    return {
+      validMove: false,
+      newState: state,
+      nodeStatus: "incorrect",
+      message: `Expected ${expectedStep.graphState.currentNode}, but got ${nodeId}`,
+    };
+  };
+
+  const handleNodeCountChange = (newCount) => {
+    setNodeCount(newCount);
+    const { nodes, edges } = generateRandomGraph(newCount);
+    const initialNodes = nodes.map((node) => ({
+      ...node,
+      visited: false,
+      backtracked: false,
+      current: false,
+    }));
+
+    setGraphState({
+      nodes: initialNodes,
+      edges,
+      currentNode: null,
+      stack: [],
+      expectedSteps: generateDFSSteps(initialNodes, edges),
+      currentStep: 0,
+    });
+  };
+
   return (
-    <div className="w-full max-w-7xl mx-auto p-4">
-      <GamePageStructure
-        title="DFS Graph Game"
-        graphStates={graphStates}
-        isValidMove={isValidMove}
-        getNodeStatus={getNodeStatus}
-        isGameComplete={isGameComplete}
-        getMessage={getMessage}
-        getScore={getScore}
-      />
-    </div>
+    <GamePageStructure
+      title="DFS Graph Game"
+      graphState={graphState}
+      setGraphState={setGraphState}
+      isValidMove={isValidMove}
+      getNodeStatus={() => "default"}
+      getScore={(status) => (status === "correct" ? 10 : 0)}
+      getMessage={(status, nodeId) =>
+        status === "correct"
+          ? graphState.expectedSteps[graphState.currentStep - 1]?.explanation ||
+            `Correct! Node ${nodeId} is the next step`
+          : `Incorrect! Try again`
+      }
+      isGameComplete={(state) =>
+        state.currentStep >= state.expectedSteps.length
+      }
+      nodeCountProp={nodeCount}
+      onNodeCountChange={handleNodeCountChange}
+      maxNodes={8}
+    />
   );
 };
 

@@ -12,21 +12,27 @@ const API_URL = BACKEND_URL;
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
-  graphStates = [], // Array of graph states instead of individual props
-  isValidMove = () => {},
-  getNodeStatus = () => {},
-  getScore = () => 0,
-  getMessage = () => "No moves made yet.",
-  isGameComplete = () => false,
-  renderCustomUI = null,
+  graphState,
+  setGraphState,
+  isValidMove,
+  getNodeStatus,
+  getScore,
+  getMessage,
+  isGameComplete,
+  nodeCountProp,
+  onNodeCountChange,
+  maxNodes = 8,
 }) {
-  const [activeTab, setActiveTab] = useState(0);
-  const [currentGraphStates, setCurrentGraphStates] = useState(graphStates);
+  const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
+  const [message, setMessage] = useState("Start DFS from any node!");
+  const [overlayState, setOverlayState] = useState({
+    show: false,
+    content: { type: "", text: "" },
+  });
+  const [activeTab, setActiveTab] = useState(0);
+  const [currentGraphStates, setCurrentGraphStates] = useState([graphState]);
   const [moves, setMoves] = useState(0);
-  const [message, setMessage] = useState("");
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [overlayContent, setOverlayContent] = useState({ type: "", text: "" });
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,11 +41,11 @@ export default function GamePageStructure({
   const startTime = Date.now();
 
   useEffect(() => {
-    setCurrentGraphStates(graphStates);
-  }, [graphStates]);
+    setCurrentGraphStates([graphState]);
+  }, [graphState]);
 
   const isFordFulkersonPage = pathname.includes("ford-fulkerson");
-  const isMultiGraphGame = graphStates.length > 1;
+  const isMultiGraphGame = currentGraphStates.length > 1;
 
   // Get current graph state based on active tab
   const getCurrentGraphState = () => currentGraphStates[activeTab];
@@ -54,11 +60,14 @@ export default function GamePageStructure({
   };
 
   const resetGame = () => {
-    setCurrentGraphStates(graphStates);
+    setCurrentGraphStates([graphState]);
     setScore(0);
     setMoves(0);
     setMessage("Game reset. Click on a node to begin!");
-    setShowOverlay(false);
+    setOverlayState({
+      show: false,
+      content: { type: "", text: "" },
+    });
     setScoreSubmitted(false);
     setIsSubmitting(false);
     submitAttempted.current = false;
@@ -121,30 +130,40 @@ export default function GamePageStructure({
   }, []);
 
   const handleNodeClick = (nodeId) => {
-    if (isGameComplete(getCurrentGraphState())) return;
+    if (isGameComplete(graphState)) return;
 
     const {
       newState,
       validMove,
       nodeStatus,
       message: customMessage,
-    } = isValidMove(getCurrentGraphState(), nodeId);
+    } = isValidMove(graphState, nodeId, currentStep);
 
     if (validMove) {
-      const newScore = getScore(nodeStatus);
-      setScore((s) => s + newScore);
+      setCurrentStep((step) => step + 1);
+      setScore((s) => s + getScore(nodeStatus));
+      setGraphState(newState);
       setMessage(customMessage || getMessage(nodeStatus, nodeId));
-      setOverlayContent({ type: "correct", text: "Correct!" });
-      setCurrentGraphState(newState);
+      setOverlayState({
+        show: true,
+        content: { type: "correct", text: "Correct!" },
+      });
     } else {
       setScore((s) => s - 5);
-      setMessage(customMessage || `Invalid move to Node ${nodeId}!`);
-      setOverlayContent({ type: "incorrect", text: "Incorrect!" });
+      setMessage(
+        customMessage || `Invalid move! That's not the correct DFS step.`
+      );
+      setOverlayState({
+        show: true,
+        content: { type: "incorrect", text: "Incorrect!" },
+      });
     }
 
     setMoves((m) => m + 1);
-    setShowOverlay(true);
-    setTimeout(() => setShowOverlay(false), 1000);
+    setTimeout(
+      () => setOverlayState((prev) => ({ ...prev, show: false })),
+      1000
+    );
   };
 
   const toggleSpeech = (text) => {
@@ -167,20 +186,26 @@ export default function GamePageStructure({
   useEffect(() => {
     const checkGameCompletion = async () => {
       if (
-        isGameComplete(getCurrentGraphState()) &&
+        isGameComplete(graphState) &&
         !scoreSubmitted &&
         !submitAttempted.current
       ) {
         await submitScore();
         setMessage("Congratulations! You've completed the game!");
-        setShowOverlay(true);
+        setOverlayState({
+          show: true,
+          content: {
+            type: "correct",
+            text: "Congratulations! You've completed the game!",
+          },
+        });
       }
     };
 
     checkGameCompletion();
-  }, [getCurrentGraphState, isGameComplete, scoreSubmitted]);
+  }, [graphState, isGameComplete, scoreSubmitted]);
 
-  if (!graphStates.length) {
+  if (!currentGraphStates.length) {
     return (
       <p className="text-center mt-[50%]">
         No content available at the moment.
@@ -191,7 +216,7 @@ export default function GamePageStructure({
   const renderGraphTabs = () =>
     isMultiGraphGame && (
       <div className="flex mb-2 border-b overflow-clip overflow-x-auto no-scrollbar">
-        {graphStates.map((_, index) => (
+        {currentGraphStates.map((_, index) => (
           <button
             key={index}
             onClick={() => setActiveTab(index)}
@@ -235,16 +260,16 @@ export default function GamePageStructure({
                 isGraphA={activeTab === 0}
                 graphIndex={activeTab}
               />
-              {showOverlay && (
+              {overlayState.show && (
                 <div
                   className={`absolute inset-0 flex items-center justify-center ${
-                    overlayContent.type === "correct"
+                    overlayState.content.type === "correct"
                       ? "bg-green-500"
                       : "bg-red-500"
                   } bg-opacity-75`}
                 >
                   <p className="text-white text-2xl font-bold">
-                    {overlayContent.text}
+                    {overlayState.content.text}
                   </p>
                 </div>
               )}
@@ -254,8 +279,8 @@ export default function GamePageStructure({
 
         {isFordFulkersonPage && (
           <div className="w-full">
-            {renderCustomUI &&
-              renderCustomUI(getCurrentGraphState(), setCurrentGraphState)}
+            {nodeCountProp &&
+              nodeCountProp(getCurrentGraphState(), setCurrentGraphState)}
           </div>
         )}
 
@@ -276,12 +301,11 @@ export default function GamePageStructure({
           </div>
         </div>
 
-        {!isGameComplete(getCurrentGraphState()) &&
-          getCurrentGraphState().currentNode === null && (
-            <p className="text-red-800 text-center text-sm font-bold">
-              ! Please click on a node to visit it
-            </p>
-          )}
+        {!isGameComplete(graphState) && graphState.currentNode === null && (
+          <p className="text-red-800 text-center text-sm font-bold">
+            ! Please click on a node to visit it
+          </p>
+        )}
       </div>
     </main>
   );
