@@ -127,7 +127,6 @@ const generateSteps = (initialNodes, initialEdges) => {
   // Initialize flows
   initialEdges.forEach((e) => flows.set(`${e.source}-${e.target}`, 0));
 
-  // Initial state
   steps.push({
     graphState: {
       nodes: calculateNodeFlows(initialNodes, initialEdges),
@@ -135,7 +134,6 @@ const generateSteps = (initialNodes, initialEdges) => {
         ...edge,
         flow: 0,
         highlight: false,
-        residualCapacity: edge.capacity,
       })),
       currentPath: [],
       currentEdge: null,
@@ -158,8 +156,6 @@ const generateSteps = (initialNodes, initialEdges) => {
           ...edge,
           flow: flows.get(`${edge.source}-${edge.target}`) || 0,
           highlight: isEdgeInPath(edge, path),
-          residualCapacity:
-            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
         })),
         currentPath: path,
         currentEdge: null,
@@ -171,53 +167,61 @@ const generateSteps = (initialNodes, initialEdges) => {
       pseudoCodeLines: [2, "a"],
     });
 
-    // Step 2: Calculate and show bottleneck
     const bottleneck = calculateBottleneck(path, initialEdges, flows);
-    steps.push({
-      graphState: {
-        nodes: calculateNodeFlows(initialNodes, initialEdges),
-        edges: initialEdges.map((edge) => ({
-          ...edge,
-          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-          highlight: isEdgeInPath(edge, path),
-          residualCapacity:
-            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-        })),
-        currentPath: path,
-        currentEdge: null,
-        maxFlow: steps[steps.length - 1].graphState.maxFlow,
-      },
-      explanation: `Found bottleneck capacity: ${bottleneck}`,
-      pseudoCodeLines: ["b"],
-    });
 
-    // Step 3: Update flows
-    updateFlows(path, bottleneck, flows);
-    const newMaxFlow = steps[steps.length - 1].graphState.maxFlow + bottleneck;
+    // Add steps for each edge update
+    for (let i = 0; i < path.length - 1; i++) {
+      const current = path[i];
+      const next = path[i + 1];
+      const currentEdge = initialEdges.find(
+        (e) =>
+          (e.source === current && e.target === next) ||
+          (e.source === next && e.target === current)
+      );
 
-    steps.push({
-      graphState: {
-        nodes: calculateNodeFlows(initialNodes, initialEdges),
-        edges: initialEdges.map((edge) => ({
-          ...edge,
-          flow: flows.get(`${edge.source}-${edge.target}`) || 0,
-          highlight: isEdgeInPath(edge, path),
-          residualCapacity:
-            edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
-        })),
-        currentPath: path,
-        currentEdge: null,
-        maxFlow: newMaxFlow,
-      },
-      explanation: `Updated flows along path. Current maximum flow: ${newMaxFlow}`,
-      pseudoCodeLines: ["c"],
-    });
+      // Create temporary flows map for this step
+      const tempFlows = new Map(flows);
+      const edgeKey = `${current}-${next}`;
+      const reverseKey = `${next}-${current}`;
+
+      if (currentEdge.source === current) {
+        tempFlows.set(edgeKey, (tempFlows.get(edgeKey) || 0) + bottleneck);
+      } else {
+        tempFlows.set(
+          reverseKey,
+          (tempFlows.get(reverseKey) || 0) - bottleneck
+        );
+      }
+
+      steps.push({
+        graphState: {
+          nodes: calculateNodeFlows(initialNodes, initialEdges),
+          edges: initialEdges.map((edge) => ({
+            ...edge,
+            flow: tempFlows.get(`${edge.source}-${edge.target}`) || 0,
+            highlight: isEdgeInPath(edge, path),
+          })),
+          currentPath: path,
+          currentEdge: currentEdge,
+          maxFlow:
+            i === path.length - 2
+              ? steps[steps.length - 1].graphState.maxFlow + bottleneck
+              : steps[steps.length - 1].graphState.maxFlow,
+        },
+        explanation: `Updating flow along edge ${current} → ${next} by ${bottleneck}`,
+        pseudoCodeLines: ["c"],
+      });
+
+      // Update the actual flows map
+      flows.set(edgeKey, tempFlows.get(edgeKey) || 0);
+      flows.set(reverseKey, tempFlows.get(reverseKey) || 0);
+    }
 
     iteration++;
     path = findPath("S", "T", initialEdges, flows);
   }
 
-  // Final state when no path exists
+  // Final state
   steps.push({
     graphState: {
       nodes: calculateNodeFlows(initialNodes, initialEdges),
@@ -225,8 +229,6 @@ const generateSteps = (initialNodes, initialEdges) => {
         ...edge,
         flow: flows.get(`${edge.source}-${edge.target}`) || 0,
         highlight: false,
-        residualCapacity:
-          edge.capacity - (flows.get(`${edge.source}-${edge.target}`) || 0),
       })),
       currentPath: [],
       currentEdge: null,
@@ -392,35 +394,30 @@ const EDGE_TYPES = {
 };
 
 const getEdgeStyle = (edge, graphState) => {
-  // Check if this specific edge is the current edge being considered
   const isCurrentEdge =
     graphState?.currentEdge &&
-    edge.source === graphState.currentEdge.source &&
-    edge.target === graphState.currentEdge.target;
-
-  // Check if this edge is part of the current path
-  const isInPath = edge.highlight;
+    ((edge.source === graphState.currentEdge.source &&
+      edge.target === graphState.currentEdge.target) ||
+      (edge.source === graphState.currentEdge.target &&
+        edge.target === graphState.currentEdge.source));
 
   if (isCurrentEdge) {
-    // Current edge being considered - pink and bold
     return {
-      color: EDGE_TYPES.CURRENT_EDGE.color,
+      color: EDGE_TYPES.CURRENT_EDGE.color, // Pink
       marker: "url(#arrowhead-current)",
       width: "3",
     };
-  } else if (isInPath) {
-    // Part of current path - blue and bold
+  } else if (edge.highlight) {
     return {
-      color: EDGE_TYPES.CURRENT_PATH.color,
+      color: EDGE_TYPES.CURRENT_PATH.color, // Blue
       marker: "url(#arrowhead-highlighted)",
       width: "3",
     };
   } else {
-    // Not part of current path - black and thin
     return {
       color: EDGE_TYPES.NORMAL.color,
       marker: "url(#arrowhead)",
-      width: "1.5", // Reduced from 2 to 1.5
+      width: "1.5",
     };
   }
 };
