@@ -458,91 +458,85 @@ export default function GamePageStructure({
     );
 
   const renderMainContent = () => (
-    <main className="hidden lg:flex flex-col p-4 max-h-screen">
-      <h1 className="text-2xl text-center md:text-3xl font-bold mt-2">
+    <main className="hidden lg:flex flex-col h-[calc(100vh-4rem)] p-4">
+      <h1 className="text-2xl text-center md:text-3xl font-bold mb-2">
         {title}
       </h1>
 
-      <div className="w-full max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">{title}</h1>
-          <div className="flex gap-4">
+      <div className="flex flex-1 gap-4">
+        {/* Left side - Graph and Controls */}
+        <div className="w-3/4 flex flex-col">
+          <div className="flex justify-between items-center mb-2">
             <div className="flex gap-6">
               <div className="text-lg">Round: {round}</div>
               <div className="text-lg">Total Score: {totalScore}</div>
               <div className="text-lg">Best Round Score: {bestScore}</div>
-              <button
-                onClick={() => setShowDifficultyModal(true)}
-                className="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
-              >
-                Change Difficulty
-              </button>
             </div>
-          </div>
-        </div>
-
-        <div className="flex mb-2 justify-between items-center">
-          <div className="flex gap-4">
-            <div>Score: {score}</div>
-            <div>Moves: {moves}</div>
-          </div>
-          <button
-            onClick={resetGame}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors"
-          >
-            Reset Game
-          </button>
-        </div>
-
-        <div className="mb-2 relative">
-          <div className="bg-white border border-gray-300 rounded-lg">
-            {renderGraphTabs()}
-            <div className="flex items-center justify-center h-[27rem] relative">
-              <GraphVisualisation
-                graphState={getCurrentGraphState()}
-                onNodeClick={handleNodeClick}
-                mode="game"
-                isGraphA={activeTab === 0}
-                graphIndex={activeTab}
-              />
-              {overlayState.show && (
-                <div
-                  className={`absolute inset-0 flex items-center justify-center ${
-                    overlayState.content.type === "correct"
-                      ? "bg-green-500"
-                      : "bg-red-500"
-                  } bg-opacity-75`}
-                >
-                  <p className="text-white text-2xl font-bold">
-                    {overlayState.content.text}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {isFordFulkersonPage && (
-          <div className="mb-2">
-            {nodeCountProp &&
-              nodeCountProp(getCurrentGraphState(), setCurrentGraphState)}
-          </div>
-        )}
-
-        <div>
-          <div className="flex items-center">
-            <h2 className="text-xl font-semibold">Feedback</h2>
             <button
-              onClick={() => toggleSpeech(message)}
-              className={`ml-2 p-2 rounded-full hover:bg-gray-100 ${
-                isSpeakingFeedback ? "bg-gray-200" : ""
-              }`}
+              onClick={() => setShowDifficultyModal(true)}
+              className="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
             >
-              🔊
+              Change Difficulty
             </button>
           </div>
-          <div className="bg-white border border-gray-300 rounded-lg p-3 text-center">
-            <p>{message}</p>
+
+          <div className="flex mb-2 justify-between items-center">
+            <div className="flex gap-4">
+              <div>Score: {score}</div>
+              <div>Moves: {moves}</div>
+            </div>
+            <button
+              onClick={resetGame}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors"
+            >
+              Reset Game
+            </button>
+          </div>
+
+          <div className="flex-1 relative">
+            <div className="h-full bg-white border border-gray-300 rounded-lg">
+              {renderGraphTabs()}
+              <div className="flex items-center justify-center h-[calc(100%-2rem)] relative">
+                <GraphVisualisation
+                  graphState={getCurrentGraphState()}
+                  onNodeClick={handleNodeClick}
+                  mode="game"
+                  isGraphA={activeTab === 0}
+                  graphIndex={activeTab}
+                />
+                {overlayState.show && (
+                  <div
+                    className={`absolute inset-0 flex items-center justify-center ${
+                      overlayState.content.type === "correct"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    } bg-opacity-75`}
+                  >
+                    <p className="text-white text-2xl font-bold">
+                      {overlayState.content.text}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right side - Feedback */}
+        <div className="w-1/4 flex flex-col">
+          <div className="bg-white border border-gray-300 rounded-lg p-3 h-full">
+            <div className="flex items-center mb-2">
+              <h2 className="text-xl font-semibold">Feedback</h2>
+              <button
+                onClick={() => toggleSpeech(message)}
+                className={`ml-2 p-2 rounded-full hover:bg-gray-100 ${
+                  isSpeakingFeedback ? "bg-gray-200" : ""
+                }`}
+              >
+                🔊
+              </button>
+            </div>
+            <p className="text-center">{message}</p>
           </div>
         </div>
       </div>
