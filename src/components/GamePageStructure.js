@@ -465,80 +465,79 @@ export default function GamePageStructure({
         {title}
       </h1>
 
-      <div className="flex flex-1 gap-4">
-        {/* Left side - Graph and Controls */}
-        <div className="w-3/4 flex flex-col">
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex gap-6">
-              <div className="text-lg">Round: {round}</div>
-              <div className="text-lg">Total Score: {totalScore}</div>
-              <div className="text-lg">Best Round Score: {bestScore}</div>
-            </div>
-            <button
-              onClick={() => setShowDifficultyModal(true)}
-              className="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
-            >
-              Change Difficulty
-            </button>
-          </div>
-
-          <div className="flex mb-2 justify-between items-center">
+      <div className="flex flex-col flex-1">
+        {/* Top Controls Bar */}
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex gap-6">
+            <div className="text-lg">Round: {round}</div>
+            <div className="text-lg">Total Score: {totalScore}</div>
+            <div className="text-lg">Best Round Score: {bestScore}</div>
             <div className="flex gap-4">
               <div>Score: {score}</div>
               <div>Moves: {moves}</div>
             </div>
+          </div>
+
+          {/* Compact Feedback Section */}
+          <div className="mx-4 flex-shrink-0 w-64">
+            <div className="bg-white border border-gray-300 rounded-lg p-2">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-sm font-semibold">Feedback</h2>
+                <button
+                  onClick={() => toggleSpeech(message)}
+                  className={`p-1 rounded-full hover:bg-gray-100 ${
+                    isSpeakingFeedback ? "bg-gray-200" : ""
+                  }`}
+                >
+                  🔊
+                </button>
+              </div>
+              <p className="text-sm text-center">{message}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
             <button
               onClick={resetGame}
               className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors"
             >
               Reset Game
             </button>
-          </div>
-
-          <div className="flex-1 relative">
-            <div className="h-full bg-white border border-gray-300 rounded-lg">
-              {renderGraphTabs()}
-              <div className="flex items-center justify-center h-[calc(100%-2rem)] relative">
-                <GraphVisualisation
-                  graphState={getCurrentGraphState()}
-                  onNodeClick={handleNodeClick}
-                  mode="game"
-                  isGraphA={activeTab === 0}
-                  graphIndex={activeTab}
-                />
-                {overlayState.show && (
-                  <div
-                    className={`absolute inset-0 flex items-center justify-center ${
-                      overlayState.content.type === "correct"
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                    } bg-opacity-75`}
-                  >
-                    <p className="text-white text-2xl font-bold">
-                      {overlayState.content.text}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <button
+              onClick={() => setShowDifficultyModal(true)}
+              className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+            >
+              Change Difficulty
+            </button>
           </div>
         </div>
 
-        {/* Right side - Feedback */}
-        <div className="w-1/4 flex flex-col">
-          <div className="bg-white border border-gray-300 rounded-lg p-3 h-full">
-            <div className="flex items-center mb-2">
-              <h2 className="text-xl font-semibold">Feedback</h2>
-              <button
-                onClick={() => toggleSpeech(message)}
-                className={`ml-2 p-2 rounded-full hover:bg-gray-100 ${
-                  isSpeakingFeedback ? "bg-gray-200" : ""
-                }`}
-              >
-                🔊
-              </button>
+        {/* Centered Graph Section */}
+        <div className="flex-1 relative mx-auto w-4/5">
+          <div className="h-full bg-white border border-gray-300 rounded-lg">
+            {renderGraphTabs()}
+            <div className="flex items-center justify-center h-[calc(100%-2rem)] relative">
+              <GraphVisualisation
+                graphState={getCurrentGraphState()}
+                onNodeClick={handleNodeClick}
+                mode="game"
+                isGraphA={activeTab === 0}
+                graphIndex={activeTab}
+              />
+              {overlayState.show && (
+                <div
+                  className={`absolute inset-0 flex items-center justify-center ${
+                    overlayState.content.type === "correct"
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  } bg-opacity-75`}
+                >
+                  <p className="text-white text-2xl font-bold">
+                    {overlayState.content.text}
+                  </p>
+                </div>
+              )}
             </div>
-            <p className="text-center">{message}</p>
           </div>
         </div>
       </div>
