@@ -12,20 +12,22 @@ import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 const API_URL = BACKEND_URL;
 
 const DifficultySelector = ({ onSelect }) => (
-  <div className="flex flex-col items-center justify-center h-screen">
-    <h1 className="text-3xl font-bold mb-8">Choose Difficulty Level</h1>
-    <div className="flex gap-4">
-      {Object.keys(DIFFICULTY_SETTINGS).map((level) => (
-        <button
-          key={level}
-          onClick={() => onSelect(level)}
-          className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize"
-        >
-          {level}
-        </button>
-      ))}
+  <main className="hidden lg:flex flex-col h-[calc(100vh-4rem)] items-center justify-center">
+    <div className="flex flex-col items-center">
+      <h1 className="text-3xl font-bold mb-8">Choose Difficulty Level</h1>
+      <div className="flex gap-4">
+        {Object.keys(DIFFICULTY_SETTINGS).map((level) => (
+          <button
+            key={level}
+            onClick={() => onSelect(level)}
+            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize"
+          >
+            {level}
+          </button>
+        ))}
+      </div>
     </div>
-  </div>
+  </main>
 );
 
 const generateRandomGraph = (nodeCount, difficulty = "medium") => {
