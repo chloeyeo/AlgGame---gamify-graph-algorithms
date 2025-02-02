@@ -49,6 +49,19 @@ const PersonalStats = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
+  const getMedalIcon = (rank) => {
+    switch (rank) {
+      case 1:
+        return "🥇";
+      case 2:
+        return "🥈";
+      case 3:
+        return "🥉";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="px-4 py-5 sm:px-6">
@@ -60,46 +73,56 @@ const PersonalStats = () => {
         <div className="divide-y divide-gray-200">
           {personalStats.map((stat) => (
             <div key={stat._id} className="px-4 py-5 sm:p-6">
-              <h4 className="text-md font-medium text-gray-900 mb-2">
-                {stat._id.toUpperCase()}
+              <h4 className="text-lg font-medium text-gray-900 mb-4">
+                {stat._id.toUpperCase()} Top Scores
               </h4>
-              <dl className="grid grid-cols-4 gap-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-800">
-                    Best Score
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {stat.bestScore}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-800">
-                    Best Time
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {Math.floor(stat.bestTime / 1000)}s
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-800">
-                    Games Played
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {stat.gamesPlayed}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-800">
-                    Average Score
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {Math.round(stat.averageScore)}
-                  </dd>
-                </div>
-              </dl>
-              <div className="mt-2 text-sm text-gray-800">
-                Last played: {new Date(stat.lastPlayed).toLocaleDateString()}
-              </div>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                      Rank
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                      Score
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                      Time
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                      Moves
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                      Difficulty
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {(stat.scores || []).slice(0, 5).map((score, index) => (
+                    <tr
+                      key={index}
+                      className={index % 2 === 0 ? "bg-gray-50" : ""}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-800">
+                          {getMedalIcon(index + 1)} {index + 1}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                        {score.score}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                        {Math.floor(score.timeSpent / 1000)}s
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                        {score.movesCount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 capitalize">
+                        {score.difficulty || "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ))}
         </div>

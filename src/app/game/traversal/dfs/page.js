@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 import { generateRandomGraph } from "@/components/GamePageStructure";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
+import { toast } from "react-hot-toast";
 
 const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
   const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
@@ -32,6 +33,7 @@ const DFSGamePage = () => {
   const [graphState, setGraphState] = useState(() =>
     generateInitialGraphState(4)
   );
+  const [bestScores, setBestScores] = useState([]);
 
   const handleDifficultySelect = (selectedDifficulty) => {
     setDifficulty(selectedDifficulty);
@@ -42,10 +44,36 @@ const DFSGamePage = () => {
     );
   };
 
-  const handleRoundComplete = (currentScore) => {
+  const handleRoundComplete = async (currentScore) => {
     setRound((prev) => prev + 1);
     setTotalScore((prev) => prev + currentScore);
-    // Generate new graph state for next round
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/scores/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithm: "dfs",
+          difficulty: difficulty,
+          score: currentScore,
+          timeSpent: Date.now() - startTime,
+          movesCount: moves,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit score");
+      }
+    } catch (error) {
+      console.error("Error submitting score:", error);
+      toast.error("Failed to save score");
+    }
+
+    // Generate new graph for next round
     setGraphState(generateInitialGraphState(nodeCount, difficulty));
   };
 

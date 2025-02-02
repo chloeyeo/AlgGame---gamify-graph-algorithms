@@ -58,6 +58,19 @@ const Leaderboard = ({ algorithm }) => {
     fetchLeaderboard();
   }, [algorithm]);
 
+  const getMedalIcon = (rank) => {
+    switch (rank) {
+      case 1:
+        return "🥇";
+      case 2:
+        return "🥈";
+      case 3:
+        return "🥉";
+      default:
+        return "";
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white p-4 rounded-lg shadow">
@@ -77,7 +90,7 @@ const Leaderboard = ({ algorithm }) => {
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full">
       <div className="px-4 py-5 sm:px-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900">
           {algorithm.toUpperCase()} Leaderboard
@@ -103,16 +116,21 @@ const Leaderboard = ({ algorithm }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                   Moves
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                  Difficulty
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {leaderboardData.map((entry, index) => (
+              {leaderboardData.slice(0, 5).map((entry, index) => (
                 <tr
                   key={entry._id}
                   className={index % 2 === 0 ? "bg-gray-50" : ""}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                    {index + 1}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm text-gray-800">
+                      {getMedalIcon(index + 1)} {index + 1}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
@@ -127,6 +145,9 @@ const Leaderboard = ({ algorithm }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                     {entry.movesCount}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 capitalize">
+                    {entry.difficulty}
                   </td>
                 </tr>
               ))}
