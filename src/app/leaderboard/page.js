@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
   return (
     <div className="container mx-auto px-4 py-20">
       <div className="space-y-8">
-        <div className="bg-blue-50 rounded-lg shadow-lg p-6">
+        <div className="bg-blue-50 rounded-lg shadow-lg p-6 mt-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Welcome, {user.username}!
           </h1>
