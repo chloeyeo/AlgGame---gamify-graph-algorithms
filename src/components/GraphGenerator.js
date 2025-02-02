@@ -1,8 +1,8 @@
 const generateGameGraph = (nodeCount = 6, difficulty = "medium") => {
   const nodes = [];
-  const width = 800;
-  const height = 600;
-  const padding = 100;
+  const width = 600;
+  const height = 500;
+  const padding = 80;
   const centerX = width / 2;
   const centerY = height / 2;
 

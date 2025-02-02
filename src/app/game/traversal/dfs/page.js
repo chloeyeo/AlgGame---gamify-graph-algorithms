@@ -54,7 +54,7 @@ const DFSGamePage = () => {
       minNodes + Math.floor((round - 1) / 2)
     );
 
-    // Pass difficulty to generate new graph
+    // Force new random graph generation
     setGraphState(generateInitialGraphState(newNodeCount, difficulty));
   };
 
