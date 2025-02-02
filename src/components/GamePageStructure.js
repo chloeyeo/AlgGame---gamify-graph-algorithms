@@ -136,10 +136,10 @@ export default function GamePageStructure({
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.replace(`/auth?redirect=${pathname}`);
+      router.replace(`/auth?redirect=${window.location.pathname}`);
       return;
     }
-  }, [router, pathname]);
+  }, [router]);
 
   const isFordFulkersonPage = pathname.includes("ford-fulkerson");
   const isMultiGraphGame = currentGraphStates.length > 1;
@@ -208,6 +208,7 @@ export default function GamePageStructure({
           score,
           timeSpent: Date.now() - startTime,
           movesCount: moves,
+          difficulty: difficulty,
         }),
       });
 

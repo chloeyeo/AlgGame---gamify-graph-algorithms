@@ -65,6 +65,7 @@ router.get("/personal", auth, async (req, res) => {
       },
       {
         $sort: {
+          algorithm: 1,
           score: -1,
           timeSpent: 1,
         },
@@ -72,17 +73,15 @@ router.get("/personal", auth, async (req, res) => {
       {
         $group: {
           _id: "$algorithm",
-          scores: { $push: "$$ROOT" },
-          gamesPlayed: { $sum: 1 },
-          averageScore: { $avg: "$score" },
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          scores: { $slice: ["$scores", 5] },
-          gamesPlayed: 1,
-          averageScore: 1,
+          scores: {
+            $push: {
+              score: "$score",
+              timeSpent: "$timeSpent",
+              movesCount: "$movesCount",
+              difficulty: "$difficulty",
+              _id: "$_id",
+            },
+          },
         },
       },
     ]);
