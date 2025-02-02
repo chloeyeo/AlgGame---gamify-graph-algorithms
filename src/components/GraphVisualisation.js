@@ -24,10 +24,28 @@ import Edges from "@/components/Edges/Edge";
 import Nodes from "@/components/Nodes/Node";
 
 // Memoized Legend component
-const MemoizedLegend = memo(({ svg, isDFSPage }) => {
-  // Existing Legend code here
-  return null;
-});
+const MemoizedLegend = memo(
+  ({
+    svg,
+    isDFSPage,
+    isAStarPage,
+    isDijkstraPage,
+    isFordFulkersonPage,
+    isKruskalsPage,
+    isPrimsPage,
+  }) => {
+    return Legend({
+      svg,
+      isDFSPage,
+      isAStarPage,
+      isDijkstraPage,
+      isFordFulkersonPage,
+      isKruskalsPage,
+      isPrimsPage,
+    });
+  }
+);
+MemoizedLegend.displayName = "MemoizedLegend";
 
 const GraphVisualisation = ({
   graphState,
@@ -84,7 +102,7 @@ const GraphVisualisation = ({
       setWidth(bbox.width);
       setHeight(bbox.height);
     }
-  }, [svgRef.current, viewBoxWidth, viewBoxHeight, isKruskalsPage]);
+  }, [viewBoxWidth, viewBoxHeight, isKruskalsPage]);
 
   useEffect(() => {
     if (!graphState) return;
@@ -93,15 +111,15 @@ const GraphVisualisation = ({
 
     // First render - add legend
     if (render === 0) {
-      Legend({
-        svg,
-        isDFSPage,
-        isAStarPage,
-        isDijkstraPage,
-        isFordFulkersonPage,
-        isKruskalsPage,
-        isPrimsPage,
-      });
+      <MemoizedLegend
+        svg={svg}
+        isDFSPage={isDFSPage}
+        isAStarPage={isAStarPage}
+        isDijkstraPage={isDijkstraPage}
+        isFordFulkersonPage={isFordFulkersonPage}
+        isKruskalsPage={isKruskalsPage}
+        isPrimsPage={isPrimsPage}
+      />;
     }
 
     // Remove all elements except legend and its children
