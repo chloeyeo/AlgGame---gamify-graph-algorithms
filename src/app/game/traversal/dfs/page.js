@@ -45,7 +45,7 @@ const DFSGamePage = () => {
   const handleRoundComplete = (currentScore) => {
     setRound((prev) => prev + 1);
     setTotalScore((prev) => prev + currentScore);
-    // Use the fixed nodeCount instead of calculating new one
+    // Generate new graph state for next round
     setGraphState(generateInitialGraphState(nodeCount, difficulty));
   };
 

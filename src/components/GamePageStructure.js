@@ -315,6 +315,8 @@ export default function GamePageStructure({
 
       setTimeout(() => {
         onRoundComplete(score);
+        setScore(0);
+        setMoves(0);
         setOverlayState({ show: false, content: { type: "", text: "" } });
       }, 2000);
     }
@@ -468,9 +470,7 @@ export default function GamePageStructure({
             <div className="flex gap-6">
               <div className="text-lg">Round: {round}</div>
               <div className="text-lg">Total Score: {totalScore}</div>
-              <div className="text-lg">
-                Best Round Score: {Math.max(score, bestScore)}
-              </div>
+              <div className="text-lg">Best Round Score: {bestScore}</div>
               <button
                 onClick={() => setShowDifficultyModal(true)}
                 className="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
