@@ -7,8 +7,26 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { BACKEND_URL } from "@/constants/constants";
+import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 
 const API_URL = BACKEND_URL;
+
+const DifficultySelector = ({ onSelect }) => (
+  <div className="flex flex-col items-center justify-center h-screen">
+    <h1 className="text-3xl font-bold mb-8">Choose Difficulty Level</h1>
+    <div className="flex gap-4">
+      {Object.keys(DIFFICULTY_SETTINGS).map((level) => (
+        <button
+          key={level}
+          onClick={() => onSelect(level)}
+          className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize"
+        >
+          {level}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -19,9 +37,13 @@ export default function GamePageStructure({
   getScore,
   getMessage,
   isGameComplete,
+  onRoundComplete,
+  round,
+  totalScore,
   nodeCountProp,
   onNodeCountChange,
-  maxNodes = 8,
+  difficulty,
+  onDifficultySelect,
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
@@ -39,6 +61,7 @@ export default function GamePageStructure({
   const submitAttempted = useRef(false);
   const pathname = usePathname();
   const startTime = Date.now();
+  const [bestScore, setBestScore] = useState(0);
 
   useEffect(() => {
     setCurrentGraphStates([graphState]);
@@ -60,7 +83,23 @@ export default function GamePageStructure({
   };
 
   const resetGame = () => {
-    setCurrentGraphStates([graphState]);
+    // Generate fresh graph state
+    const freshGraphState = {
+      ...graphState,
+      nodes: graphState.nodes.map((node) => ({
+        ...node,
+        visited: false,
+        backtracked: false,
+        current: false,
+      })),
+      currentNode: null,
+      stack: [],
+      visitedNodes: [],
+      backtrackedNodes: [],
+    };
+
+    setCurrentGraphStates([freshGraphState]);
+    setGraphState(freshGraphState);
     setScore(0);
     setMoves(0);
     setMessage("Game reset. Click on a node to begin!");
@@ -202,6 +241,23 @@ export default function GamePageStructure({
     checkGameCompletion();
   }, [graphState, isGameComplete, scoreSubmitted]);
 
+  useEffect(() => {
+    if (isGameComplete(graphState)) {
+      setOverlayState({
+        show: true,
+        content: {
+          type: "success",
+          text: `Round ${round} Complete! Starting next round...`,
+        },
+      });
+
+      setTimeout(() => {
+        onRoundComplete(score);
+        setOverlayState({ show: false, content: { type: "", text: "" } });
+      }, 2000);
+    }
+  }, [graphState, isGameComplete, round, onRoundComplete, score]);
+
   const isValidDFSMove = (graphState, nodeId) => {
     const newState = { ...graphState };
     const clickedNode = newState.nodes.find((n) => n.id === nodeId);
@@ -278,6 +334,16 @@ export default function GamePageStructure({
     };
   };
 
+  useEffect(() => {
+    if (score > bestScore) {
+      setBestScore(score);
+    }
+  }, [score]);
+
+  if (!difficulty) {
+    return <DifficultySelector onSelect={onDifficultySelect} />;
+  }
+
   if (!currentGraphStates.length) {
     return (
       <p className="text-center mt-[50%]">
@@ -310,6 +376,25 @@ export default function GamePageStructure({
       </h1>
 
       <div className="w-full max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">{title}</h1>
+          <div className="flex gap-4">
+            <div className="flex gap-6">
+              <div className="text-lg">Round: {round}</div>
+              <div className="text-lg">Total Score: {totalScore}</div>
+              <div className="text-lg">
+                Best Round Score: {Math.max(score, bestScore)}
+              </div>
+              <button
+                onClick={() => setShowDifficultyModal(true)}
+                className="px-4 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
+              >
+                Change Difficulty
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="flex mb-2 justify-between items-center">
           <div className="flex gap-4">
             <div>Score: {score}</div>

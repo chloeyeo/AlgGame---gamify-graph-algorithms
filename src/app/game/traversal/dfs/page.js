@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-import { generateDFSSteps } from "@/components/EducationPageStructure";
+import {
+  generateDFSSteps,
+  isValidDFSMove,
+} from "@/components/EducationPageStructure";
+import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 
 // Helper function to generate a simple graph
 const generateGameGraph = (nodeCount) => {
@@ -54,55 +58,65 @@ const generateGameGraph = (nodeCount) => {
   return { nodes, edges };
 };
 
-const DFSGamePage = () => {
-  const [nodeCount, setNodeCount] = useState(6);
-  const [graphState, setGraphState] = useState(() => {
-    const { nodes, edges } = generateGameGraph(nodeCount);
-    return {
-      nodes: nodes.map((node) => ({
-        ...node,
-        visited: false,
-        backtracked: false,
-        current: false,
-      })),
-      edges,
-      currentNode: null,
-      stack: [],
-      visitedNodes: [],
-      backtrackedNodes: [],
-    };
-  });
+// Define this function before using it in useState
+const generateInitialGraphState = (nodeCount) => {
+  const { nodes, edges } = generateGameGraph(nodeCount);
+  return {
+    nodes: nodes.map((node) => ({
+      ...node,
+      visited: false,
+      backtracked: false,
+      current: false,
+    })),
+    edges,
+    currentNode: null,
+    stack: [],
+    visitedNodes: [],
+    backtrackedNodes: [],
+    round: 1,
+  };
+};
 
-  const handleNodeCountChange = (newCount) => {
-    const { nodes, edges } = generateGameGraph(newCount);
-    setGraphState({
-      nodes: nodes.map((node) => ({
-        ...node,
-        visited: false,
-        backtracked: false,
-        current: false,
-      })),
-      edges,
-      currentNode: null,
-      stack: [],
-      visitedNodes: [],
-      backtrackedNodes: [],
-    });
+const DFSGamePage = () => {
+  const [difficulty, setDifficulty] = useState(null);
+  const [round, setRound] = useState(1);
+  const [totalScore, setTotalScore] = useState(0);
+  const [graphState, setGraphState] = useState(() =>
+    generateInitialGraphState(4)
+  );
+
+  const handleDifficultySelect = (selectedDifficulty) => {
+    setDifficulty(selectedDifficulty);
+    const initialNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
+    setGraphState(generateInitialGraphState(initialNodeCount));
   };
 
-  const isValidMove = (graphState, nodeId) => {
-    const newState = JSON.parse(JSON.stringify(graphState));
+  const handleRoundComplete = (currentScore) => {
+    setRound((prev) => prev + 1);
+    setTotalScore((prev) => prev + currentScore);
+
+    // Get new node count based on difficulty and round
+    const { minNodes, maxNodes } = DIFFICULTY_SETTINGS[difficulty];
+    const newNodeCount = Math.min(
+      maxNodes,
+      minNodes + Math.floor((round - 1) / 2)
+    );
+
+    // Generate new graph state for next round
+    setGraphState(generateInitialGraphState(newNodeCount));
+  };
+
+  // Replace the isValidMove function with this implementation
+  const isValidMove = (state, nodeId) => {
+    const newState = { ...state };
     const clickedNode = newState.nodes.find((n) => n.id === nodeId);
 
-    if (!clickedNode) return { validMove: false, newState: graphState };
-
-    // First move - can start from any node
+    // First move
     if (!newState.currentNode) {
       clickedNode.visited = true;
       clickedNode.current = true;
       newState.currentNode = nodeId;
       newState.stack = [nodeId];
-      newState.visitedNodes.push(nodeId);
       return {
         validMove: true,
         newState,
@@ -111,19 +125,17 @@ const DFSGamePage = () => {
       };
     }
 
-    const neighbors = newState.edges
-      .filter(
-        (e) =>
-          e.source === newState.currentNode || e.target === newState.currentNode
-      )
-      .map((e) => (e.source === newState.currentNode ? e.target : e.source));
+    // Get unvisited neighbors of current node
+    const currentNodeNeighbors = newState.edges
+      .filter((e) => e.source === newState.currentNode)
+      .map((e) => e.target);
 
-    const unvisitedNeighbors = neighbors.filter(
-      (n) => !newState.visitedNodes.includes(n)
+    const unvisitedNeighbors = currentNodeNeighbors.filter(
+      (n) => !newState.nodes.find((node) => node.id === n).visited
     );
 
-    // Visit unvisited neighbor
-    if (neighbors.includes(nodeId) && !newState.visitedNodes.includes(nodeId)) {
+    // If clicked node is unvisited neighbor
+    if (unvisitedNeighbors.includes(nodeId)) {
       const prevNode = newState.nodes.find(
         (n) => n.id === newState.currentNode
       );
@@ -132,7 +144,6 @@ const DFSGamePage = () => {
       clickedNode.current = true;
       newState.currentNode = nodeId;
       newState.stack.push(nodeId);
-      newState.visitedNodes.push(nodeId);
       return {
         validMove: true,
         newState,
@@ -141,7 +152,7 @@ const DFSGamePage = () => {
       };
     }
 
-    // Backtrack
+    // If no unvisited neighbors, allow backtracking
     if (
       unvisitedNeighbors.length === 0 &&
       newState.stack.length > 1 &&
@@ -155,7 +166,6 @@ const DFSGamePage = () => {
       clickedNode.current = true;
       newState.currentNode = nodeId;
       newState.stack.pop();
-      newState.backtrackedNodes.push(prevNode.id);
       return {
         validMove: true,
         newState,
@@ -166,7 +176,7 @@ const DFSGamePage = () => {
 
     return {
       validMove: false,
-      newState: graphState,
+      newState: state,
       nodeStatus: "incorrect",
       message:
         "Invalid move! Follow DFS rules: visit unvisited neighbors or backtrack when needed.",
@@ -205,9 +215,11 @@ const DFSGamePage = () => {
           : `Valid move to node ${nodeId}`
       }
       isGameComplete={isGameComplete}
-      nodeCountProp={nodeCount}
-      onNodeCountChange={handleNodeCountChange}
-      maxNodes={8}
+      onRoundComplete={handleRoundComplete}
+      round={round}
+      totalScore={totalScore}
+      difficulty={difficulty}
+      onDifficultySelect={handleDifficultySelect}
     />
   );
 };
