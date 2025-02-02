@@ -22,6 +22,7 @@ import {
 import { usePathname } from "next/navigation";
 import Edges from "@/components/Edges/Edge";
 import Nodes from "@/components/Nodes/Node";
+import { useRouter } from "next/navigation";
 
 // Memoized Legend component
 const MemoizedLegend = memo(
@@ -78,6 +79,8 @@ const GraphVisualisation = ({
   // get width and height of svg
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+
+  const router = useRouter();
 
   useLayoutEffect(() => {
     if (!svgRef.current) return;
@@ -171,6 +174,24 @@ const GraphVisualisation = ({
     isKruskalsPage,
     isPrimsPage,
   ]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (!token || !userData) {
+      router.replace("/auth?redirect=/leaderboard");
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      router.replace("/auth?redirect=/leaderboard");
+    }
+  }, [router]);
 
   const getNodeColor = (node) => {
     if (node.id === graphState.activeNeighbor) return "#FFE082"; // Highlight checking neighbor

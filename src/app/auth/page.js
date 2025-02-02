@@ -63,12 +63,18 @@ const AuthPage = () => {
       toast.success(
         isLogin ? "Login successful!" : "Account created successfully!"
       );
-      router.push("/myaccount");
+      handleLoginSuccess();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Authentication failed";
       toast.error(errorMessage);
     }
+  };
+
+  const handleLoginSuccess = () => {
+    const params = new URLSearchParams(window.location.search);
+    const redirectPath = params.get("redirect") || "/myaccount";
+    router.replace(redirectPath);
   };
 
   return (

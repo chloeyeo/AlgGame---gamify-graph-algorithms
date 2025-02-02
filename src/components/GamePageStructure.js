@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { BACKEND_URL } from "@/constants/constants";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
+import { useRouter } from "next/navigation";
 
 const API_URL = BACKEND_URL;
 
@@ -126,10 +127,19 @@ export default function GamePageStructure({
   const startTime = Date.now();
   const [bestScore, setBestScore] = useState(0);
   const [showDifficultyModal, setShowDifficultyModal] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setCurrentGraphStates([graphState]);
   }, [graphState]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace(`/auth?redirect=${pathname}`);
+      return;
+    }
+  }, [router, pathname]);
 
   const isFordFulkersonPage = pathname.includes("ford-fulkerson");
   const isMultiGraphGame = currentGraphStates.length > 1;

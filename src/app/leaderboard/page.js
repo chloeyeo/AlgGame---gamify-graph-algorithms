@@ -23,15 +23,16 @@ export default function LeaderboardPage() {
     const userData = localStorage.getItem("user");
 
     if (!token || !userData) {
-      router.replace("/auth");
+      router.replace("/auth?redirect=/leaderboard");
       return;
     }
 
     try {
-      setUser(JSON.parse(userData));
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
     } catch (error) {
       console.error("Error parsing user data:", error);
-      router.replace("/auth");
+      router.replace("/auth?redirect=/leaderboard");
     }
   }, [router]);
 
