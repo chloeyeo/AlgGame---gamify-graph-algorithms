@@ -7,60 +7,11 @@ import {
   isValidDFSMove,
 } from "@/components/EducationPageStructure";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
+import { generateGameGraph } from "@/components/GraphGenerator";
 
-// Helper function to generate a simple graph
-const generateGameGraph = (nodeCount) => {
-  const nodes = [];
-  const edges = [];
-
-  // Generate nodes in a circular layout
-  for (let i = 0; i < nodeCount; i++) {
-    nodes.push({
-      id: String.fromCharCode(65 + i),
-      x: 300 + 200 * Math.cos((2 * Math.PI * i) / nodeCount),
-      y: 300 + 200 * Math.sin((2 * Math.PI * i) / nodeCount),
-    });
-  }
-
-  // Create a connected graph with bidirectional edges
-  for (let i = 0; i < nodes.length - 1; i++) {
-    edges.push(
-      { source: nodes[i].id, target: nodes[i + 1].id },
-      { source: nodes[i + 1].id, target: nodes[i].id }
-    );
-  }
-  // Connect last and first node
-  edges.push(
-    { source: nodes[nodes.length - 1].id, target: nodes[0].id },
-    { source: nodes[0].id, target: nodes[nodes.length - 1].id }
-  );
-
-  // Add some random edges for more interesting paths
-  for (let i = 0; i < nodes.length; i++) {
-    if (Math.random() > 0.5) {
-      const target = Math.floor(Math.random() * nodes.length);
-      if (
-        target !== i &&
-        !edges.some(
-          (e) =>
-            (e.source === nodes[i].id && e.target === nodes[target].id) ||
-            (e.source === nodes[target].id && e.target === nodes[i].id)
-        )
-      ) {
-        edges.push(
-          { source: nodes[i].id, target: nodes[target].id },
-          { source: nodes[target].id, target: nodes[i].id }
-        );
-      }
-    }
-  }
-
-  return { nodes, edges };
-};
-
-// Define this function before using it in useState
-const generateInitialGraphState = (nodeCount) => {
-  const { nodes, edges } = generateGameGraph(nodeCount);
+// Update generateInitialGraphState to use difficulty
+const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
+  const { nodes, edges } = generateGameGraph(nodeCount, difficulty);
   return {
     nodes: nodes.map((node) => ({
       ...node,
@@ -88,22 +39,23 @@ const DFSGamePage = () => {
   const handleDifficultySelect = (selectedDifficulty) => {
     setDifficulty(selectedDifficulty);
     const initialNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
-    setGraphState(generateInitialGraphState(initialNodeCount));
+    setGraphState(
+      generateInitialGraphState(initialNodeCount, selectedDifficulty)
+    );
   };
 
   const handleRoundComplete = (currentScore) => {
     setRound((prev) => prev + 1);
     setTotalScore((prev) => prev + currentScore);
 
-    // Get new node count based on difficulty and round
     const { minNodes, maxNodes } = DIFFICULTY_SETTINGS[difficulty];
     const newNodeCount = Math.min(
       maxNodes,
       minNodes + Math.floor((round - 1) / 2)
     );
 
-    // Generate new graph state for next round
-    setGraphState(generateInitialGraphState(newNodeCount));
+    // Pass difficulty to generate new graph
+    setGraphState(generateInitialGraphState(newNodeCount, difficulty));
   };
 
   // Replace the isValidMove function with this implementation

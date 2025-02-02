@@ -62,6 +62,7 @@ export default function GamePageStructure({
   const pathname = usePathname();
   const startTime = Date.now();
   const [bestScore, setBestScore] = useState(0);
+  const [showDifficultyModal, setShowDifficultyModal] = useState(false);
 
   useEffect(() => {
     setCurrentGraphStates([graphState]);
@@ -340,6 +341,28 @@ export default function GamePageStructure({
     }
   }, [score]);
 
+  const DifficultyModal = ({ onClose, onSelect }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4">Select Difficulty</h2>
+        <div className="flex gap-4">
+          {Object.keys(DIFFICULTY_SETTINGS).map((level) => (
+            <button
+              key={level}
+              onClick={() => {
+                onSelect(level);
+                onClose();
+              }}
+              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize"
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   if (!difficulty) {
     return <DifficultySelector onSelect={onDifficultySelect} />;
   }
@@ -463,5 +486,15 @@ export default function GamePageStructure({
     </main>
   );
 
-  return renderMainContent();
+  return (
+    <>
+      {renderMainContent()}
+      {showDifficultyModal && (
+        <DifficultyModal
+          onClose={() => setShowDifficultyModal(false)}
+          onSelect={onDifficultySelect}
+        />
+      )}
+    </>
+  );
 }
