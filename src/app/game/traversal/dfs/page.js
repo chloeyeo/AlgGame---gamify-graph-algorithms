@@ -2,16 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-import {
-  generateDFSSteps,
-  isValidDFSMove,
-} from "@/components/EducationPageStructure";
-import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { generateGameGraph } from "@/components/GraphGenerator";
+import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 
 // Update generateInitialGraphState to use difficulty
 const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
   const { nodes, edges } = generateGameGraph(nodeCount, difficulty);
+
   return {
     nodes: nodes.map((node) => ({
       ...node,
@@ -32,30 +29,25 @@ const DFSGamePage = () => {
   const [difficulty, setDifficulty] = useState(null);
   const [round, setRound] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
+  const [nodeCount, setNodeCount] = useState(4);
   const [graphState, setGraphState] = useState(() =>
     generateInitialGraphState(4)
   );
 
   const handleDifficultySelect = (selectedDifficulty) => {
     setDifficulty(selectedDifficulty);
-    const initialNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
+    const fixedNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
+    setNodeCount(fixedNodeCount);
     setGraphState(
-      generateInitialGraphState(initialNodeCount, selectedDifficulty)
+      generateInitialGraphState(fixedNodeCount, selectedDifficulty)
     );
   };
 
   const handleRoundComplete = (currentScore) => {
     setRound((prev) => prev + 1);
     setTotalScore((prev) => prev + currentScore);
-
-    const { minNodes, maxNodes } = DIFFICULTY_SETTINGS[difficulty];
-    const newNodeCount = Math.min(
-      maxNodes,
-      minNodes + Math.floor((round - 1) / 2)
-    );
-
-    // Force new random graph generation
-    setGraphState(generateInitialGraphState(newNodeCount, difficulty));
+    // Use the fixed nodeCount instead of calculating new one
+    setGraphState(generateInitialGraphState(nodeCount, difficulty));
   };
 
   // Replace the isValidMove function with this implementation
