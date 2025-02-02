@@ -68,16 +68,23 @@ const DFSGamePage = () => {
       };
     }
 
-    // Get unvisited neighbors of current node
-    const currentNodeNeighbors = newState.edges
-      .filter((e) => e.source === newState.currentNode)
-      .map((e) => e.target);
+    // Get all neighbors (both incoming and outgoing edges)
+    const allNeighbors = newState.edges
+      .filter(
+        (edge) =>
+          edge.source === newState.currentNode ||
+          edge.target === newState.currentNode
+      )
+      .map((edge) =>
+        edge.source === newState.currentNode ? edge.target : edge.source
+      );
 
-    const unvisitedNeighbors = currentNodeNeighbors.filter(
-      (n) => !newState.nodes.find((node) => node.id === n).visited
+    // Find unvisited neighbors
+    const unvisitedNeighbors = allNeighbors.filter(
+      (neighbor) => !newState.nodes.find((node) => node.id === neighbor).visited
     );
 
-    // If clicked node is unvisited neighbor
+    // If clicked node is an unvisited neighbor
     if (unvisitedNeighbors.includes(nodeId)) {
       const prevNode = newState.nodes.find(
         (n) => n.id === newState.currentNode
@@ -95,7 +102,7 @@ const DFSGamePage = () => {
       };
     }
 
-    // If no unvisited neighbors, allow backtracking
+    // Allow backtracking when no unvisited neighbors
     if (
       unvisitedNeighbors.length === 0 &&
       newState.stack.length > 1 &&
