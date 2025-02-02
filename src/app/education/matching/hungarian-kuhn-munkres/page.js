@@ -237,3 +237,5 @@
 // };
 
 // export default HungarianKhunMunkresEducationPage;
+
+export const dynamic = "force-dynamic";

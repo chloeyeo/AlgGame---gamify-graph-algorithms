@@ -605,3 +605,5 @@
 // };
 
 // export default HungarianKhunMunkresGamePage;
+
+export const dynamic = "force-dynamic";

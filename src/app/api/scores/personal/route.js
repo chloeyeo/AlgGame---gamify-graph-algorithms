@@ -3,6 +3,8 @@ import axios from "axios";
 
 const API_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const token = request.cookies.get("token")?.value;
