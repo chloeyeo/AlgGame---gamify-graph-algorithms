@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-import { generateGameGraph } from "@/components/GraphGenerator";
+import { generateRandomGraph } from "@/components/GamePageStructure";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 
-// Update generateInitialGraphState to use difficulty
 const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
-  const { nodes, edges } = generateGameGraph(nodeCount, difficulty);
+  const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
 
   return {
     nodes: nodes.map((node) => ({

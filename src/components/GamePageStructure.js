@@ -28,6 +28,67 @@ const DifficultySelector = ({ onSelect }) => (
   </div>
 );
 
+const generateRandomGraph = (nodeCount, difficulty = "medium") => {
+  // Generate nodes with randomized positions in a circular layout
+  const nodes = Array.from({ length: nodeCount }, (_, i) => {
+    // Random angle with some jitter
+    const baseAngle = (2 * Math.PI * i) / nodeCount;
+    const angleJitter = Math.random() * 0.5 - 0.25; // ±0.25 radians of jitter
+    const angle = baseAngle + angleJitter;
+
+    // Random radius with bounds
+    const minRadius = 100;
+    const maxRadius = 200;
+    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
+    return {
+      id: String.fromCharCode(65 + i),
+      x: 300 + radius * Math.cos(angle),
+      y: 300 + radius * Math.sin(angle),
+    };
+  });
+
+  const edges = [];
+  // Ensure graph is connected
+  for (let i = 1; i < nodes.length; i++) {
+    const parent = Math.floor(Math.random() * i);
+    edges.push({
+      source: nodes[parent].id,
+      target: nodes[i].id,
+    });
+  }
+
+  // Add random extra edges based on difficulty
+  const maxExtraEdges = {
+    easy: 1,
+    medium: 2,
+    hard: 3,
+  }[difficulty];
+
+  for (let i = 0; i < maxExtraEdges; i++) {
+    const source = Math.floor(Math.random() * nodes.length);
+    const target = Math.floor(Math.random() * nodes.length);
+
+    if (
+      source !== target &&
+      !edges.some(
+        (e) =>
+          (e.source === nodes[source].id && e.target === nodes[target].id) ||
+          (e.source === nodes[target].id && e.target === nodes[source].id)
+      )
+    ) {
+      edges.push({
+        source: nodes[source].id,
+        target: nodes[target].id,
+      });
+    }
+  }
+
+  return { nodes, edges };
+};
+
+export { generateRandomGraph };
+
 export default function GamePageStructure({
   title = "Graph Traversal Game",
   graphState,
