@@ -514,9 +514,9 @@ export default function GamePageStructure({
 
         {/* Centered Graph Section */}
         <div className="flex-1 relative mx-auto w-4/5">
-          <div className="h-full bg-white border border-gray-300 rounded-lg">
+          <div className="h-full bg-white border border-gray-300 rounded-lg overflow-hidden">
             {renderGraphTabs()}
-            <div className="flex items-center justify-center h-[calc(100%-2rem)] relative">
+            <div className="flex items-center justify-center h-[calc(100%-2rem)]">
               <GraphVisualisation
                 graphState={getCurrentGraphState()}
                 onNodeClick={handleNodeClick}
