@@ -3,10 +3,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Sidebar from "@/components/Sidebar";
+import AchievementDisplay from "@/components/profile/AchievementDisplay";
 
 export default function MyAccountPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState("details");
+  const [achievements, setAchievements] = useState([]);
+  const [stats, setStats] = useState({
+    totalGames: 0,
+    bestScores: {},
+    achievementsCount: 0,
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -25,6 +33,32 @@ export default function MyAccountPage() {
       router.replace("/auth");
     }
   }, [router]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      const [achievementsRes, statsRes] = await Promise.all([
+        fetch("/api/achievements", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("/api/scores/stats", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      if (achievementsRes.ok) {
+        const data = await achievementsRes.json();
+        setAchievements(data.achievements || []);
+      }
+
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setStats(data);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleSignOut = () => {
     localStorage.removeItem("token");
@@ -51,54 +85,79 @@ export default function MyAccountPage() {
             </button>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                <img
-                  src="/images/lion.png"
-                  alt="Profile"
-                  className="w-16 h-16 rounded-full"
-                />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold">{user?.username}</h2>
-                <p className="text-gray-600">{user?.email}</p>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Account Details</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="border rounded p-4">
-                  <label className="block text-sm font-medium text-gray-600">
-                    Username
-                  </label>
-                  <p className="mt-1">{user?.username}</p>
-                </div>
-                <div className="border rounded p-4">
-                  <label className="block text-sm font-medium text-gray-600">
-                    Email
-                  </label>
-                  <p className="mt-1">{user?.email}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
-              <div className="space-y-4">
-                <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
-                  Change Password
-                </button>
-                <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
-                  Update Profile
-                </button>
-                <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
-                  Notification Settings
-                </button>
-              </div>
-            </div>
+          <div className="mb-6 border-b">
+            <button
+              className={`px-4 py-2 ${
+                activeTab === "details" ? "border-b-2 border-blue-500" : ""
+              }`}
+              onClick={() => setActiveTab("details")}
+            >
+              Account Details
+            </button>
+            <button
+              className={`px-4 py-2 ${
+                activeTab === "achievements" ? "border-b-2 border-blue-500" : ""
+              }`}
+              onClick={() => setActiveTab("achievements")}
+            >
+              Achievements
+            </button>
           </div>
+
+          {activeTab === "details" ? (
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                  <img
+                    src="/images/lion.png"
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold">{user?.username}</h2>
+                  <p className="text-gray-600 bg-black bg-opacity-30 p-1">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Account Details</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="border rounded p-4">
+                    <label className="block text-sm font-medium text-gray-600 bg-black bg-opacity-30 p-1">
+                      Username
+                    </label>
+                    <p className="mt-1">{user?.username}</p>
+                  </div>
+                  <div className="border rounded p-4">
+                    <label className="block text-sm font-medium text-gray-600 bg-black bg-opacity-30 p-1">
+                      Email
+                    </label>
+                    <p className="mt-1">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
+                <div className="space-y-4">
+                  <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
+                    Change Password
+                  </button>
+                  <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
+                    Update Profile
+                  </button>
+                  <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
+                    Notification Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <AchievementDisplay earnedAchievements={achievements} />
+          )}
         </div>
       </div>
     </div>
