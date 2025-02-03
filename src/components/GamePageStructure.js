@@ -108,10 +108,11 @@ export default function GamePageStructure({
   onNodeCountChange,
   difficulty,
   onDifficultySelect,
+  initialMessage = "Start from any node!",
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
-  const [message, setMessage] = useState("Start DFS from any node!");
+  const [message, setMessage] = useState(initialMessage);
   const [overlayState, setOverlayState] = useState({
     show: false,
     content: { type: "", text: "" },

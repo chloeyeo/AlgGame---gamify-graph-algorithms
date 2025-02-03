@@ -1,341 +1,91 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
+import { generateRandomGraph } from "@/components/GamePageStructure";
+import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
+import { toast } from "react-hot-toast";
 
-const createGraphState = (graphId, nodes, edges) => ({
-  graphId,
-  nodes: nodes.map((id) => ({
-    id,
-    visited: false,
-    current: false,
-  })),
-  edges,
-  currentNode: null,
-  currentLevel: [],
-  nextLevel: [],
-  visitedNodes: [],
-  levelMap: {}, // Tracks which level each node belongs to
-});
+const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
+  const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
 
-const graphStates = [
-  // Graph A - Basic (Tree)
-  createGraphState(
-    "A",
-    ["A", "B", "C", "D", "E", "F", "G"],
-    [
-      { source: "A", target: "B" },
-      { source: "A", target: "C" },
-      { source: "B", target: "D" },
-      { source: "B", target: "E" },
-      { source: "C", target: "F" },
-      { source: "D", target: "G" },
-    ]
-  ),
-
-  // Graph B - Caterpillar
-  createGraphState(
-    "B",
-    ["A", "B", "C", "D", "E", "F", "G", "H"],
-    [
-      { source: "A", target: "E" },
-      { source: "E", target: "D" },
-      { source: "D", target: "C" },
-      { source: "C", target: "B" },
-      { source: "B", target: "C" },
-      { source: "C", target: "D" },
-      { source: "D", target: "E" },
-      { source: "B", target: "F" },
-      { source: "C", target: "G" },
-      { source: "D", target: "H" },
-      { source: "E", target: "A" },
-    ]
-  ),
-
-  // Graph C - Star
-  createGraphState(
-    "C",
-    ["A", "B", "C", "D", "E", "F"],
-    [
-      { source: "A", target: "B" },
-      { source: "A", target: "C" },
-      { source: "A", target: "D" },
-      { source: "A", target: "E" },
-      { source: "A", target: "F" },
-      { source: "B", target: "A" },
-      { source: "E", target: "A" },
-      { source: "C", target: "A" },
-      { source: "D", target: "A" },
-      { source: "F", target: "A" },
-    ]
-  ),
-
-  // Graph D - Diamond graph
-  createGraphState(
-    "D",
-    ["A", "B", "C", "D"],
-    [
-      { source: "A", target: "B" },
-      { source: "B", target: "A" },
-      { source: "A", target: "C" },
-      { source: "C", target: "A" },
-      { source: "B", target: "C" },
-      { source: "C", target: "B" },
-      { source: "B", target: "D" },
-      { source: "D", target: "B" },
-      { source: "C", target: "D" },
-      { source: "D", target: "C" },
-    ]
-  ),
-
-  // Graph E - Cycle
-  createGraphState(
-    "E",
-    ["A", "B", "C", "D", "E", "F"],
-    [
-      { source: "A", target: "B" },
-      { source: "B", target: "A" },
-      { source: "B", target: "C" },
-      { source: "C", target: "B" },
-      { source: "C", target: "D" },
-      { source: "D", target: "C" },
-      { source: "D", target: "E" },
-      { source: "E", target: "D" },
-      { source: "E", target: "F" },
-      { source: "F", target: "E" },
-      { source: "F", target: "A" },
-      { source: "A", target: "F" },
-    ]
-  ),
-
-  // Graph F - Disconnected
-  createGraphState(
-    "F",
-    ["A", "B", "C", "D", "E", "F"],
-    [
-      { source: "A", target: "B" },
-      { source: "B", target: "A" },
-      { source: "B", target: "C" },
-      { source: "C", target: "B" },
-      { source: "D", target: "E" },
-      { source: "E", target: "D" },
-      { source: "E", target: "F" },
-      { source: "F", target: "E" },
-    ]
-  ),
-
-  // Graph G - Complete graph - the only graph where only one move is needed to visit all adjacent vertices
-  createGraphState(
-    "G",
-    ["A", "B", "C", "D"],
-    [
-      { source: "A", target: "B" },
-      { source: "B", target: "A" },
-      { source: "A", target: "C" },
-      { source: "C", target: "A" },
-      { source: "B", target: "C" },
-      { source: "C", target: "B" },
-      { source: "B", target: "D" },
-      { source: "D", target: "B" },
-      { source: "C", target: "D" },
-      { source: "D", target: "C" },
-      { source: "A", target: "D" },
-      { source: "D", target: "A" },
-    ]
-  ),
-];
-
-const getNodeNeighbors = (graphState, nodeId) => {
-  return graphState.edges
-    .filter((e) => e.source === nodeId)
-    .map((e) => e.target);
+  return {
+    nodes: nodes.map((node) => ({
+      ...node,
+      visited: false,
+      current: false,
+    })),
+    edges,
+    currentNode: null,
+    queue: [],
+    visitedNodes: [],
+    round: 1,
+  };
 };
 
-const getLevelForNode = (graphState, nodeId) => {
-  if (nodeId === graphState.visitedNodes[0]) return 0;
-  const parentEdge = graphState.edges.find((e) => e.target === nodeId);
-  if (!parentEdge) return -1;
-  return (graphState.levelMap[parentEdge.source] || 0) + 1;
-};
-
-const isValidMove = (graphState, nodeId) => {
-  const newState = JSON.parse(JSON.stringify(graphState));
+const isValidMove = (state, nodeId) => {
+  const newState = { ...state };
   const clickedNode = newState.nodes.find((n) => n.id === nodeId);
+  const visited = new Set(newState.visitedNodes);
 
-  // Node already visited
-  if (clickedNode.visited) {
-    return {
-      newState: graphState,
-      validMove: false,
-      message: `Node ${nodeId} was already visited! In BFS, we never revisit nodes.`,
-    };
-  }
-
-  // Initial move validation
+  // First move - matches education page initialization
   if (!newState.currentNode) {
-    switch (graphState.graphId) {
-      case "A":
-        if (nodeId !== "A") {
-          return {
-            newState: graphState,
-            validMove: false,
-            message:
-              "BFS must start from node A! Let's begin our breadth-first exploration from the root node.",
-          };
-        }
-        break;
-      case "B":
-        if (nodeId !== "A" && nodeId !== "B") {
-          return {
-            newState: graphState,
-            validMove: false,
-            message: "BFS must start from node A or B in this graph!",
-          };
-        }
-        break;
-    }
-
     clickedNode.visited = true;
     clickedNode.current = true;
     newState.currentNode = nodeId;
+    newState.queue = [nodeId];
     newState.visitedNodes = [nodeId];
-    newState.levelMap = { [nodeId]: 0 };
-
-    // Initialize next level with unvisited neighbors
-    const children = getNodeNeighbors(newState, nodeId);
-    children.forEach((childId) => {
-      newState.levelMap[childId] = 1;
-    });
-    newState.currentLevel = children;
-
-    return { newState, validMove: true, nodeStatus: "unvisited" };
-  }
-
-  // Special handling for disconnected graph (Graph F)
-  if (graphState.graphId === "F") {
-    const component1 = ["A", "B", "C"];
-    const component2 = ["D", "E", "F"];
-    const currentComponent = component1.includes(newState.currentNode)
-      ? component1
-      : component2;
-    const isInSameComponent = currentComponent.includes(nodeId);
-
-    // Check if component 1 is fully visited and deny interaction with component 1 nodes
-    const isComponent1Complete = component1.every(
-      (id) => newState.nodes.find((n) => n.id === id).visited
-    );
-    // Check if component 2 is fully visited and deny interaction with component 2 nodes
-    const isComponent2Complete = component2.every(
-      (id) => newState.nodes.find((n) => n.id === id).visited
-    );
-
-    // If component 1 is complete, block interaction with its nodes
-    if (isComponent1Complete && component1.includes(nodeId)) {
-      return {
-        newState: graphState,
-        validMove: false,
-        message:
-          "You cannot interact with nodes in the completed subcomponent. Complete the other subcomponent first!",
-      };
-    }
-
-    // If component 2 is complete, block interaction with its nodes
-    if (isComponent2Complete && component2.includes(nodeId)) {
-      return {
-        newState: graphState,
-        validMove: false,
-        message:
-          "You cannot interact with nodes in the completed subcomponent. Complete the other subcomponent first!",
-      };
-    }
-
-    if (!isInSameComponent) {
-      const isCurrentComponentComplete = currentComponent.every(
-        (id) => newState.nodes.find((n) => n.id === id).visited
-      );
-
-      if (!isCurrentComponentComplete) {
-        return {
-          newState: graphState,
-          validMove: false,
-          message:
-            "Complete the current component first before moving to the other component.",
-        };
-      }
-
-      if (!clickedNode.visited) {
-        // Start new component
-        const prevNode = newState.nodes.find(
-          (n) => n.id === newState.currentNode
-        );
-        prevNode.current = false;
-
-        clickedNode.visited = true;
-        clickedNode.current = true;
-        newState.currentNode = nodeId;
-        newState.visitedNodes.push(nodeId);
-        newState.levelMap = { [nodeId]: 0 };
-        newState.currentLevel = getNodeNeighbors(newState, nodeId);
-        newState.nextLevel = [];
-
-        return { newState, validMove: true, nodeStatus: "unvisited" };
-      }
-    }
-  }
-
-  // Check if the clicked node is in the current level
-  if (!newState.currentLevel.includes(nodeId)) {
     return {
-      newState: graphState,
-      validMove: false,
-      message: `Cannot visit node ${nodeId} yet! In BFS, we must complete the current level first.`,
-    };
-  }
-
-  // Valid move
-  const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
-  prevNode.current = false;
-  clickedNode.visited = true;
-  clickedNode.current = true;
-  newState.currentNode = nodeId;
-  newState.visitedNodes.push(nodeId);
-
-  // Update levels
-  newState.currentLevel = newState.currentLevel.filter((id) => id !== nodeId);
-  const newNeighbors = getNodeNeighbors(newState, nodeId).filter(
-    (id) =>
-      !newState.nodes.find((n) => n.id === id).visited &&
-      !newState.currentLevel.includes(id) &&
-      !newState.nextLevel.includes(id)
-  );
-  newState.nextLevel.push(...newNeighbors);
-
-  // Update level map for new neighbors
-  newNeighbors.forEach((neighborId) => {
-    newState.levelMap[neighborId] = newState.levelMap[nodeId] + 1;
-  });
-
-  // If current level is empty, move to next level
-  if (newState.currentLevel.length === 0) {
-    newState.currentLevel = newState.nextLevel;
-    newState.nextLevel = [];
-  }
-
-  // Check if BFS is complete
-  if (newState.currentLevel.length === 0 && newState.nextLevel.length === 0) {
-    clickedNode.current = false;
-    newState.currentNode = null;
-    return {
-      newState,
       validMove: true,
-      nodeStatus: "final-move",
-      message: `Excellent! You've completed the BFS traversal in the correct order: ${newState.visitedNodes.join(
-        " → "
-      )}`,
+      newState,
+      nodeStatus: "correct",
+      message: `Starting BFS from node ${nodeId}`,
     };
   }
 
-  return { newState, validMove: true, nodeStatus: "unvisited" };
+  // Get unvisited neighbors using the same logic as education page
+  const neighbors = newState.edges
+    .filter(
+      (edge) =>
+        (edge.source === newState.currentNode && !visited.has(edge.target)) ||
+        (edge.target === newState.currentNode && !visited.has(edge.source))
+    )
+    .map((edge) =>
+      edge.source === newState.currentNode ? edge.target : edge.source
+    )
+    .sort();
+
+  // If clicked node is the next node in queue (following BFS order)
+  if (newState.queue[0] === nodeId) {
+    const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
+    prevNode.current = false;
+    clickedNode.visited = true;
+    clickedNode.current = true;
+    newState.currentNode = nodeId;
+    newState.queue.shift(); // dequeue the current node
+
+    // Add unvisited neighbors to queue (like in education page)
+    neighbors.forEach((neighbor) => {
+      if (!visited.has(neighbor) && !newState.queue.includes(neighbor)) {
+        newState.queue.push(neighbor);
+      }
+    });
+
+    return {
+      validMove: true,
+      newState,
+      nodeStatus: "correct",
+      message: `Processing node ${nodeId} in BFS order`,
+    };
+  }
+
+  return {
+    validMove: false,
+    newState: state,
+    nodeStatus: "incorrect",
+    message:
+      "Invalid move! In BFS, you must visit nodes in queue order, level by level.",
+  };
 };
 
 const getNodeStatus = (node) => {
@@ -344,57 +94,79 @@ const getNodeStatus = (node) => {
   return "unvisited";
 };
 
-const isGameComplete = (graphState) => {
-  if (graphState.graphId === "F") {
-    const component1 = ["A", "B", "C"];
-    const component2 = ["D", "E", "F"];
-    return (
-      component1.every(
-        (id) => graphState.nodes.find((n) => n.id === id).visited
-      ) &&
-      component2.every(
-        (id) => graphState.nodes.find((n) => n.id === id).visited
-      )
-    );
-  }
-  return graphState.nodes.every((node) => node.visited);
-};
-
-const getMessage = (nodeStatus, nodeId) => {
-  switch (nodeStatus) {
-    case "unvisited":
-      return `Successfully visited Node ${nodeId}. Continue exploring nodes at the current level!`;
-    case "final-move":
-      return `Congratulations! You've completed the BFS traversal by visiting all nodes in the correct order.`;
-    default:
-      return "";
-  }
-};
-
-const getScore = (nodeStatus) => {
-  switch (nodeStatus) {
-    case "unvisited":
-      return 10;
-    case "final-move":
-      return 20;
-    default:
-      return 0;
-  }
+const isGameComplete = (state) => {
+  return state.nodes.every((node) => node.visited);
 };
 
 const BFSGamePage = () => {
+  const [difficulty, setDifficulty] = useState(null);
+  const [round, setRound] = useState(1);
+  const [totalScore, setTotalScore] = useState(0);
+  const [nodeCount, setNodeCount] = useState(4);
+  const [graphState, setGraphState] = useState(() =>
+    generateInitialGraphState(4)
+  );
+
+  const handleDifficultySelect = (selectedDifficulty) => {
+    setDifficulty(selectedDifficulty);
+    const fixedNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
+    setNodeCount(fixedNodeCount);
+    setGraphState(
+      generateInitialGraphState(fixedNodeCount, selectedDifficulty)
+    );
+  };
+
+  const handleRoundComplete = async (currentScore) => {
+    setRound((prev) => prev + 1);
+    setTotalScore((prev) => prev + currentScore);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/scores/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithm: "bfs",
+          difficulty: difficulty,
+          score: currentScore,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit score");
+      }
+    } catch (error) {
+      console.error("Error submitting score:", error);
+      toast.error("Failed to save score");
+    }
+
+    setGraphState(generateInitialGraphState(nodeCount, difficulty));
+  };
+
   return (
-    <div className="w-full max-w-7xl mx-auto p-4">
-      <GamePageStructure
-        title="BFS Graph Game"
-        graphStates={graphStates}
-        isValidMove={isValidMove}
-        getNodeStatus={getNodeStatus}
-        isGameComplete={isGameComplete}
-        getMessage={getMessage}
-        getScore={getScore}
-      />
-    </div>
+    <GamePageStructure
+      title="BFS Graph Game"
+      graphState={graphState}
+      setGraphState={setGraphState}
+      isValidMove={isValidMove}
+      getNodeStatus={getNodeStatus}
+      getScore={(status) => (status === "correct" ? 10 : -5)}
+      getMessage={(status, nodeId) =>
+        status === "incorrect"
+          ? "Invalid move! In BFS, you must visit nodes in queue order, level by level."
+          : `Valid move to node ${nodeId}`
+      }
+      isGameComplete={isGameComplete}
+      onRoundComplete={handleRoundComplete}
+      round={round}
+      totalScore={totalScore}
+      difficulty={difficulty}
+      onDifficultySelect={handleDifficultySelect}
+      initialMessage="Start BFS from any node!"
+    />
   );
 };
 

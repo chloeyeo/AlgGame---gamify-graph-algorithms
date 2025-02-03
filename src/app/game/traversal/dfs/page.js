@@ -198,6 +198,7 @@ const DFSGamePage = () => {
       totalScore={totalScore}
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
+      initialMessage="Start DFS from any node!"
     />
   );
 };
