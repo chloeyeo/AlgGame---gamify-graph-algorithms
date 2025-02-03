@@ -28,13 +28,26 @@ const isValidMove = (state, nodeId) => {
   const clickedNode = newState.nodes.find((n) => n.id === nodeId);
   const visited = new Set(newState.visitedNodes);
 
-  // First move - matches education page initialization
+  // First move
   if (!newState.currentNode) {
     clickedNode.visited = true;
     clickedNode.current = true;
     newState.currentNode = nodeId;
-    newState.queue = [nodeId];
+    newState.queue = [];
     newState.visitedNodes = [nodeId];
+
+    // Add all unvisited neighbors to queue (like education page)
+    const neighbors = newState.edges
+      .filter(
+        (edge) =>
+          (edge.source === nodeId && !visited.has(edge.target)) ||
+          (edge.target === nodeId && !visited.has(edge.source))
+      )
+      .map((edge) => (edge.source === nodeId ? edge.target : edge.source))
+      .sort();
+
+    newState.queue.push(...neighbors);
+
     return {
       validMove: true,
       newState,
@@ -43,28 +56,29 @@ const isValidMove = (state, nodeId) => {
     };
   }
 
-  // Get unvisited neighbors using the same logic as education page
-  const neighbors = newState.edges
-    .filter(
-      (edge) =>
-        (edge.source === newState.currentNode && !visited.has(edge.target)) ||
-        (edge.target === newState.currentNode && !visited.has(edge.source))
-    )
-    .map((edge) =>
-      edge.source === newState.currentNode ? edge.target : edge.source
-    )
-    .sort();
-
-  // If clicked node is the next node in queue (following BFS order)
-  if (newState.queue[0] === nodeId) {
+  // Check if clicked node is in queue (following education page logic)
+  if (newState.queue.includes(nodeId) && !visited.has(nodeId)) {
     const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
     prevNode.current = false;
     clickedNode.visited = true;
     clickedNode.current = true;
     newState.currentNode = nodeId;
-    newState.queue.shift(); // dequeue the current node
+    newState.visitedNodes.push(nodeId);
 
-    // Add unvisited neighbors to queue (like in education page)
+    // Remove clicked node from queue
+    newState.queue = newState.queue.filter((n) => n !== nodeId);
+
+    // Add unvisited neighbors to queue
+    const neighbors = newState.edges
+      .filter(
+        (edge) =>
+          (edge.source === nodeId && !visited.has(edge.target)) ||
+          (edge.target === nodeId && !visited.has(edge.source))
+      )
+      .map((edge) => (edge.source === nodeId ? edge.target : edge.source))
+      .sort();
+
+    // Only add neighbors that aren't already in queue and aren't visited
     neighbors.forEach((neighbor) => {
       if (!visited.has(neighbor) && !newState.queue.includes(neighbor)) {
         newState.queue.push(neighbor);
