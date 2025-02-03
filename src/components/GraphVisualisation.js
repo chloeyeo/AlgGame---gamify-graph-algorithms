@@ -175,24 +175,6 @@ const GraphVisualisation = ({
     isPrimsPage,
   ]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-
-    if (!token || !userData) {
-      router.replace("/auth?redirect=/leaderboard");
-      return;
-    }
-
-    try {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      router.replace("/auth?redirect=/leaderboard");
-    }
-  }, [router]);
-
   const getNodeColor = (node) => {
     if (node.id === graphState.activeNeighbor) return "#FFE082"; // Highlight checking neighbor
     if (node.id === graphState.currentNode) return "#4CAF50"; // Current - Green

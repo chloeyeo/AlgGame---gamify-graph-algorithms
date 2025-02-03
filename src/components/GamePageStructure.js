@@ -133,14 +133,6 @@ export default function GamePageStructure({
     setCurrentGraphStates([graphState]);
   }, [graphState]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace(`/auth?redirect=${window.location.pathname}`);
-      return;
-    }
-  }, [router]);
-
   const isFordFulkersonPage = pathname.includes("ford-fulkerson");
   const isMultiGraphGame = currentGraphStates.length > 1;
 
@@ -191,7 +183,7 @@ export default function GamePageStructure({
 
     const token = localStorage.getItem("token");
     if (!token) {
-      setMessage("Please log in to save your score!");
+      setMessage("Please log in to save your score to the leaderboard!");
       return;
     }
 
