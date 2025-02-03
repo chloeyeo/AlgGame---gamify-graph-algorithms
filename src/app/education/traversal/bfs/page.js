@@ -1,6 +1,7 @@
 "use client";
 
 import EducationPageStructure from "@/components/EducationPageStructure";
+import { isValidBFSMove } from "@/utils/graphTraversalValidators";
 
 const bfsConceptText = {
   introduction:
@@ -152,6 +153,7 @@ export default function BFSEducationPage() {
       conceptText={bfsConceptText}
       pseudocode={bfsPseudocode}
       generateSteps={generateBFSSteps}
+      isValidMove={isValidBFSMove}
     />
   );
 }

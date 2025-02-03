@@ -1,6 +1,7 @@
 "use client";
 
 import EducationPageStructure from "@/components/EducationPageStructure";
+import { isValidDFSMove } from "@/utils/graphTraversalValidators";
 
 const dfsConceptText = {
   introduction:
@@ -42,6 +43,7 @@ export default function DFSEducationPage() {
       conceptText={dfsConceptText}
       pseudocode={dfsPseudocode}
       generateSteps={generateDFSSteps}
+      isValidMove={isValidDFSMove}
     />
   );
 }
