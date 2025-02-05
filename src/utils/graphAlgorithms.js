@@ -608,38 +608,55 @@ const getCurrentLevelNodes = (state) => {
   }
 
   const visited = new Set(state.visitedNodes);
-  const startNode = state.visitedNodes[0]; // The first node visited (B in this case)
 
-  // Get all direct unvisited neighbors of the start node first
-  const directNeighborsOfStart = new Set(
-    state.edges
-      .filter((edge) => edge.source === startNode || edge.target === startNode)
-      .map((edge) => (edge.source === startNode ? edge.target : edge.source))
-      .filter((neighborId) => !visited.has(neighborId))
-  );
+  // Calculate distances from start node for all nodes
+  const distances = new Map();
+  const startNode = state.visitedNodes[0];
 
-  // If there are still unvisited direct neighbors of the start node, they must be visited first
-  if (directNeighborsOfStart.size > 0) {
-    return directNeighborsOfStart;
+  // Initialize all distances to Infinity
+  state.nodes.forEach((node) => distances.set(node.id, Infinity));
+  distances.set(startNode, 0);
+
+  // Calculate shortest distances using BFS
+  const queue = [startNode];
+  const processed = new Set();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (processed.has(current)) continue;
+    processed.add(current);
+
+    // Get neighbors
+    const neighbors = state.edges
+      .filter((edge) => edge.source === current || edge.target === current)
+      .map((edge) => (edge.source === current ? edge.target : edge.source));
+
+    // Update distances for unvisited neighbors
+    neighbors.forEach((neighbor) => {
+      if (!processed.has(neighbor)) {
+        const newDist = distances.get(current) + 1;
+        if (newDist < distances.get(neighbor)) {
+          distances.set(neighbor, newDist);
+          queue.push(neighbor);
+        }
+      }
+    });
   }
 
-  // If all direct neighbors of start are visited, get the next level
-  const nextLevelNodes = new Set();
-  const currentLevelNodes = state.visitedNodes.filter(
-    (nodeId) => nodeId !== startNode
-  );
-
-  currentLevelNodes.forEach((nodeId) => {
-    const neighbors = state.edges
-      .filter((edge) => edge.source === nodeId || edge.target === nodeId)
-      .map((edge) => (edge.source === nodeId ? edge.target : edge.source))
-      .filter(
-        (neighborId) =>
-          !visited.has(neighborId) && state.queue.includes(neighborId)
-      );
-
-    neighbors.forEach((neighborId) => nextLevelNodes.add(neighborId));
+  // Find minimum distance of any unvisited node
+  let minDist = Infinity;
+  state.nodes.forEach((node) => {
+    if (!visited.has(node.id)) {
+      minDist = Math.min(minDist, distances.get(node.id));
+    }
   });
 
-  return nextLevelNodes;
+  // Return all unvisited nodes at the minimum distance
+  return new Set(
+    state.nodes
+      .filter(
+        (node) => !visited.has(node.id) && distances.get(node.id) === minDist
+      )
+      .map((node) => node.id)
+  );
 };
