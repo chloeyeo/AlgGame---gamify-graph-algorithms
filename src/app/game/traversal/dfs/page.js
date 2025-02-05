@@ -45,39 +45,6 @@ const DFSGamePage = () => {
     );
   };
 
-  const handleRoundComplete = async (currentScore) => {
-    setRound((prev) => prev + 1);
-    setTotalScore((prev) => prev + currentScore);
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/scores/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          algorithm: "dfs",
-          difficulty: difficulty,
-          score: currentScore,
-          timeSpent: Date.now() - startTime,
-          movesCount: moves,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit score");
-      }
-    } catch (error) {
-      console.error("Error submitting score:", error);
-      toast.error("Failed to save score");
-    }
-
-    // Generate new graph for next round
-    setGraphState(generateInitialGraphState(nodeCount, difficulty));
-  };
-
   const getNodeStatus = (node) => {
     if (node.current) return "current";
     if (node.backtracked) return "backtracked";

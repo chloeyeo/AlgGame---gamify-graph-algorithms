@@ -660,3 +660,72 @@ const getCurrentLevelNodes = (state) => {
       .map((node) => node.id)
   );
 };
+
+export const isValidDijkstraMove = (graphState, nodeId) => {
+  const newState = JSON.parse(JSON.stringify(graphState));
+  const clickedNode = newState.nodes.find((n) => n.id === nodeId);
+
+  // If no start node selected yet
+  if (!newState.startNode) {
+    clickedNode.distance = 0;
+    clickedNode.current = true;
+    newState.startNode = nodeId;
+    newState.currentNode = nodeId;
+    return {
+      validMove: true,
+      newState,
+      nodeStatus: "correct",
+      message: `Starting Dijkstra's algorithm from node ${nodeId}`,
+    };
+  }
+
+  // Get unvisited nodes with their distances
+  const unvisitedNodes = newState.nodes.filter(
+    (n) => !n.visited && n.distance !== Infinity
+  );
+
+  // Find the node with minimum distance
+  const minDistanceNode = unvisitedNodes.reduce(
+    (min, node) => (node.distance < min.distance ? node : min),
+    unvisitedNodes[0]
+  );
+
+  // If clicked node is not the minimum distance node
+  if (minDistanceNode && nodeId !== minDistanceNode.id) {
+    return {
+      validMove: false,
+      newState: graphState,
+      nodeStatus: "incorrect",
+      message:
+        "Invalid move! Choose the unvisited node with smallest distance.",
+    };
+  }
+
+  // Mark node as visited and update neighbors
+  clickedNode.visited = true;
+  clickedNode.current = true;
+  const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
+  if (prevNode) prevNode.current = false;
+  newState.currentNode = nodeId;
+
+  // Update distances of neighboring nodes
+  const edges = newState.edges.filter((e) => e.source === nodeId);
+  edges.forEach((edge) => {
+    const neighbor = newState.nodes.find((n) => n.id === edge.target);
+    if (!neighbor.visited) {
+      const newDistance = clickedNode.distance + edge.weight;
+      if (newDistance < neighbor.distance) {
+        neighbor.distance = newDistance;
+        neighbor.previous = nodeId;
+        neighbor.recentlyUpdated = true;
+      }
+    }
+  });
+
+  return {
+    validMove: true,
+    newState,
+    nodeStatus: "correct",
+    message: `Visited node ${nodeId} and updated its neighbors`,
+  };
+};

@@ -52,42 +52,6 @@ const BFSGamePage = () => {
     );
   };
 
-  const handleRoundComplete = async (currentScore) => {
-    // Prevent multiple state updates by batching them
-    const nextRound = round + 1;
-    const nextTotalScore = totalScore + currentScore;
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/scores/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          algorithm: "bfs",
-          difficulty: difficulty,
-          score: currentScore,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit score");
-      }
-    } catch (error) {
-      console.error("Error submitting score:", error);
-      toast.error("Failed to save score");
-    }
-
-    // Batch state updates
-    React.startTransition(() => {
-      setRound(nextRound);
-      setTotalScore(nextTotalScore);
-      setGraphState(generateInitialGraphState(nodeCount, difficulty));
-    });
-  };
-
   return (
     <GamePageStructure
       title="BFS Graph Game"

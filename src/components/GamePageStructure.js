@@ -320,96 +320,10 @@ export default function GamePageStructure({
       });
 
       setTimeout(() => {
-        // Update round and score
-        setRound((prev) => prev + 1);
-        setTotalScore((prev) => prev + score);
-
-        // Generate new graph for next round
-        setGraphState(generateRandomGraph(nodeCount, difficulty));
-
-        // Reset game state
-        setScore(0);
-        setMoves(0);
-        setOverlayState({ show: false, content: { type: "", text: "" } });
+        handleRoundComplete(score, title.split(" ")[0].toLowerCase());
       }, 2000);
     }
   }, [graphState, isGameComplete, round, score]);
-
-  const isValidDFSMove = (graphState, nodeId) => {
-    const newState = { ...graphState };
-    const clickedNode = newState.nodes.find((n) => n.id === nodeId);
-
-    // First move
-    if (!newState.currentNode) {
-      clickedNode.visited = true;
-      clickedNode.current = true;
-      newState.currentNode = nodeId;
-      newState.stack = [nodeId];
-      return {
-        validMove: true,
-        newState,
-        nodeStatus: "correct",
-        message: `Starting DFS from node ${nodeId}`,
-      };
-    }
-
-    // Get unvisited neighbors of current node
-    const currentNodeNeighbors = newState.edges
-      .filter((e) => e.source === newState.currentNode)
-      .map((e) => e.target);
-
-    const unvisitedNeighbors = currentNodeNeighbors.filter(
-      (n) => !newState.nodes.find((node) => node.id === n).visited
-    );
-
-    // If clicked node is unvisited neighbor
-    if (unvisitedNeighbors.includes(nodeId)) {
-      const prevNode = newState.nodes.find(
-        (n) => n.id === newState.currentNode
-      );
-      prevNode.current = false;
-      clickedNode.visited = true;
-      clickedNode.current = true;
-      newState.currentNode = nodeId;
-      newState.stack.push(nodeId);
-      return {
-        validMove: true,
-        newState,
-        nodeStatus: "correct",
-        message: `Visited node ${nodeId}`,
-      };
-    }
-
-    // If no unvisited neighbors, allow backtracking
-    if (
-      unvisitedNeighbors.length === 0 &&
-      newState.stack.length > 1 &&
-      newState.stack[newState.stack.length - 2] === nodeId
-    ) {
-      const prevNode = newState.nodes.find(
-        (n) => n.id === newState.currentNode
-      );
-      prevNode.current = false;
-      prevNode.backtracked = true;
-      clickedNode.current = true;
-      newState.currentNode = nodeId;
-      newState.stack.pop();
-      return {
-        validMove: true,
-        newState,
-        nodeStatus: "correct",
-        message: `Backtracked to node ${nodeId}`,
-      };
-    }
-
-    return {
-      validMove: false,
-      newState: graphState,
-      nodeStatus: "incorrect",
-      message:
-        "Invalid move! Follow DFS rules: visit unvisited neighbors or backtrack when needed.",
-    };
-  };
 
   useEffect(() => {
     if (score > bestScore) {
@@ -461,7 +375,7 @@ export default function GamePageStructure({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          algorithm: title.split(" ")[0].toLowerCase(), // Extract algorithm from title
+          algorithm: algorithm,
           difficulty: difficulty,
           score: currentScore,
           timeSpent: Date.now() - startTime,
