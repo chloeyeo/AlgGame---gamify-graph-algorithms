@@ -101,11 +101,11 @@ export default function GamePageStructure({
   getScore,
   getMessage,
   isGameComplete,
-  onRoundComplete,
   round,
+  setRound,
   totalScore,
-  nodeCountProp,
-  onNodeCountChange,
+  setTotalScore,
+  nodeCount,
   difficulty,
   onDifficultySelect,
   initialMessage = "Start from any node!",
@@ -320,13 +320,20 @@ export default function GamePageStructure({
       });
 
       setTimeout(() => {
-        onRoundComplete(score);
+        // Update round and score
+        setRound((prev) => prev + 1);
+        setTotalScore((prev) => prev + score);
+
+        // Generate new graph for next round
+        setGraphState(generateRandomGraph(nodeCount, difficulty));
+
+        // Reset game state
         setScore(0);
         setMoves(0);
         setOverlayState({ show: false, content: { type: "", text: "" } });
       }, 2000);
     }
-  }, [graphState, isGameComplete, round, onRoundComplete, score]);
+  }, [graphState, isGameComplete, round, score]);
 
   const isValidDFSMove = (graphState, nodeId) => {
     const newState = { ...graphState };
@@ -433,6 +440,36 @@ export default function GamePageStructure({
       </div>
     </div>
   );
+
+  const handleRoundComplete = async (currentScore, algorithm) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/scores/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithm: algorithm,
+          difficulty: difficulty,
+          score: currentScore,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit score");
+      }
+    } catch (error) {
+      console.error("Error submitting score:", error);
+      toast.error("Failed to save score");
+    }
+
+    // Generate new graph for next round
+    setGraphState(generateRandomGraph(nodeCount, difficulty));
+    setRound((prev) => prev + 1);
+    setTotalScore((prev) => prev + currentScore);
+  };
 
   if (!difficulty) {
     return <DifficultySelector onSelect={onDifficultySelect} />;

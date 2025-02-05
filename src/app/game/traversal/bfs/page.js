@@ -53,8 +53,9 @@ const BFSGamePage = () => {
   };
 
   const handleRoundComplete = async (currentScore) => {
-    setRound((prev) => prev + 1);
-    setTotalScore((prev) => prev + currentScore);
+    // Prevent multiple state updates by batching them
+    const nextRound = round + 1;
+    const nextTotalScore = totalScore + currentScore;
 
     try {
       const token = localStorage.getItem("token");
@@ -79,7 +80,12 @@ const BFSGamePage = () => {
       toast.error("Failed to save score");
     }
 
-    setGraphState(generateInitialGraphState(nodeCount, difficulty));
+    // Batch state updates
+    React.startTransition(() => {
+      setRound(nextRound);
+      setTotalScore(nextTotalScore);
+      setGraphState(generateInitialGraphState(nodeCount, difficulty));
+    });
   };
 
   return (
@@ -96,9 +102,11 @@ const BFSGamePage = () => {
           : `Valid move to node ${nodeId}`
       }
       isGameComplete={isGameComplete}
-      onRoundComplete={handleRoundComplete}
       round={round}
+      setRound={setRound}
       totalScore={totalScore}
+      setTotalScore={setTotalScore}
+      nodeCount={nodeCount}
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
       initialMessage="Start BFS from any node!"

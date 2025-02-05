@@ -110,9 +110,11 @@ const DFSGamePage = () => {
           : `Valid move to node ${nodeId}`
       }
       isGameComplete={isGameComplete}
-      onRoundComplete={handleRoundComplete}
       round={round}
+      setRound={setRound}
       totalScore={totalScore}
+      setTotalScore={setTotalScore}
+      nodeCount={nodeCount}
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
       initialMessage="Start DFS from any node!"
