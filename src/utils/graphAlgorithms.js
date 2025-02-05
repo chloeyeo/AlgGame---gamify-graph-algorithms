@@ -33,19 +33,8 @@ export const isValidBFSMove = (state, nodeId) => {
 
   // Check if clicked node is in queue and at the current level
   if (newState.queue.includes(nodeId) && !visited.has(nodeId)) {
-    // Get all nodes at current level (all unvisited neighbors of current node)
-    const currentLevelNodes = new Set(
-      newState.edges
-        .filter(
-          (edge) =>
-            (edge.source === newState.currentNode &&
-              !visited.has(edge.target)) ||
-            (edge.target === newState.currentNode && !visited.has(edge.source))
-        )
-        .map((edge) =>
-          edge.source === newState.currentNode ? edge.target : edge.source
-        )
-    );
+    // Get ALL nodes at current level from ANY previously visited node
+    const currentLevelNodes = getCurrentLevelNodes(newState);
 
     // Only allow visiting nodes at current level
     if (!currentLevelNodes.has(nodeId)) {
@@ -609,4 +598,48 @@ export const generateBFSExplanation = (step, visited, queue) => {
   }
 
   return "Processing next BFS step";
+};
+
+// for BFS
+const getCurrentLevelNodes = (state) => {
+  // If this is the first move
+  if (state.visitedNodes.length === 0) {
+    return new Set(state.queue);
+  }
+
+  const visited = new Set(state.visitedNodes);
+  const startNode = state.visitedNodes[0]; // The first node visited (B in this case)
+
+  // Get all direct unvisited neighbors of the start node first
+  const directNeighborsOfStart = new Set(
+    state.edges
+      .filter((edge) => edge.source === startNode || edge.target === startNode)
+      .map((edge) => (edge.source === startNode ? edge.target : edge.source))
+      .filter((neighborId) => !visited.has(neighborId))
+  );
+
+  // If there are still unvisited direct neighbors of the start node, they must be visited first
+  if (directNeighborsOfStart.size > 0) {
+    return directNeighborsOfStart;
+  }
+
+  // If all direct neighbors of start are visited, get the next level
+  const nextLevelNodes = new Set();
+  const currentLevelNodes = state.visitedNodes.filter(
+    (nodeId) => nodeId !== startNode
+  );
+
+  currentLevelNodes.forEach((nodeId) => {
+    const neighbors = state.edges
+      .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+      .map((edge) => (edge.source === nodeId ? edge.target : edge.source))
+      .filter(
+        (neighborId) =>
+          !visited.has(neighborId) && state.queue.includes(neighborId)
+      );
+
+    neighbors.forEach((neighborId) => nextLevelNodes.add(neighborId));
+  });
+
+  return nextLevelNodes;
 };
