@@ -5,7 +5,7 @@ import GamePageStructure from "@/components/GamePageStructure";
 import { generateRandomGraph } from "@/components/GamePageStructure";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { toast } from "react-hot-toast";
-import { isValidBFSMove } from "@/utils/graphTraversalValidators";
+import { isValidBFSMove } from "@/utils/graphAlgorithms";
 
 const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
   const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);

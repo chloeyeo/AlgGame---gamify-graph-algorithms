@@ -1,7 +1,7 @@
 "use client";
 
 import EducationPageStructure from "@/components/EducationPageStructure";
-import { isValidDFSMove } from "@/utils/graphTraversalValidators";
+import { generateDFSSteps, isValidDFSMove } from "@/utils/graphAlgorithms";
 
 const dfsConceptText = {
   introduction:
@@ -32,9 +32,6 @@ const dfsPseudocode = `DFS(graph, start_node):
             for neighbor in graph[node]:
                 if neighbor not in Visited:
                     Stack.push(neighbor)`;
-
-// Import the generateDFSSteps function from EducationPageStructure
-import { generateDFSSteps } from "@/components/EducationPageStructure";
 
 export default function DFSEducationPage() {
   return (
