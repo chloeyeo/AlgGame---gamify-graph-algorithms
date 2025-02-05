@@ -24,9 +24,19 @@ const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
     })),
     currentNode: null,
     startNode: null,
-    endNode: null,
     visitedNodes: [],
   };
+};
+
+const getNodeStatus = (node) => {
+  if (node.current) return "current";
+  if (node.visited) return "visited";
+  if (node.recentlyUpdated) return "updated";
+  return "unvisited";
+};
+
+const isGameComplete = (state) => {
+  return state.nodes.every((node) => node.visited);
 };
 
 const DijkstraGamePage = () => {
@@ -46,17 +56,6 @@ const DijkstraGamePage = () => {
       generateInitialGraphState(fixedNodeCount, selectedDifficulty)
     );
     setRound(1);
-  };
-
-  const getNodeStatus = (node) => {
-    if (node.current) return "current";
-    if (node.visited) return "visited";
-    if (node.recentlyUpdated) return "updated";
-    return "unvisited";
-  };
-
-  const isGameComplete = (state) => {
-    return state.nodes.every((node) => node.visited);
   };
 
   return (

@@ -661,16 +661,125 @@ const getCurrentLevelNodes = (state) => {
   );
 };
 
-export const isValidDijkstraMove = (graphState, nodeId) => {
-  const newState = JSON.parse(JSON.stringify(graphState));
-  const clickedNode = newState.nodes.find((n) => n.id === nodeId);
+export const generateDijkstraSteps = (initialNodes, edges) => {
+  const steps = [];
+  const visited = new Set();
+  const distances = new Map();
+  const previous = new Map();
 
-  // If no start node selected yet
-  if (!newState.startNode) {
-    clickedNode.distance = 0;
-    clickedNode.current = true;
-    newState.startNode = nodeId;
-    newState.currentNode = nodeId;
+  // Initialize distances
+  initialNodes.forEach((node) => {
+    distances.set(node.id, node.id === initialNodes[0].id ? 0 : Infinity);
+    previous.set(node.id, null);
+  });
+
+  // Initial state
+  steps.push({
+    graphState: {
+      nodes: initialNodes.map((node) => ({
+        ...node,
+        visited: false,
+        distance: distances.get(node.id),
+        recentlyUpdated: false,
+        current: false,
+      })),
+      edges,
+      currentNode: null,
+      startNode: initialNodes[0].id,
+    },
+    explanation:
+      "Initial state: All nodes have infinite distance except the start node",
+  });
+
+  while (visited.size < initialNodes.length) {
+    // Find unvisited node with minimum distance
+    let minDistance = Infinity;
+    let current = null;
+
+    initialNodes.forEach((node) => {
+      if (!visited.has(node.id) && distances.get(node.id) < minDistance) {
+        minDistance = distances.get(node.id);
+        current = node.id;
+      }
+    });
+
+    if (!current || distances.get(current) === Infinity) {
+      break;
+    }
+
+    // Mark as visited
+    visited.add(current);
+    steps.push({
+      graphState: {
+        nodes: initialNodes.map((node) => ({
+          ...node,
+          visited: visited.has(node.id),
+          distance: distances.get(node.id),
+          recentlyUpdated: false,
+          current: node.id === current,
+        })),
+        edges,
+        currentNode: current,
+        startNode: initialNodes[0].id,
+      },
+      explanation: `Processing node ${current} (current shortest distance: ${distances.get(
+        current
+      )})`,
+    });
+
+    // Process neighbors
+    const neighbors = edges
+      .filter((edge) => edge.source === current || edge.target === current)
+      .map((edge) => ({
+        id: edge.source === current ? edge.target : edge.source,
+        weight: edge.weight,
+      }));
+
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor.id)) {
+        const newDistance = distances.get(current) + neighbor.weight;
+        if (newDistance < distances.get(neighbor.id)) {
+          distances.set(neighbor.id, newDistance);
+          previous.set(neighbor.id, current);
+
+          steps.push({
+            graphState: {
+              nodes: initialNodes.map((node) => ({
+                ...node,
+                visited: visited.has(node.id),
+                distance: distances.get(node.id),
+                recentlyUpdated: node.id === neighbor.id,
+                current: node.id === current,
+              })),
+              edges,
+              currentNode: current,
+              startNode: initialNodes[0].id,
+            },
+            explanation: `Updated distance to ${neighbor.id}: ${newDistance} through node ${current}`,
+          });
+        }
+      }
+    }
+  }
+
+  return steps;
+};
+
+export const isValidDijkstraMove = (graphState, nodeId, currentStep) => {
+  const steps = generateDijkstraSteps(graphState.nodes, graphState.edges);
+
+  // If this is the first move
+  if (!graphState.startNode) {
+    const newState = {
+      ...graphState,
+      nodes: graphState.nodes.map((node) => ({
+        ...node,
+        distance: node.id === nodeId ? 0 : Infinity,
+        current: node.id === nodeId,
+      })),
+      startNode: nodeId,
+      currentNode: nodeId,
+    };
     return {
       validMove: true,
       newState,
@@ -679,19 +788,12 @@ export const isValidDijkstraMove = (graphState, nodeId) => {
     };
   }
 
-  // Get unvisited nodes with their distances
-  const unvisitedNodes = newState.nodes.filter(
-    (n) => !n.visited && n.distance !== Infinity
-  );
+  // Get the expected next state from our steps
+  const expectedState = steps[currentStep]?.graphState;
+  if (!expectedState) return { validMove: false, newState: graphState };
 
-  // Find the node with minimum distance
-  const minDistanceNode = unvisitedNodes.reduce(
-    (min, node) => (node.distance < min.distance ? node : min),
-    unvisitedNodes[0]
-  );
-
-  // If clicked node is not the minimum distance node
-  if (minDistanceNode && nodeId !== minDistanceNode.id) {
+  // Check if the clicked node matches the expected current node
+  if (expectedState.currentNode !== nodeId) {
     return {
       validMove: false,
       newState: graphState,
@@ -701,30 +803,10 @@ export const isValidDijkstraMove = (graphState, nodeId) => {
     };
   }
 
-  // Mark node as visited and update neighbors
-  clickedNode.visited = true;
-  clickedNode.current = true;
-  const prevNode = newState.nodes.find((n) => n.id === newState.currentNode);
-  if (prevNode) prevNode.current = false;
-  newState.currentNode = nodeId;
-
-  // Update distances of neighboring nodes
-  const edges = newState.edges.filter((e) => e.source === nodeId);
-  edges.forEach((edge) => {
-    const neighbor = newState.nodes.find((n) => n.id === edge.target);
-    if (!neighbor.visited) {
-      const newDistance = clickedNode.distance + edge.weight;
-      if (newDistance < neighbor.distance) {
-        neighbor.distance = newDistance;
-        neighbor.previous = nodeId;
-        neighbor.recentlyUpdated = true;
-      }
-    }
-  });
-
+  // Valid move - return the new state from our steps
   return {
     validMove: true,
-    newState,
+    newState: expectedState,
     nodeStatus: "correct",
     message: `Visited node ${nodeId} and updated its neighbors`,
   };
