@@ -2,42 +2,9 @@
 
 import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-import { generateRandomGraph } from "@/components/GamePageStructure";
+import { generateInitialGraphState } from "@/utils/graphUtils.js";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
-import { isValidDijkstraMove } from "@/utils/graphAlgorithms";
-
-const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
-  const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
-
-  return {
-    nodes: nodes.map((node) => ({
-      ...node,
-      visited: false,
-      distance: Infinity,
-      previous: null,
-      current: false,
-      recentlyUpdated: false,
-    })),
-    edges: edges.map((edge) => ({
-      ...edge,
-      weight: Math.floor(Math.random() * 10) + 1,
-    })),
-    currentNode: null,
-    startNode: null,
-    visitedNodes: [],
-  };
-};
-
-const getNodeStatus = (node) => {
-  if (node.current) return "current";
-  if (node.visited) return "visited";
-  if (node.recentlyUpdated) return "updated";
-  return "unvisited";
-};
-
-const isGameComplete = (state) => {
-  return state.nodes.every((node) => node.visited);
-};
+import GraphVisualisation from "@/components/GraphVisualisation";
 
 const DijkstraGamePage = () => {
   const [difficulty, setDifficulty] = useState(null);
@@ -45,7 +12,7 @@ const DijkstraGamePage = () => {
   const [totalScore, setTotalScore] = useState(0);
   const [nodeCount, setNodeCount] = useState(4);
   const [graphState, setGraphState] = useState(() =>
-    generateInitialGraphState(4)
+    generateInitialGraphState(4, "dijkstra")
   );
 
   const handleDifficultySelect = (selectedDifficulty) => {
@@ -53,9 +20,117 @@ const DijkstraGamePage = () => {
     const fixedNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
     setNodeCount(fixedNodeCount);
     setGraphState(
-      generateInitialGraphState(fixedNodeCount, selectedDifficulty)
+      generateInitialGraphState(fixedNodeCount, "dijkstra", selectedDifficulty)
     );
     setRound(1);
+  };
+
+  const isValidMove = (state, nodeId) => {
+    const distances = new Map();
+    const visited = new Set();
+
+    // First move
+    if (!state.startNode) {
+      state.nodes.forEach((node) => {
+        distances.set(node.id, node.id === nodeId ? 0 : Infinity);
+      });
+
+      const neighbors = state.edges
+        .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+        .map((edge) => ({
+          id: edge.source === nodeId ? edge.target : edge.source,
+          weight: edge.weight,
+        }));
+
+      // Update neighbor distances
+      neighbors.forEach((n) => {
+        distances.set(n.id, n.weight);
+      });
+
+      const newState = {
+        ...state,
+        startNode: nodeId,
+        currentNode: nodeId,
+        nodes: state.nodes.map((node) => ({
+          ...node,
+          distance: distances.get(node.id),
+          displayText:
+            distances.get(node.id) === Infinity
+              ? "∞"
+              : distances.get(node.id).toString(),
+          visited: node.id === nodeId,
+          current: node.id === nodeId,
+          recentlyUpdated: neighbors.some((n) => n.id === node.id),
+        })),
+      };
+
+      return {
+        validMove: true,
+        newState,
+        nodeStatus: "correct",
+      };
+    }
+
+    // Subsequent moves
+    state.nodes.forEach((node) => {
+      distances.set(node.id, node.distance);
+      if (node.visited) visited.add(node.id);
+    });
+
+    // Find node with minimum distance
+    const minNode = state.nodes
+      .filter((node) => !node.visited)
+      .reduce(
+        (min, node) => (!min || node.distance < min.distance ? node : min),
+        null
+      );
+
+    if (!minNode || nodeId !== minNode.id) {
+      return {
+        validMove: false,
+        newState: state,
+        nodeStatus: "incorrect",
+      };
+    }
+
+    visited.add(nodeId);
+    const neighbors = state.edges
+      .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+      .map((edge) => ({
+        id: edge.source === nodeId ? edge.target : edge.source,
+        weight: edge.weight,
+      }))
+      .filter((n) => !visited.has(n.id));
+
+    // Update distances through current node
+    neighbors.forEach((n) => {
+      const newDist = distances.get(nodeId) + n.weight;
+      if (newDist < distances.get(n.id)) {
+        distances.set(n.id, newDist);
+      }
+    });
+
+    const newState = {
+      ...state,
+      currentNode: nodeId,
+      nodes: state.nodes.map((node) => ({
+        ...node,
+        distance: distances.get(node.id),
+        displayText:
+          distances.get(node.id) === Infinity
+            ? "∞"
+            : distances.get(node.id).toString(),
+        visited: visited.has(node.id),
+        current: node.id === nodeId,
+        recentlyUpdated: neighbors.some((n) => n.id === node.id),
+      })),
+    };
+
+    return {
+      validMove: true,
+      newState,
+      nodeStatus: "correct",
+    };
   };
 
   return (
@@ -63,26 +138,20 @@ const DijkstraGamePage = () => {
       title="Dijkstra's Algorithm Game"
       graphState={graphState}
       setGraphState={setGraphState}
-      isValidMove={isValidDijkstraMove}
-      getNodeStatus={getNodeStatus}
-      getScore={(status) => {
-        switch (status) {
-          case "correct":
-            return 15;
-          case "updated":
-            return 10;
-          case "incorrect":
-            return -5;
-          default:
-            return 0;
-        }
+      isValidMove={isValidMove}
+      getNodeStatus={(node) => {
+        if (node.current) return "current";
+        if (node.visited) return "visited";
+        if (node.recentlyUpdated) return "updated";
+        return "unvisited";
       }}
+      getScore={(status) => (status === "correct" ? 15 : -5)}
       getMessage={(status, nodeId) =>
         status === "incorrect"
           ? "Invalid move! Choose the unvisited node with smallest distance."
           : `Valid move to node ${nodeId}`
       }
-      isGameComplete={isGameComplete}
+      isGameComplete={(state) => state.nodes.every((node) => node.visited)}
       round={round}
       setRound={setRound}
       totalScore={totalScore}
@@ -91,6 +160,14 @@ const DijkstraGamePage = () => {
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
       initialMessage="Select a starting node for Dijkstra's algorithm!"
+      VisualizationComponent={({ graphState, onNodeClick }) => (
+        <GraphVisualisation
+          graphState={graphState}
+          onNodeClick={onNodeClick}
+          mode="game"
+          isDijkstraPage={true}
+        />
+      )}
     />
   );
 };

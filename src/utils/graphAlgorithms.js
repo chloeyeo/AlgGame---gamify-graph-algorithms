@@ -770,16 +770,40 @@ export const isValidDijkstraMove = (graphState, nodeId, currentStep) => {
 
   // If this is the first move
   if (!graphState.startNode) {
+    // Get neighbors and their edge weights
+    const neighbors = graphState.edges
+      .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+      .map((edge) => ({
+        id: edge.source === nodeId ? edge.target : edge.source,
+        weight: edge.weight,
+      }));
+
     const newState = {
       ...graphState,
-      nodes: graphState.nodes.map((node) => ({
-        ...node,
-        distance: node.id === nodeId ? 0 : Infinity,
-        current: node.id === nodeId,
-      })),
+      nodes: graphState.nodes.map((node) => {
+        const neighborEdge = neighbors.find((n) => n.id === node.id);
+        const distance =
+          node.id === nodeId
+            ? 0
+            : neighborEdge
+            ? neighborEdge.weight
+            : Infinity;
+
+        return {
+          ...node,
+          distance: distance,
+          current: node.id === nodeId,
+          visited: node.id === nodeId,
+          recentlyUpdated: neighborEdge !== undefined, // Pink highlight for neighbors
+          displayText: distance === Infinity ? "∞" : distance.toString(),
+        };
+      }),
       startNode: nodeId,
       currentNode: nodeId,
+      steps: steps,
+      currentStep: 0,
     };
+
     return {
       validMove: true,
       newState,
@@ -789,11 +813,11 @@ export const isValidDijkstraMove = (graphState, nodeId, currentStep) => {
   }
 
   // Get the expected next state from our steps
-  const expectedState = steps[currentStep]?.graphState;
-  if (!expectedState) return { validMove: false, newState: graphState };
+  const nextStep = steps[currentStep + 1]?.graphState;
+  if (!nextStep) return { validMove: false, newState: graphState };
 
   // Check if the clicked node matches the expected current node
-  if (expectedState.currentNode !== nodeId) {
+  if (nextStep.currentNode !== nodeId) {
     return {
       validMove: false,
       newState: graphState,
@@ -803,10 +827,30 @@ export const isValidDijkstraMove = (graphState, nodeId, currentStep) => {
     };
   }
 
-  // Valid move - return the new state from our steps
+  // Get unvisited neighbors for highlighting
+  const neighbors = graphState.edges
+    .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+    .map((edge) => (edge.source === nodeId ? edge.target : edge.source))
+    .filter(
+      (neighborId) => !nextStep.nodes.find((n) => n.id === neighborId).visited
+    );
+
+  // Valid move - return the new state with neighbor highlighting
+  const newState = {
+    ...graphState,
+    ...nextStep,
+    currentStep: currentStep + 1,
+    steps: steps,
+    nodes: nextStep.nodes.map((node) => ({
+      ...node,
+      recentlyUpdated: neighbors.includes(node.id) && !node.visited,
+      displayText: node.distance === Infinity ? "∞" : node.distance.toString(),
+    })),
+  };
+
   return {
     validMove: true,
-    newState: expectedState,
+    newState,
     nodeStatus: "correct",
     message: `Visited node ${nodeId} and updated its neighbors`,
   };

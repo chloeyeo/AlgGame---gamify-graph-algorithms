@@ -169,3 +169,64 @@ export const getNodesForGraph = (graphIndex) => {
   }
   return getKruskalEducationGraphNodes[0]; // Default to first graph if invalid index
 };
+
+export const generateInitialGraphState = (
+  nodeCount,
+  type = "default",
+  difficulty = null
+) => {
+  // For Dijkstra's algorithm
+  if (type === "dijkstra") {
+    const nodes = [];
+    const edges = [];
+
+    // Use the first graph layout from getDijkstraNodes
+    const nodePositions = getDijkstraNodes[0];
+
+    // Create nodes
+    Object.entries(nodePositions)
+      .slice(0, nodeCount)
+      .forEach(([id, pos]) => {
+        nodes.push({
+          id,
+          x: pos.x,
+          y: pos.y,
+          visited: false,
+          current: false,
+          recentlyUpdated: false,
+          distance: Infinity,
+          displayText: "∞",
+        });
+      });
+
+    // Create edges with random weights (1-9)
+    const nodeIds = nodes.map((node) => node.id);
+    for (let i = 0; i < nodeIds.length; i++) {
+      for (let j = i + 1; j < nodeIds.length; j++) {
+        if (Math.random() < 0.5) {
+          // 50% chance to create an edge
+          edges.push({
+            source: nodeIds[i],
+            target: nodeIds[j],
+            weight: Math.floor(Math.random() * 9) + 1,
+          });
+        }
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+      startNode: null,
+      currentNode: null,
+    };
+  }
+
+  // Handle other graph types here if needed
+  return {
+    nodes: [],
+    edges: [],
+    startNode: null,
+    currentNode: null,
+  };
+};
