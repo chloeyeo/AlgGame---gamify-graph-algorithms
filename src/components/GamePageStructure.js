@@ -442,8 +442,18 @@ export default function GamePageStructure({
   );
 
   const handleRoundComplete = async (currentScore, algorithm) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setMessage("Please log in to submit score to the leaderboard!");
+      // Still continue with the game even if not logged in
+      setRound((prev) => prev + 1);
+      setTotalScore((prev) => prev + currentScore);
+      setGraphState(generateRandomGraph(nodeCount, difficulty));
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch("/api/scores/submit", {
         method: "POST",
         headers: {
@@ -451,24 +461,34 @@ export default function GamePageStructure({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          algorithm: algorithm,
+          algorithm: title.split(" ")[0].toLowerCase(), // Extract algorithm from title
           difficulty: difficulty,
           score: currentScore,
+          timeSpent: Date.now() - startTime,
+          movesCount: moves,
         }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to submit score");
       }
+
+      // Continue with game regardless of score submission
+      setRound((prev) => prev + 1);
+      setTotalScore((prev) => prev + currentScore);
+      setGraphState(generateRandomGraph(nodeCount, difficulty));
+      setMessage("Score submitted successfully!");
     } catch (error) {
       console.error("Error submitting score:", error);
-      toast.error("Failed to save score");
-    }
+      setMessage(
+        "Game completed but score submission failed. Please try again."
+      );
 
-    // Generate new graph for next round
-    setGraphState(generateRandomGraph(nodeCount, difficulty));
-    setRound((prev) => prev + 1);
-    setTotalScore((prev) => prev + currentScore);
+      // Still continue with game even if submission fails
+      setRound((prev) => prev + 1);
+      setTotalScore((prev) => prev + currentScore);
+      setGraphState(generateRandomGraph(nodeCount, difficulty));
+    }
   };
 
   if (!difficulty) {
