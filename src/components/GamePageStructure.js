@@ -368,6 +368,7 @@ export default function GamePageStructure({
     }
 
     try {
+      setIsSubmitting(true);
       const response = await fetch("/api/scores/submit", {
         method: "POST",
         headers: {

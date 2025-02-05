@@ -175,42 +175,60 @@ export const generateInitialGraphState = (
   type = "default",
   difficulty = null
 ) => {
-  // For Dijkstra's algorithm
   if (type === "dijkstra") {
-    const nodes = [];
+    // Use circular layout for consistent positioning
+    const nodes = Array.from({ length: nodeCount }, (_, i) => {
+      const angle = (2 * Math.PI * i) / nodeCount;
+      const radius = 150; // Fixed radius for consistent spacing
+
+      return {
+        id: String.fromCharCode(65 + i),
+        x: 300 + radius * Math.cos(angle),
+        y: 300 + radius * Math.sin(angle),
+        visited: false,
+        current: false,
+        recentlyUpdated: false,
+        distance: Infinity,
+        displayText: "∞",
+      };
+    });
+
     const edges = [];
-
-    // Use the first graph layout from getDijkstraNodes
-    const nodePositions = getDijkstraNodes[0];
-
-    // Create nodes
-    Object.entries(nodePositions)
-      .slice(0, nodeCount)
-      .forEach(([id, pos]) => {
-        nodes.push({
-          id,
-          x: pos.x,
-          y: pos.y,
-          visited: false,
-          current: false,
-          recentlyUpdated: false,
-          distance: Infinity,
-          displayText: "∞",
-        });
+    // Ensure graph is connected
+    for (let i = 1; i < nodes.length; i++) {
+      const parent = Math.floor(Math.random() * i);
+      edges.push({
+        source: nodes[parent].id,
+        target: nodes[i].id,
+        weight: Math.floor(Math.random() * 8) + 1, // Random weight 1-9
       });
+    }
 
-    // Create edges with random weights (1-9)
-    const nodeIds = nodes.map((node) => node.id);
-    for (let i = 0; i < nodeIds.length; i++) {
-      for (let j = i + 1; j < nodeIds.length; j++) {
-        if (Math.random() < 0.5) {
-          // 50% chance to create an edge
-          edges.push({
-            source: nodeIds[i],
-            target: nodeIds[j],
-            weight: Math.floor(Math.random() * 9) + 1,
-          });
-        }
+    // Add extra edges based on difficulty
+    const maxExtraEdges =
+      {
+        easy: 1,
+        medium: 2,
+        hard: 3,
+      }[difficulty] || 1;
+
+    for (let i = 0; i < maxExtraEdges; i++) {
+      const source = Math.floor(Math.random() * nodes.length);
+      const target = Math.floor(Math.random() * nodes.length);
+
+      if (
+        source !== target &&
+        !edges.some(
+          (e) =>
+            (e.source === nodes[source].id && e.target === nodes[target].id) ||
+            (e.source === nodes[target].id && e.target === nodes[source].id)
+        )
+      ) {
+        edges.push({
+          source: nodes[source].id,
+          target: nodes[target].id,
+          weight: Math.floor(Math.random() * 8) + 1,
+        });
       }
     }
 
@@ -222,7 +240,6 @@ export const generateInitialGraphState = (
     };
   }
 
-  // Handle other graph types here if needed
   return {
     nodes: [],
     edges: [],
