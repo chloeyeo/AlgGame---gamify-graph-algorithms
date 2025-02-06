@@ -9,6 +9,8 @@ import axios from "axios";
 import { BACKEND_URL } from "@/constants/constants";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { useRouter } from "next/navigation";
+import { generateInitialGraphState } from "@/utils/graphUtils";
+import { generateRandomGraph } from "@/utils/graphUtils";
 
 const API_URL = BACKEND_URL;
 
@@ -30,65 +32,6 @@ const DifficultySelector = ({ onSelect }) => (
     </div>
   </main>
 );
-
-const generateRandomGraph = (nodeCount, difficulty = "medium") => {
-  // Generate nodes with randomized positions in a circular layout
-  const nodes = Array.from({ length: nodeCount }, (_, i) => {
-    // Random angle with some jitter
-    const baseAngle = (2 * Math.PI * i) / nodeCount;
-    const angleJitter = Math.random() * 0.5 - 0.25; // ±0.25 radians of jitter
-    const angle = baseAngle + angleJitter;
-
-    // Random radius with bounds
-    const minRadius = 100;
-    const maxRadius = 200;
-    const radius = minRadius + Math.random() * (maxRadius - minRadius);
-
-    return {
-      id: String.fromCharCode(65 + i),
-      x: 300 + radius * Math.cos(angle),
-      y: 300 + radius * Math.sin(angle),
-    };
-  });
-
-  const edges = [];
-  // Ensure graph is connected
-  for (let i = 1; i < nodes.length; i++) {
-    const parent = Math.floor(Math.random() * i);
-    edges.push({
-      source: nodes[parent].id,
-      target: nodes[i].id,
-    });
-  }
-
-  // Add random extra edges based on difficulty
-  const maxExtraEdges = {
-    easy: 1,
-    medium: 2,
-    hard: 3,
-  }[difficulty];
-
-  for (let i = 0; i < maxExtraEdges; i++) {
-    const source = Math.floor(Math.random() * nodes.length);
-    const target = Math.floor(Math.random() * nodes.length);
-
-    if (
-      source !== target &&
-      !edges.some(
-        (e) =>
-          (e.source === nodes[source].id && e.target === nodes[target].id) ||
-          (e.source === nodes[target].id && e.target === nodes[source].id)
-      )
-    ) {
-      edges.push({
-        source: nodes[source].id,
-        target: nodes[target].id,
-      });
-    }
-  }
-
-  return { nodes, edges };
-};
 
 export { generateRandomGraph };
 
@@ -320,7 +263,10 @@ export default function GamePageStructure({
       });
 
       setTimeout(() => {
-        handleRoundComplete(score, title.split(" ")[0].toLowerCase());
+        handleRoundComplete(
+          score,
+          title.toLowerCase().includes("dijkstra") ? "dijkstra" : "default"
+        );
       }, 2000);
     }
   }, [graphState, isGameComplete, round, score]);
@@ -358,12 +304,20 @@ export default function GamePageStructure({
   const handleRoundComplete = async (currentScore, algorithm) => {
     const token = localStorage.getItem("token");
 
+    let newState;
+    if (algorithm === "dijkstra") {
+      newState = generateInitialGraphState(nodeCount, "dijkstra", difficulty);
+      setCurrentGraphStates([newState]);
+    } else {
+      newState = generateRandomGraph(nodeCount, difficulty);
+    }
+
+    setGraphState(newState);
+    setRound((prev) => prev + 1);
+    setTotalScore((prev) => prev + currentScore);
+
     if (!token) {
       setMessage("Please log in to submit score to the leaderboard!");
-      // Still continue with the game even if not logged in
-      setRound((prev) => prev + 1);
-      setTotalScore((prev) => prev + currentScore);
-      setGraphState(generateRandomGraph(nodeCount, difficulty));
       return;
     }
 
@@ -388,10 +342,6 @@ export default function GamePageStructure({
         throw new Error("Failed to submit score");
       }
 
-      // Continue with game regardless of score submission
-      setRound((prev) => prev + 1);
-      setTotalScore((prev) => prev + currentScore);
-      setGraphState(generateRandomGraph(nodeCount, difficulty));
       setMessage("Score submitted successfully!");
     } catch (error) {
       console.error("Error submitting score:", error);
@@ -399,10 +349,9 @@ export default function GamePageStructure({
         "Game completed but score submission failed. Please try again."
       );
 
-      // Still continue with game even if submission fails
       setRound((prev) => prev + 1);
       setTotalScore((prev) => prev + currentScore);
-      setGraphState(generateRandomGraph(nodeCount, difficulty));
+      setGraphState(newState);
     }
   };
 
