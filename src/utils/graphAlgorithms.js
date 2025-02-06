@@ -855,3 +855,70 @@ export const isValidDijkstraMove = (graphState, nodeId, currentStep) => {
     message: `Visited node ${nodeId} and updated its neighbors`,
   };
 };
+
+export const isValidAStarMove = (state, nodeId) => {
+  if (state.nodes.find((n) => n.id === nodeId).visited) {
+    return {
+      validMove: false,
+      newState: state,
+      nodeStatus: "incorrect",
+    };
+  }
+
+  // Find unvisited node with smallest f-value
+  const unvisitedNodes = state.nodes.filter((n) => !n.visited);
+  const minFNode = unvisitedNodes.reduce(
+    (min, node) => (!min || node.f < min.f ? node : min),
+    null
+  );
+
+  if (nodeId !== minFNode.id) {
+    return {
+      validMove: false,
+      newState: state,
+      nodeStatus: "incorrect",
+    };
+  }
+
+  // Update g and f values for neighbors
+  const currentNode = state.nodes.find((n) => n.id === nodeId);
+  const neighbors = state.edges
+    .filter((e) => e.source === nodeId || e.target === nodeId)
+    .map((e) => ({
+      id: e.source === nodeId ? e.target : e.source,
+      weight: e.weight,
+    }))
+    .filter((n) => !state.nodes.find((node) => node.id === n.id).visited);
+
+  const newNodes = state.nodes.map((node) => {
+    const neighbor = neighbors.find((n) => n.id === node.id);
+    if (neighbor) {
+      const newG = currentNode.g + neighbor.weight;
+      if (newG < node.g) {
+        return {
+          ...node,
+          g: newG,
+          f: newG + node.h,
+          recentlyUpdated: true,
+        };
+      }
+    }
+    return {
+      ...node,
+      recentlyUpdated: false,
+    };
+  });
+
+  return {
+    validMove: true,
+    newState: {
+      ...state,
+      nodes: newNodes.map((node) => ({
+        ...node,
+        visited: node.id === nodeId ? true : node.visited,
+        current: node.id === nodeId,
+      })),
+    },
+    nodeStatus: "correct",
+  };
+};
