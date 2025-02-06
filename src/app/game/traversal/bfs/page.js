@@ -2,13 +2,17 @@
 
 import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-import { generateRandomGraph } from "@/components/GamePageStructure";
+import { generateAlgorithmSpecificGraph } from "@/components/GamePageStructure";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { toast } from "react-hot-toast";
 import { isValidBFSMove } from "@/utils/graphAlgorithms";
 
 const generateInitialGraphState = (nodeCount, difficulty = "medium") => {
-  const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
+  const { nodes, edges } = generateAlgorithmSpecificGraph(
+    nodeCount,
+    difficulty,
+    "bfs"
+  );
 
   return {
     nodes: nodes.map((node) => ({

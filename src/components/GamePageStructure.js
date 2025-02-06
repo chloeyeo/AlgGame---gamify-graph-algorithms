@@ -33,7 +33,49 @@ const DifficultySelector = ({ onSelect }) => (
   </main>
 );
 
-export { generateRandomGraph };
+const generateAlgorithmSpecificGraph = (nodeCount, difficulty, algorithm) => {
+  const baseGraph = generateRandomGraph(nodeCount, difficulty);
+
+  if (algorithm === "bfs" || algorithm === "dfs") {
+    // Modify edges to create more appropriate paths for BFS/DFS
+    const { nodes } = baseGraph;
+    const edges = [];
+
+    // Create a connected path
+    for (let i = 0; i < nodes.length - 1; i++) {
+      edges.push(
+        { source: nodes[i].id, target: nodes[i + 1].id },
+        { source: nodes[i + 1].id, target: nodes[i].id }
+      );
+    }
+
+    // Add some cross edges based on difficulty
+    const maxExtraEdges =
+      {
+        easy: 1,
+        medium: 2,
+        hard: 3,
+      }[difficulty] || 2;
+
+    for (let i = 0; i < maxExtraEdges; i++) {
+      const source = Math.floor(Math.random() * nodes.length);
+      const target = Math.floor(Math.random() * nodes.length);
+
+      if (source !== target && Math.abs(source - target) > 1) {
+        edges.push(
+          { source: nodes[source].id, target: nodes[target].id },
+          { source: nodes[target].id, target: nodes[source].id }
+        );
+      }
+    }
+
+    return { ...baseGraph, edges };
+  }
+
+  return baseGraph;
+};
+
+export { generateRandomGraph, generateAlgorithmSpecificGraph };
 
 export default function GamePageStructure({
   title = "Graph Traversal Game",
@@ -307,9 +349,12 @@ export default function GamePageStructure({
     let newState;
     if (algorithm === "dijkstra") {
       newState = generateInitialGraphState(nodeCount, "dijkstra", difficulty);
-      setCurrentGraphStates([newState]);
     } else {
-      newState = generateRandomGraph(nodeCount, difficulty);
+      newState = generateAlgorithmSpecificGraph(
+        nodeCount,
+        difficulty,
+        algorithm
+      );
     }
 
     setGraphState(newState);
