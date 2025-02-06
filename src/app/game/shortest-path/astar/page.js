@@ -4,76 +4,7 @@ import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import GraphVisualisation from "@/components/GraphVisualisation";
-
-const generateInitialGraphState = (
-  nodeCount,
-  algorithm,
-  difficulty = "medium"
-) => {
-  // Generate nodes in a circular layout like Dijkstra's page
-  const nodes = Array.from({ length: nodeCount }, (_, i) => {
-    const angle = (2 * Math.PI * i) / nodeCount;
-    const radius = 200;
-    return {
-      id: String.fromCharCode(65 + i),
-      x: 300 + radius * Math.cos(angle),
-      y: 300 + radius * Math.sin(angle),
-      visited: false,
-      f: Infinity,
-      g: Infinity,
-      h: 0,
-      current: false,
-      recentlyUpdated: false,
-      displayText: "∞",
-    };
-  });
-
-  // Generate weighted edges similar to Dijkstra's page
-  const edges = [];
-  // Ensure basic connectivity
-  for (let i = 0; i < nodes.length - 1; i++) {
-    edges.push({
-      source: nodes[i].id,
-      target: nodes[i + 1].id,
-      weight: Number((Math.random() * 8 + 1).toFixed(2)),
-    });
-  }
-
-  // Add extra edges based on difficulty
-  const maxEdges = {
-    easy: nodeCount * 1.5,
-    medium: nodeCount * 2,
-    hard: nodeCount * 2.5,
-  }[difficulty];
-
-  while (edges.length < maxEdges) {
-    const source = Math.floor(Math.random() * nodes.length);
-    const target = Math.floor(Math.random() * nodes.length);
-
-    if (
-      source !== target &&
-      !edges.some(
-        (e) =>
-          (e.source === nodes[source].id && e.target === nodes[target].id) ||
-          (e.source === nodes[target].id && e.target === nodes[source].id)
-      )
-    ) {
-      edges.push({
-        source: nodes[source].id,
-        target: nodes[target].id,
-        weight: Number((Math.random() * 8 + 1).toFixed(2)),
-      });
-    }
-  }
-
-  return {
-    nodes,
-    edges,
-    currentNode: null,
-    startNode: null,
-    goalNode: nodes[nodes.length - 1].id,
-  };
-};
+import { generateAStarGraph } from "@/utils/astarGraphGenerator";
 
 const isValidMove = (state, nodeId) => {
   // First move - selecting start node
@@ -172,17 +103,13 @@ const AStarGamePage = () => {
   const [round, setRound] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
   const [nodeCount, setNodeCount] = useState(6);
-  const [graphState, setGraphState] = useState(() =>
-    generateInitialGraphState(6)
-  );
+  const [graphState, setGraphState] = useState(() => generateAStarGraph(6));
 
   const handleDifficultySelect = (selectedDifficulty) => {
     setDifficulty(selectedDifficulty);
     const fixedNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
     setNodeCount(fixedNodeCount);
-    setGraphState(
-      generateInitialGraphState(fixedNodeCount, "A*", selectedDifficulty)
-    );
+    setGraphState(generateAStarGraph(fixedNodeCount, selectedDifficulty));
   };
 
   return (
@@ -191,6 +118,7 @@ const AStarGamePage = () => {
       graphState={graphState}
       setGraphState={setGraphState}
       isValidMove={isValidMove}
+      algorithm="astar"
       getNodeStatus={(node) => {
         if (node.current) return "current";
         if (node.visited) return "visited";
@@ -203,9 +131,11 @@ const AStarGamePage = () => {
           ? "Invalid move! In A*, select the unvisited node with lowest f-value (f = g + h)."
           : `Valid move to node ${nodeId}`
       }
-      isGameComplete={(state) =>
-        state.nodes.find((n) => n.id === state.goalNode)?.visited
-      }
+      isGameComplete={(state) => {
+        // Check if we have a valid path to the goal node
+        const goalNode = state.nodes.find((n) => n.id === state.goalNode);
+        return goalNode?.visited && state.currentNode === state.goalNode;
+      }}
       round={round}
       setRound={setRound}
       totalScore={totalScore}

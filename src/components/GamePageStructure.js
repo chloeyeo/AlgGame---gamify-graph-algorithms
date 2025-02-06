@@ -11,6 +11,7 @@ import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { useRouter } from "next/navigation";
 import { generateInitialGraphState } from "@/utils/graphUtils";
 import { generateGameGraph as generateDijkstraGraph } from "./GraphGenerator";
+import { generateAStarGraph } from "@/utils/astarGraphGenerator";
 
 const API_URL = BACKEND_URL;
 
@@ -406,8 +407,10 @@ export default function GamePageStructure({
     let newState;
     if (algorithm === "dijkstra") {
       newState = generateInitialGraphState(nodeCount, "dijkstra", difficulty);
+    } else if (algorithm === "astar") {
+      newState = generateAStarGraph(nodeCount, difficulty);
     } else {
-      // For BFS/DFS, use the original graph generation
+      // Keep existing BFS/DFS logic unchanged
       const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
       newState = {
         nodes: nodes.map((node) => ({
