@@ -10,7 +10,7 @@ import { BACKEND_URL } from "@/constants/constants";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { useRouter } from "next/navigation";
 import { generateInitialGraphState } from "@/utils/graphUtils";
-import { generateGameGraph as generateRandomGraph } from "./GraphGenerator";
+import { generateGameGraph as generateDijkstraGraph } from "./GraphGenerator";
 
 const API_URL = BACKEND_URL;
 
@@ -33,23 +33,79 @@ const DifficultySelector = ({ onSelect }) => (
   </main>
 );
 
+const generateRandomGraph = (nodeCount = 6, difficulty = "medium") => {
+  const nodes = Array.from({ length: nodeCount }, (_, i) => {
+    const baseAngle = (2 * Math.PI * i) / nodeCount;
+    const angleJitter = Math.random() * 0.5 - 0.25;
+    const angle = baseAngle + angleJitter;
+
+    const minRadius = 100;
+    const maxRadius = 200;
+    const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
+    return {
+      id: String.fromCharCode(65 + i),
+      x: 300 + radius * Math.cos(angle),
+      y: 300 + radius * Math.sin(angle),
+    };
+  });
+
+  const edges = [];
+  // Ensure graph is connected
+  for (let i = 1; i < nodes.length; i++) {
+    const parent = Math.floor(Math.random() * i);
+    edges.push({
+      source: nodes[parent].id,
+      target: nodes[i].id,
+    });
+  }
+
+  // Add random extra edges based on difficulty
+  const maxExtraEdges =
+    {
+      easy: 1,
+      medium: 2,
+      hard: 3,
+    }[difficulty] || 2;
+
+  for (let i = 0; i < maxExtraEdges; i++) {
+    const source = Math.floor(Math.random() * nodes.length);
+    const target = Math.floor(Math.random() * nodes.length);
+
+    if (
+      source !== target &&
+      !edges.some(
+        (e) =>
+          (e.source === nodes[source].id && e.target === nodes[target].id) ||
+          (e.source === nodes[target].id && e.target === nodes[source].id)
+      )
+    ) {
+      edges.push({
+        source: nodes[source].id,
+        target: nodes[target].id,
+      });
+    }
+  }
+
+  return { nodes, edges };
+};
+
 const generateAlgorithmSpecificGraph = (nodeCount, difficulty, algorithm) => {
   const baseGraph = generateRandomGraph(nodeCount, difficulty);
 
   if (algorithm === "bfs" || algorithm === "dfs") {
-    // Modify edges to create more appropriate paths for BFS/DFS
     const { nodes } = baseGraph;
     const edges = [];
 
     // Create a connected path
     for (let i = 0; i < nodes.length - 1; i++) {
-      edges.push(
-        { source: nodes[i].id, target: nodes[i + 1].id },
-        { source: nodes[i + 1].id, target: nodes[i].id }
-      );
+      edges.push({
+        source: nodes[i].id,
+        target: nodes[i + 1].id,
+      });
     }
 
-    // Add some cross edges based on difficulty
+    // Add random extra edges based on difficulty
     const maxExtraEdges =
       {
         easy: 1,
@@ -62,10 +118,10 @@ const generateAlgorithmSpecificGraph = (nodeCount, difficulty, algorithm) => {
       const target = Math.floor(Math.random() * nodes.length);
 
       if (source !== target && Math.abs(source - target) > 1) {
-        edges.push(
-          { source: nodes[source].id, target: nodes[target].id },
-          { source: nodes[target].id, target: nodes[source].id }
-        );
+        edges.push({
+          source: nodes[source].id,
+          target: nodes[target].id,
+        });
       }
     }
 
@@ -75,6 +131,7 @@ const generateAlgorithmSpecificGraph = (nodeCount, difficulty, algorithm) => {
   return baseGraph;
 };
 
+// Export both functions
 export { generateRandomGraph, generateAlgorithmSpecificGraph };
 
 export default function GamePageStructure({
@@ -350,11 +407,23 @@ export default function GamePageStructure({
     if (algorithm === "dijkstra") {
       newState = generateInitialGraphState(nodeCount, "dijkstra", difficulty);
     } else {
-      newState = generateAlgorithmSpecificGraph(
-        nodeCount,
-        difficulty,
-        algorithm
-      );
+      // For BFS/DFS, use the original graph generation
+      const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
+      newState = {
+        nodes: nodes.map((node) => ({
+          ...node,
+          visited: false,
+          backtracked: algorithm === "dfs",
+          current: false,
+        })),
+        edges,
+        currentNode: null,
+        stack: algorithm === "dfs" ? [] : undefined,
+        queue: algorithm === "bfs" ? [] : undefined,
+        visitedNodes: [],
+        backtrackedNodes: algorithm === "dfs" ? [] : undefined,
+        round: 1,
+      };
     }
 
     setGraphState(newState);
