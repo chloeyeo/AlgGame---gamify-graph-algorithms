@@ -10,7 +10,7 @@ import { BACKEND_URL } from "@/constants/constants";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { useRouter } from "next/navigation";
 import { generateInitialGraphState } from "@/utils/graphUtils";
-import { generateRandomGraph } from "@/utils/graphUtils";
+import { generateGameGraph as generateRandomGraph } from "./GraphGenerator";
 
 const API_URL = BACKEND_URL;
 
