@@ -90,6 +90,8 @@ const DijkstraGamePage = () => {
         validMove: false,
         newState: state,
         nodeStatus: "incorrect",
+        message:
+          "Invalid move! In Dijkstra's algorithm, you must select the unvisited node with the smallest tentative distance.",
       };
     }
 
@@ -148,7 +150,7 @@ const DijkstraGamePage = () => {
       getScore={(status) => (status === "correct" ? 15 : -5)}
       getMessage={(status, nodeId) =>
         status === "incorrect"
-          ? "Invalid move! Choose the unvisited node with smallest distance."
+          ? "Invalid move! In Dijkstra's algorithm, you must select the unvisited node with the smallest tentative distance."
           : `Valid move to node ${nodeId}`
       }
       isGameComplete={(state) => state.nodes.every((node) => node.visited)}
