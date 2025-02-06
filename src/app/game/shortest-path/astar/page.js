@@ -2,30 +2,31 @@
 
 import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
+import { generateAStarGraph } from "@/utils/astarGraphGenerator";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import GraphVisualisation from "@/components/GraphVisualisation";
-import { generateAStarGraph } from "@/utils/astarGraphGenerator";
 
 const isValidMove = (state, nodeId) => {
   // First move - selecting start node
   if (!state.startNode) {
     const goalNode = state.nodes.find((n) => n.id === state.goalNode);
-    const newNodes = state.nodes.map((node) => {
-      const h = Number(
+    const h = (node) => {
+      return Number(
         Math.sqrt(
           Math.pow(node.x - goalNode.x, 2) + Math.pow(node.y - goalNode.y, 2)
         ).toFixed(2)
       );
-      return {
-        ...node,
-        h,
-        g: node.id === nodeId ? 0 : Infinity,
-        f: node.id === nodeId ? h : Infinity,
-        visited: node.id === nodeId,
-        current: node.id === nodeId,
-        displayText: node.id === nodeId ? `f=${h}` : "∞",
-      };
-    });
+    };
+
+    const newNodes = state.nodes.map((node) => ({
+      ...node,
+      h: h(node),
+      g: node.id === nodeId ? 0 : Infinity,
+      f: node.id === nodeId ? h(node) : Infinity,
+      visited: node.id === nodeId,
+      current: node.id === nodeId,
+      displayText: node.id === nodeId ? `f=${h(node)}` : "∞",
+    }));
 
     return {
       validMove: true,
@@ -39,7 +40,16 @@ const isValidMove = (state, nodeId) => {
     };
   }
 
-  // Find unvisited node with lowest f-value
+  // Regular moves
+  if (state.nodes.find((n) => n.id === nodeId).visited) {
+    return {
+      validMove: false,
+      newState: state,
+      nodeStatus: "incorrect",
+      message: "This node has already been visited!",
+    };
+  }
+
   const unvisitedNodes = state.nodes.filter((n) => !n.visited);
   const minFNode = unvisitedNodes.reduce(
     (min, node) => (!min || node.f < min.f ? node : min),
@@ -51,10 +61,11 @@ const isValidMove = (state, nodeId) => {
       validMove: false,
       newState: state,
       nodeStatus: "incorrect",
+      message:
+        "Invalid move! In A*, you must select the unvisited node with the lowest f-value.",
     };
   }
 
-  // Update neighbors
   const currentNode = state.nodes.find((n) => n.id === nodeId);
   const neighbors = state.edges
     .filter((e) => e.source === nodeId || e.target === nodeId)
@@ -110,6 +121,7 @@ const AStarGamePage = () => {
     const fixedNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
     setNodeCount(fixedNodeCount);
     setGraphState(generateAStarGraph(fixedNodeCount, selectedDifficulty));
+    setRound(1);
   };
 
   return (
@@ -128,14 +140,10 @@ const AStarGamePage = () => {
       getScore={(status) => (status === "correct" ? 15 : -5)}
       getMessage={(status, nodeId) =>
         status === "incorrect"
-          ? "Invalid move! In A*, select the unvisited node with lowest f-value (f = g + h)."
+          ? "Invalid move! In A*, you must select the unvisited node with the lowest f-value."
           : `Valid move to node ${nodeId}`
       }
-      isGameComplete={(state) => {
-        // Check if we have a valid path to the goal node
-        const goalNode = state.nodes.find((n) => n.id === state.goalNode);
-        return goalNode?.visited && state.currentNode === state.goalNode;
-      }}
+      isGameComplete={(state) => state.nodes.every((node) => node.visited)}
       round={round}
       setRound={setRound}
       totalScore={totalScore}
@@ -143,15 +151,7 @@ const AStarGamePage = () => {
       nodeCount={nodeCount}
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
-      initialMessage="A* starts from node A. Select nodes with lowest f-value (f = g + h) to reach the goal!"
-      VisualizationComponent={({ graphState, onNodeClick }) => (
-        <GraphVisualisation
-          graphState={graphState}
-          onNodeClick={onNodeClick}
-          mode="game"
-          isAStarPage={true}
-        />
-      )}
+      initialMessage="Select a starting node for A* algorithm!"
     />
   );
 };
