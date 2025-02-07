@@ -364,6 +364,8 @@ export default function GamePageStructure({
       setTimeout(() => {
         const algorithm = title.toLowerCase().includes("kruskal")
           ? "kruskal"
+          : title.toLowerCase().includes("prim")
+          ? "prim"
           : title.toLowerCase().includes("dijkstra")
           ? "dijkstra"
           : title.toLowerCase().includes("a*")
@@ -442,44 +444,6 @@ export default function GamePageStructure({
     setGraphState(newState);
     setRound((prev) => prev + 1);
     setTotalScore((prev) => prev + currentScore);
-
-    if (!token) {
-      setMessage("Please log in to submit score to the leaderboard!");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch("/api/scores/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          algorithm: algorithm,
-          difficulty: difficulty,
-          score: currentScore,
-          timeSpent: Date.now() - startTime,
-          movesCount: moves,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit score");
-      }
-
-      setMessage("Score submitted successfully!");
-    } catch (error) {
-      console.error("Error submitting score:", error);
-      setMessage(
-        "Game completed but score submission failed. Please try again."
-      );
-
-      setRound((prev) => prev + 1);
-      setTotalScore((prev) => prev + currentScore);
-      setGraphState(newState);
-    }
   };
 
   if (!difficulty) {

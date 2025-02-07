@@ -181,6 +181,7 @@ const PrimsGamePage = () => {
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
       initialMessage="Select any edge to start building the Minimum Spanning Tree!"
+      algorithm="prim"
     />
   );
 };
