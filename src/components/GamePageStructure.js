@@ -11,7 +11,6 @@ import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { useRouter } from "next/navigation";
 import { generateInitialGraphState } from "@/utils/graphUtils";
 import { generateGameGraph as generateDijkstraGraph } from "./GraphGenerator";
-import { generateAStarGraph } from "@/utils/astarGraphGenerator";
 
 const API_URL = BACKEND_URL;
 
@@ -363,9 +362,14 @@ export default function GamePageStructure({
       });
 
       setTimeout(() => {
+        console.log(title);
         handleRoundComplete(
           score,
-          title.toLowerCase().includes("dijkstra") ? "dijkstra" : "default"
+          title.toLowerCase().includes("dijkstra")
+            ? "dijkstra"
+            : title.toLowerCase().includes("a*")
+            ? "astar"
+            : "default"
         );
       }, 2000);
     }
@@ -404,11 +408,13 @@ export default function GamePageStructure({
   const handleRoundComplete = async (currentScore, algorithm) => {
     const token = localStorage.getItem("token");
 
+    console.log("algorithm:", algorithm);
+
     let newState;
     if (algorithm === "dijkstra") {
       newState = generateInitialGraphState(nodeCount, "dijkstra", difficulty);
     } else if (algorithm === "astar") {
-      newState = generateAStarGraph(nodeCount, difficulty);
+      newState = generateInitialGraphState(nodeCount, "astar", difficulty);
     } else {
       // Keep existing BFS/DFS logic unchanged
       const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);

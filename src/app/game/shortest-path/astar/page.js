@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-import { generateAStarGraph } from "@/utils/astarGraphGenerator";
 import { generateInitialGraphState } from "@/utils/graphUtils.js";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import GraphVisualisation from "@/components/GraphVisualisation";
