@@ -36,26 +36,28 @@ const AStarGamePage = () => {
     const fScore = new Map();
     const cameFrom = new Map();
     const openSet = new Set();
+    const goalNode = state.nodes.find((n) => n.id === state.goalNode);
 
-    // Initialize scores for all nodes
+    const calculateHeuristic = (node) => {
+      const dx = Math.abs(node.x - goalNode.x);
+      const dy = Math.abs(node.y - goalNode.y);
+      const scaleFactor = 0.02;
+      return roundToTwo((dx + dy) * scaleFactor);
+    };
+
+    // Initialize scores from current state
     state.nodes.forEach((node) => {
-      gScore.set(node.id, node.id === state.startNode ? 0 : Infinity);
-      fScore.set(node.id, Infinity);
+      if (node.visited) visited.add(node.id);
+      gScore.set(node.id, node.g === Infinity ? Infinity : node.g);
+      const h = calculateHeuristic(node);
+      fScore.set(node.id, node.f === Infinity ? Infinity : node.f);
+      if (!node.visited && node.f !== Infinity) openSet.add(node.id);
     });
 
-    // First move - selecting start node
+    // First move handling
     if (!state.startNode) {
-      const goalNode = state.nodes.find((n) => n.id === state.goalNode);
-
-      const calculateHeuristic = (node) => {
-        const dx = Math.abs(node.x - goalNode.x);
-        const dy = Math.abs(node.y - goalNode.y);
-        const scaleFactor = 0.02;
-        return roundToTwo((dx + dy) * scaleFactor);
-      };
-
       const newNodes = state.nodes.map((node) => {
-        const h = roundToTwo(calculateHeuristic(node));
+        const h = calculateHeuristic(node);
         const g = node.id === nodeId ? 0 : Infinity;
         const f = node.id === nodeId ? h : Infinity;
 
@@ -83,14 +85,7 @@ const AStarGamePage = () => {
       };
     }
 
-    // Regular moves
-    state.nodes.forEach((node) => {
-      if (node.visited) visited.add(node.id);
-      gScore.set(node.id, node.g);
-      fScore.set(node.id, node.f);
-    });
-
-    // Check if node is already visited
+    // Regular moves - validation
     if (visited.has(nodeId)) {
       return {
         validMove: false,
@@ -101,9 +96,10 @@ const AStarGamePage = () => {
     }
 
     // Find unvisited node with minimum f-value
-    const unvisitedNodes = state.nodes.filter((n) => !n.visited);
+    const unvisitedNodes = state.nodes.filter((n) => !visited.has(n.id));
     const minFNode = unvisitedNodes.reduce(
-      (min, node) => (!min || node.f < min.f ? node : min),
+      (min, node) =>
+        !min || fScore.get(node.id) < fScore.get(min.id) ? node : min,
       null
     );
 
@@ -117,16 +113,6 @@ const AStarGamePage = () => {
       };
     }
 
-    const currentNode = state.nodes.find((n) => n.id === state.currentNode);
-    const goalNode = state.nodes.find((n) => n.id === state.goalNode);
-
-    const calculateHeuristic = (node) => {
-      const dx = Math.abs(node.x - goalNode.x);
-      const dy = Math.abs(node.y - goalNode.y);
-      const scaleFactor = 0.02;
-      return roundToTwo((dx + dy) * scaleFactor);
-    };
-
     // Process neighbors
     const neighbors = state.edges
       .filter(
@@ -135,35 +121,43 @@ const AStarGamePage = () => {
       .map((e) => ({
         id: e.source === state.currentNode ? e.target : e.source,
         weight: e.weight,
-      }));
+      }))
+      .filter((n) => !visited.has(n.id));
 
-    // Update g and f scores for neighbors
+    // Update neighbors' scores
     for (const neighbor of neighbors) {
       const tentativeGScore = roundToTwo(
-        gScore.get(currentNode.id) + neighbor.weight
+        gScore.get(state.currentNode) + neighbor.weight
       );
+      const currentNeighborGScore = gScore.get(neighbor.id);
 
-      if (tentativeGScore < gScore.get(neighbor.id)) {
-        cameFrom.set(neighbor.id, currentNode.id);
+      if (tentativeGScore < currentNeighborGScore) {
+        cameFrom.set(neighbor.id, state.currentNode);
         gScore.set(neighbor.id, tentativeGScore);
-        const h = calculateHeuristic(
-          state.nodes.find((n) => n.id === neighbor.id)
+        const h = roundToTwo(
+          calculateHeuristic(state.nodes.find((n) => n.id === neighbor.id))
         );
-        fScore.set(neighbor.id, roundToTwo(tentativeGScore + h));
+        const newF = roundToTwo(tentativeGScore + h);
+        fScore.set(neighbor.id, newF);
         openSet.add(neighbor.id);
       }
     }
 
+    // Update node states
     const newNodes = state.nodes.map((node) => {
+      const g = gScore.get(node.id);
+      const h = roundToTwo(calculateHeuristic(node));
+      const f = fScore.get(node.id);
+
       return {
         ...node,
-        g: gScore.get(node.id),
-        h: calculateHeuristic(node),
-        f: fScore.get(node.id),
+        g: g === Infinity ? Infinity : roundToTwo(g),
+        h,
+        f: f === Infinity ? Infinity : roundToTwo(f),
         recentlyUpdated: openSet.has(node.id),
-        visited: node.id === nodeId ? true : node.visited,
+        visited: node.id === nodeId ? true : visited.has(node.id),
         current: node.id === nodeId,
-        displayText: `f=${roundToTwo(fScore.get(node.id))}`,
+        displayText: f === Infinity ? "∞" : `f=${roundToTwo(f)}`,
       };
     });
 
