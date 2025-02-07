@@ -170,7 +170,7 @@ export const getNodesForGraph = (graphIndex) => {
   return getKruskalEducationGraphNodes[0]; // Default to first graph if invalid index
 };
 
-const EDGE_STATES = {
+export const EDGE_STATES = {
   NORMAL: "normal",
   CONSIDERING: "checking",
   MST: "mst",

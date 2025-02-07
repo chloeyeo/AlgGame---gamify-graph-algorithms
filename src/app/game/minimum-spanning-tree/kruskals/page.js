@@ -6,6 +6,23 @@ import { generateInitialGraphState } from "@/utils/graphUtils.js";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import { EDGE_STATES } from "@/utils/graphUtils.js";
 
+const findRoot = (components, nodeId) => {
+  if (components.get(nodeId) !== nodeId) {
+    components.set(nodeId, findRoot(components, components.get(nodeId)));
+  }
+  return components.get(nodeId);
+};
+
+const unionComponents = (components, node1, node2) => {
+  const root1 = findRoot(components, node1);
+  const root2 = findRoot(components, node2);
+  if (root1 !== root2) {
+    components.set(root2, root1);
+    return true;
+  }
+  return false;
+};
+
 const KruskalsGamePage = () => {
   const [difficulty, setDifficulty] = useState(null);
   const [round, setRound] = useState(1);
