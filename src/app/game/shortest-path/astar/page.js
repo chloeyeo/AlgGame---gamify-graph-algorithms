@@ -168,12 +168,15 @@ const AStarGamePage = () => {
       const h = roundToTwo(calculateHeuristic(node));
       const f = fScore.get(node.id);
 
+      // Check if this node is a neighbor of the current node
+      const isCurrentNeighbor = neighbors.some((n) => n.id === node.id);
+
       return {
         ...node,
         g: g === Infinity ? Infinity : roundToTwo(g),
         h,
         f: f === Infinity ? Infinity : roundToTwo(f),
-        recentlyUpdated: openSet.has(node.id),
+        recentlyUpdated: isCurrentNeighbor && openSet.has(node.id), // Only mark current neighbors as recently updated
         visited: node.id === nodeId ? true : visited.has(node.id),
         current: node.id === nodeId,
         displayText: f === Infinity ? "∞" : `f=${roundToTwo(f)}`,
