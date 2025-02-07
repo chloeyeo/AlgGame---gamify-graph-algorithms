@@ -6,6 +6,12 @@ import { generateInitialGraphState } from "@/utils/graphUtils.js";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 import GraphVisualisation from "@/components/GraphVisualisation";
 
+const roundToTwo = (num) => {
+  if (num === Infinity) return "∞";
+  if (isNaN(num)) return "∞";
+  return Number(Math.round(num + "e2") + "e-2");
+};
+
 const AStarGamePage = () => {
   const [difficulty, setDifficulty] = useState(null);
   const [round, setRound] = useState(1);
@@ -25,22 +31,145 @@ const AStarGamePage = () => {
     setRound(1);
   };
 
+  // const isValidMove = (state, nodeId) => {
+  //   // First move - selecting start node
+  //   if (!state.startNode) {
+  //     const goalNode = state.nodes.find((n) => n.id === state.goalNode);
+  //     const calculateHeuristic = (node) => {
+  //       return Math.abs(node.x - goalNode.x) + Math.abs(node.y - goalNode.y);
+  //     };
+
+  //     const newNodes = state.nodes.map((node) => ({
+  //       ...node,
+  //       h: calculateHeuristic(node),
+  //       g: node.id === nodeId ? 0 : Infinity,
+  //       f: node.id === nodeId ? calculateHeuristic(node) : Infinity,
+  //       visited: node.id === nodeId,
+  //       current: node.id === nodeId,
+  //       displayText: node.id === nodeId ? `f=${calculateHeuristic(node)}` : "∞",
+  //     }));
+
+  //     return {
+  //       validMove: true,
+  //       newState: {
+  //         ...state,
+  //         nodes: newNodes,
+  //         startNode: nodeId,
+  //         currentNode: nodeId,
+  //       },
+  //       nodeStatus: "correct",
+  //     };
+  //   }
+
+  //   // Regular moves
+  //   if (state.nodes.find((n) => n.id === nodeId).visited) {
+  //     return {
+  //       validMove: false,
+  //       newState: state,
+  //       nodeStatus: "incorrect",
+  //       message: "This node has already been visited!",
+  //     };
+  //   }
+
+  //   // Find unvisited node with minimum f-value
+  //   const unvisitedNodes = state.nodes.filter((n) => !n.visited);
+  //   const minFNode = unvisitedNodes.reduce(
+  //     (min, node) => (!min || node.f < min.f ? node : min),
+  //     null
+  //   );
+
+  //   if (!minFNode || nodeId !== minFNode.id) {
+  //     return {
+  //       validMove: false,
+  //       newState: state,
+  //       nodeStatus: "incorrect",
+  //       message:
+  //         "Invalid move! In A*, you must select the unvisited node with the lowest f-value.",
+  //     };
+  //   }
+
+  //   const currentNode = state.nodes.find((n) => n.id === nodeId);
+  //   const neighbors = state.edges
+  //     .filter((e) => e.source === nodeId || e.target === nodeId)
+  //     .map((e) => ({
+  //       id: e.source === nodeId ? e.target : e.source,
+  //       weight: e.weight,
+  //     }))
+  //     .filter((n) => !state.nodes.find((node) => node.id === n.id).visited);
+
+  //   const newNodes = state.nodes.map((node) => {
+  //     const neighbor = neighbors.find((n) => n.id === node.id);
+  //     if (neighbor) {
+  //       const tentativeGScore = Number(
+  //         (currentNode.g + neighbor.weight).toFixed(2)
+  //       );
+  //       if (tentativeGScore < node.g) {
+  //         const newF = Number((tentativeGScore + node.h).toFixed(2));
+  //         return {
+  //           ...node,
+  //           g: tentativeGScore,
+  //           f: newF,
+  //           recentlyUpdated: true,
+  //           displayText: `f=${newF}`,
+  //         };
+  //       }
+  //     }
+  //     return {
+  //       ...node,
+  //       recentlyUpdated: false,
+  //       visited: node.id === nodeId ? true : node.visited,
+  //       current: node.id === nodeId,
+  //     };
+  //   });
+
+  //   const isComplete =
+  //     nodeId === state.goalNode ||
+  //     newNodes.every((node) => node.visited || node.f === Infinity);
+
+  //   return {
+  //     validMove: true,
+  //     newState: {
+  //       ...state,
+  //       nodes: newNodes,
+  //       currentNode: nodeId,
+  //     },
+  //     nodeStatus: "correct",
+  //     message: isComplete ? "A* algorithm complete!" : undefined,
+  //   };
+  // };
+
   const isValidMove = (state, nodeId) => {
     // First move - selecting start node
     if (!state.startNode) {
       const goalNode = state.nodes.find((n) => n.id === state.goalNode);
       const calculateHeuristic = (node) => {
-        return Math.abs(node.x - goalNode.x) + Math.abs(node.y - goalNode.y);
+        return Number(
+          (
+            Math.abs(node.x - goalNode.x) + Math.abs(node.y - goalNode.y)
+          ).toFixed(2)
+        );
       };
+
+      // Initialize score maps
+      const gScore = new Map();
+      const fScore = new Map();
+
+      state.nodes.forEach((node) => {
+        gScore.set(node.id, node.id === nodeId ? 0 : Infinity);
+        const h = calculateHeuristic(node);
+        fScore.set(node.id, node.id === nodeId ? h : Infinity);
+      });
 
       const newNodes = state.nodes.map((node) => ({
         ...node,
-        h: calculateHeuristic(node),
-        g: node.id === nodeId ? 0 : Infinity,
-        f: node.id === nodeId ? calculateHeuristic(node) : Infinity,
+        h: roundToTwo(calculateHeuristic(node)),
+        g: roundToTwo(gScore.get(node.id)),
+        f: roundToTwo(fScore.get(node.id)),
         visited: node.id === nodeId,
         current: node.id === nodeId,
-        displayText: node.id === nodeId ? `f=${calculateHeuristic(node)}` : "∞",
+        recentlyUpdated: false,
+        displayText:
+          node.id === nodeId ? `f=${roundToTwo(fScore.get(node.id))}` : "∞",
       }));
 
       return {
@@ -56,33 +185,7 @@ const AStarGamePage = () => {
     }
 
     // Regular moves
-    if (state.nodes.find((n) => n.id === nodeId).visited) {
-      return {
-        validMove: false,
-        newState: state,
-        nodeStatus: "incorrect",
-        message: "This node has already been visited!",
-      };
-    }
-
-    // Find unvisited node with minimum f-value
-    const unvisitedNodes = state.nodes.filter((n) => !n.visited);
-    const minFNode = unvisitedNodes.reduce(
-      (min, node) => (!min || node.f < min.f ? node : min),
-      null
-    );
-
-    if (!minFNode || nodeId !== minFNode.id) {
-      return {
-        validMove: false,
-        newState: state,
-        nodeStatus: "incorrect",
-        message:
-          "Invalid move! In A*, you must select the unvisited node with the lowest f-value.",
-      };
-    }
-
-    const currentNode = state.nodes.find((n) => n.id === nodeId);
+    const currentNode = state.nodes.find((n) => n.id === state.currentNode);
     const neighbors = state.edges
       .filter((e) => e.source === nodeId || e.target === nodeId)
       .map((e) => ({
@@ -94,14 +197,14 @@ const AStarGamePage = () => {
     const newNodes = state.nodes.map((node) => {
       const neighbor = neighbors.find((n) => n.id === node.id);
       if (neighbor) {
-        const tentativeGScore = Number(
-          (currentNode.g + neighbor.weight).toFixed(2)
-        );
+        const tentativeGScore = roundToTwo(currentNode.g + neighbor.weight);
         if (tentativeGScore < node.g) {
-          const newF = Number((tentativeGScore + node.h).toFixed(2));
+          const h = roundToTwo(calculateHeuristic(node));
+          const newF = roundToTwo(tentativeGScore + h);
           return {
             ...node,
             g: tentativeGScore,
+            h: h,
             f: newF,
             recentlyUpdated: true,
             displayText: `f=${newF}`,
