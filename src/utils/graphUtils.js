@@ -240,6 +240,10 @@ export const generateInitialGraphState = (
     };
   }
   if (type === "astar") {
+    console.log("Generating initial A* state");
+    console.log("Node count:", nodeCount);
+    console.log("Difficulty:", difficulty);
+
     // Use circular layout for consistent positioning
     const nodes = Array.from({ length: nodeCount }, (_, i) => {
       const angle = (2 * Math.PI * i) / nodeCount;
@@ -297,6 +301,12 @@ export const generateInitialGraphState = (
         });
       }
     }
+
+    // After generating nodes
+    console.log("Generated nodes:", nodes);
+
+    // After generating edges
+    console.log("Generated edges:", edges);
 
     return {
       nodes,
