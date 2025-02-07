@@ -157,6 +157,8 @@ const GraphVisualisation = ({
       isAStarPage,
       isDFSPage,
       isBFSPage,
+      isKruskalsPage: pathname.includes("kruskals"),
+      isPrimsPage: pathname.includes("prims"),
       COLORS,
       onNodeClick,
       graphIndex,
@@ -173,6 +175,7 @@ const GraphVisualisation = ({
     isDijkstraPage,
     isKruskalsPage,
     isPrimsPage,
+    pathname,
   ]);
 
   const getNodeColor = (node) => {

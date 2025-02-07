@@ -11,6 +11,8 @@ const Nodes = {
       isAStarPage,
       isDFSPage,
       isBFSPage,
+      isKruskalsPage,
+      isPrimsPage,
       COLORS,
       onNodeClick,
     }
@@ -21,8 +23,12 @@ const Nodes = {
       .enter()
       .append("g")
       .attr("class", "node")
-      .style("cursor", "pointer")
+      .style("cursor", (d) => {
+        if (isPrimsPage || isKruskalsPage) return "default";
+        return "pointer";
+      })
       .on("click", (event, d) => {
+        if (isPrimsPage || isKruskalsPage) return;
         if (onNodeClick) onNodeClick(d.id);
       });
 
