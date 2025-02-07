@@ -1,210 +1,193 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
-
-const graphAState = {
-  nodes: [
-    { id: "A", visited: false },
-    { id: "B", visited: false },
-    { id: "C", visited: false },
-    { id: "D", visited: false },
-    { id: "E", visited: false },
-    { id: "F", visited: false },
-  ],
-  edges: [
-    { source: "A", target: "B", weight: 7, selected: false },
-    { source: "A", target: "C", weight: 9, selected: false },
-    { source: "A", target: "F", weight: 14, selected: false },
-    { source: "B", target: "C", weight: 10, selected: false },
-    { source: "B", target: "D", weight: 15, selected: false },
-    { source: "C", target: "D", weight: 11, selected: false },
-    { source: "C", target: "F", weight: 2, selected: false },
-    { source: "D", target: "E", weight: 6, selected: false },
-    { source: "E", target: "F", weight: 9, selected: false },
-  ],
-  mstEdges: [],
-  currentEdge: null,
-};
-
-const graphBState = {
-  nodes: [
-    { id: "A", visited: false },
-    { id: "B", visited: false },
-    { id: "C", visited: false },
-    { id: "D", visited: false },
-    { id: "E", visited: false },
-    { id: "F", visited: false },
-    { id: "G", visited: false },
-  ],
-  edges: [
-    { source: "A", target: "B", weight: 4, selected: false },
-    { source: "A", target: "C", weight: 3, selected: false },
-    { source: "B", target: "D", weight: 5, selected: false },
-    { source: "B", target: "E", weight: 2, selected: false },
-    { source: "C", target: "F", weight: 4, selected: false },
-    { source: "D", target: "G", weight: 3, selected: false },
-    { source: "E", target: "G", weight: 4, selected: false },
-    { source: "F", target: "G", weight: 2, selected: false },
-  ],
-  mstEdges: [],
-  currentEdge: null,
-};
-
-const isValidMove = (graphState, edgeIndex) => {
-  // Guard clause for invalid edge index
-  if (
-    edgeIndex === undefined ||
-    edgeIndex < 0 ||
-    edgeIndex >= graphState.edges.length
-  ) {
-    return {
-      newState: graphState,
-      validMove: false,
-      message: "Invalid edge selection.",
-    };
-  }
-
-  const newState = JSON.parse(JSON.stringify(graphState));
-  const selectedEdge = newState.edges[edgeIndex];
-
-  // Guard clause for invalid edge
-  if (!selectedEdge) {
-    return {
-      newState: graphState,
-      validMove: false,
-      message: "Invalid edge selection.",
-    };
-  }
-
-  // Get visited nodes
-  const visitedNodes = new Set(
-    newState.nodes.filter((n) => n.visited).map((n) => n.id)
-  );
-
-  // If no nodes are visited yet, only allow starting from node A
-  if (visitedNodes.size === 0) {
-    if (selectedEdge.source !== "A" && selectedEdge.target !== "A") {
-      return {
-        newState: graphState,
-        validMove: false,
-        message: "Must start from node A!",
-      };
-    }
-  } else {
-    // Check if the edge connects to the visited set
-    const connectsToVisited =
-      (visitedNodes.has(selectedEdge.source) &&
-        !visitedNodes.has(selectedEdge.target)) ||
-      (visitedNodes.has(selectedEdge.target) &&
-        !visitedNodes.has(selectedEdge.source));
-
-    if (!connectsToVisited) {
-      return {
-        newState: graphState,
-        validMove: false,
-        message: "Edge must connect a visited node to an unvisited node!",
-      };
-    }
-
-    // Find the minimum weight among valid edges
-    const minWeight = Math.min(
-      ...newState.edges
-        .filter(
-          (e) =>
-            !e.selected &&
-            ((visitedNodes.has(e.source) && !visitedNodes.has(e.target)) ||
-              (visitedNodes.has(e.target) && !visitedNodes.has(e.source)))
-        )
-        .map((e) => e.weight)
-    );
-
-    if (selectedEdge.weight > minWeight) {
-      return {
-        newState: graphState,
-        validMove: false,
-        message: `Incorrect! There is an available edge with lower weight (${minWeight}).`,
-      };
-    }
-  }
-
-  // Valid move - update the state
-  selectedEdge.selected = true;
-  newState.mstEdges.push({
-    source: selectedEdge.source,
-    target: selectedEdge.target,
-    weight: selectedEdge.weight,
-  });
-
-  // Mark nodes as visited
-  const sourceNode = newState.nodes.find((n) => n.id === selectedEdge.source);
-  const targetNode = newState.nodes.find((n) => n.id === selectedEdge.target);
-  if (sourceNode) sourceNode.visited = true;
-  if (targetNode) targetNode.visited = true;
-
-  newState.currentEdge = edgeIndex;
-
-  let nodeStatus = "regular-move";
-  if (newState.mstEdges.length === newState.nodes.length - 1) {
-    nodeStatus = "final-move";
-  }
-
-  return {
-    newState,
-    validMove: true,
-    nodeStatus,
-    message: getMessage(nodeStatus, edgeIndex, newState),
-  };
-};
-
-const getNodeStatus = (node) => {
-  if (node.visited) return "visited";
-  return "unvisited";
-};
-
-const isGameComplete = (graphState) => {
-  return graphState.mstEdges.length === graphState.nodes.length - 1;
-};
-
-const getMessage = (nodeStatus, edgeIndex, graphState) => {
-  if (edgeIndex === undefined) {
-    return "Start by selecting edges to build the Minimum Spanning Tree. Begin from node A!";
-  }
-
-  const edge = graphState.edges[edgeIndex];
-  const totalWeight = graphState.mstEdges.reduce((sum, e) => sum + e.weight, 0);
-
-  switch (nodeStatus) {
-    case "regular-move":
-      return `Correct! Added edge ${edge.source}-${edge.target} (weight: ${edge.weight}) to the MST. Current total weight: ${totalWeight}`;
-    case "final-move":
-      return `Congratulations! You've completed the MST with total weight ${totalWeight}. All vertices are connected optimally!`;
-    default:
-      return "";
-  }
-};
-
-const getScore = (nodeStatus) => {
-  switch (nodeStatus) {
-    case "regular-move":
-      return 10;
-    case "final-move":
-      return 20;
-    default:
-      return 0;
-  }
-};
+import { generateInitialGraphState } from "@/utils/graphUtils";
+import { EDGE_STATES } from "@/utils/graphUtils";
 
 const PrimsGamePage = () => {
+  const [difficulty, setDifficulty] = useState(null);
+  const [round, setRound] = useState(1);
+  const [totalScore, setTotalScore] = useState(0);
+  const [nodeCount, setNodeCount] = useState(6);
+  const [graphState, setGraphState] = useState(() =>
+    generateInitialGraphState(4, "prim")
+  );
+
+  const handleDifficultySelect = (selectedDifficulty) => {
+    setDifficulty(selectedDifficulty);
+    const fixedNodeCount = DIFFICULTY_SETTINGS[selectedDifficulty].minNodes;
+    setNodeCount(fixedNodeCount);
+    setGraphState(
+      generateInitialGraphState(fixedNodeCount, "prim", selectedDifficulty)
+    );
+    setRound(1);
+    setTotalScore(0);
+  };
+
+  const isValidMove = (state, edgeIndex) => {
+    if (
+      edgeIndex === undefined ||
+      edgeIndex < 0 ||
+      edgeIndex >= state.edges.length
+    ) {
+      return {
+        validMove: false,
+        newState: state,
+        nodeStatus: "incorrect",
+        message: "Invalid edge selection.",
+      };
+    }
+
+    const selectedEdge = state.edges[edgeIndex];
+    const newState = {
+      ...state,
+      edges: state.edges.map((edge) => ({
+        ...edge,
+        state: edge.selected ? EDGE_STATES.MST : EDGE_STATES.NORMAL,
+      })),
+      mstEdges: [...state.mstEdges],
+    };
+
+    if (selectedEdge.selected) {
+      return {
+        validMove: false,
+        newState,
+        nodeStatus: "incorrect",
+        message: "Edge already selected!",
+      };
+    }
+
+    // Get visited nodes
+    const visitedNodes = new Set(
+      newState.nodes.filter((n) => n.visited).map((n) => n.id)
+    );
+
+    // If no nodes are visited, must start from A
+    if (visitedNodes.size === 0) {
+      if (selectedEdge.source !== "A" && selectedEdge.target !== "A") {
+        return {
+          validMove: false,
+          newState: {
+            ...newState,
+            edges: newState.edges.map((edge, idx) => ({
+              ...edge,
+              state: idx === edgeIndex ? EDGE_STATES.CONSIDERING : edge.state,
+            })),
+          },
+          nodeStatus: "incorrect",
+          message: "Must start from node A!",
+        };
+      }
+    } else {
+      // Check if edge connects to visited set
+      const connectsToVisited =
+        (visitedNodes.has(selectedEdge.source) &&
+          !visitedNodes.has(selectedEdge.target)) ||
+        (visitedNodes.has(selectedEdge.target) &&
+          !visitedNodes.has(selectedEdge.source));
+
+      if (!connectsToVisited) {
+        return {
+          validMove: false,
+          newState: {
+            ...newState,
+            edges: newState.edges.map((edge, idx) => ({
+              ...edge,
+              state: idx === edgeIndex ? EDGE_STATES.CONSIDERING : edge.state,
+            })),
+          },
+          nodeStatus: "incorrect",
+          message: "Edge must connect a visited node to an unvisited node!",
+        };
+      }
+
+      // Find minimum weight among valid edges
+      const validEdges = state.edges.filter(
+        (e) =>
+          !e.selected &&
+          ((visitedNodes.has(e.source) && !visitedNodes.has(e.target)) ||
+            (visitedNodes.has(e.target) && !visitedNodes.has(e.source)))
+      );
+
+      const minWeight = Math.min(...validEdges.map((e) => e.weight));
+
+      if (selectedEdge.weight > minWeight) {
+        return {
+          validMove: false,
+          newState: {
+            ...newState,
+            edges: newState.edges.map((edge, idx) => ({
+              ...edge,
+              state: idx === edgeIndex ? EDGE_STATES.CONSIDERING : edge.state,
+            })),
+          },
+          nodeStatus: "incorrect",
+          message: `Incorrect! Choose the edge with minimum weight (${minWeight}) first.`,
+        };
+      }
+    }
+
+    // Valid move - update state
+    newState.edges[edgeIndex].selected = true;
+    newState.edges[edgeIndex].state = EDGE_STATES.MST;
+
+    newState.mstEdges.push({
+      source: selectedEdge.source,
+      target: selectedEdge.target,
+      weight: selectedEdge.weight,
+      state: EDGE_STATES.MST,
+    });
+
+    // Update visited nodes
+    newState.nodes = newState.nodes.map((node) => ({
+      ...node,
+      visited:
+        node.id === selectedEdge.source ||
+        node.id === selectedEdge.target ||
+        visitedNodes.has(node.id),
+    }));
+
+    const isComplete = newState.mstEdges.length === newState.nodes.length - 1;
+    const totalWeight = newState.mstEdges.reduce((sum, e) => sum + e.weight, 0);
+
+    return {
+      validMove: true,
+      newState,
+      nodeStatus: isComplete ? "final-move" : "correct",
+      message: isComplete
+        ? `Congratulations! MST completed with total weight ${totalWeight}!`
+        : `Correct! Added edge ${selectedEdge.source}-${selectedEdge.target} (weight: ${selectedEdge.weight}). Current total weight: ${totalWeight}`,
+    };
+  };
+
   return (
     <GamePageStructure
       title="Prim's Algorithm Game"
-      graphStates={[graphAState, graphBState]}
+      graphState={graphState}
+      setGraphState={setGraphState}
       isValidMove={isValidMove}
-      getNodeStatus={getNodeStatus}
-      isGameComplete={isGameComplete}
-      getMessage={getMessage}
-      getScore={getScore}
+      getNodeStatus={(node) => (node.visited ? "visited" : "unvisited")}
+      getScore={(status) =>
+        status === "correct" ? 10 : status === "final-move" ? 20 : -5
+      }
+      getMessage={(status, edgeIndex, state) => {
+        if (status === "incorrect") {
+          return "Invalid move! In Prim's algorithm, you must select the unvisited edge with the lowest weight that connects to the visited set.";
+        }
+        return `Valid move! Edge selected: ${state.edges[edgeIndex].source}-${state.edges[edgeIndex].target}`;
+      }}
+      isGameComplete={(state) =>
+        state.mstEdges.length === state.nodes.length - 1
+      }
+      round={round}
+      setRound={setRound}
+      totalScore={totalScore}
+      setTotalScore={setTotalScore}
+      nodeCount={nodeCount}
+      difficulty={difficulty}
+      onDifficultySelect={handleDifficultySelect}
+      initialMessage="Start from node A and select edges to build the Minimum Spanning Tree!"
     />
   );
 };
