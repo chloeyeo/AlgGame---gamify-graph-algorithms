@@ -414,6 +414,7 @@ export default function GamePageStructure({
     let newState;
     if (
       algorithm === "kruskal" ||
+      algorithm === "prim" ||
       algorithm === "dijkstra" ||
       algorithm === "astar"
     ) {

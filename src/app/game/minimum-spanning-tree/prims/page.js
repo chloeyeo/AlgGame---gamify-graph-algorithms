@@ -64,24 +64,16 @@ const PrimsGamePage = () => {
       newState.nodes.filter((n) => n.visited).map((n) => n.id)
     );
 
-    // If no nodes are visited, must start from A
+    // Check if this is the first move
     if (visitedNodes.size === 0) {
-      if (selectedEdge.source !== "A" && selectedEdge.target !== "A") {
-        return {
-          validMove: false,
-          newState: {
-            ...newState,
-            edges: newState.edges.map((edge, idx) => ({
-              ...edge,
-              state: idx === edgeIndex ? EDGE_STATES.CONSIDERING : edge.state,
-            })),
-          },
-          nodeStatus: "incorrect",
-          message: "Must start from node A!",
-        };
-      }
+      // Allow starting from any node - just mark the nodes as visited
+      newState.nodes = newState.nodes.map((node) => ({
+        ...node,
+        visited:
+          node.id === selectedEdge.source || node.id === selectedEdge.target,
+      }));
     } else {
-      // Check if edge connects to visited set
+      // Rest of the validation logic for subsequent moves
       const connectsToVisited =
         (visitedNodes.has(selectedEdge.source) &&
           !visitedNodes.has(selectedEdge.target)) ||
@@ -188,7 +180,7 @@ const PrimsGamePage = () => {
       nodeCount={nodeCount}
       difficulty={difficulty}
       onDifficultySelect={handleDifficultySelect}
-      initialMessage="Start from node A and select edges to build the Minimum Spanning Tree!"
+      initialMessage="Select any edge to start building the Minimum Spanning Tree!"
     />
   );
 };
