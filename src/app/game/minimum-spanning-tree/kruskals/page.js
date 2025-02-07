@@ -59,11 +59,23 @@ const KruskalsGamePage = () => {
 
     const selectedEdge = state.edges[edgeIndex];
 
+    // Create a new state object to avoid mutating the original
+    const newState = {
+      ...state,
+      edges: state.edges.map((edge, idx) => ({
+        ...edge,
+        // Set edge state to show weights for all unselected edges
+        state: edge.selected ? EDGE_STATES.SELECTED : EDGE_STATES.NORMAL,
+      })),
+      components: new Map(state.components),
+      mstEdges: [...state.mstEdges],
+    };
+
     // Check if edge is already selected
     if (selectedEdge.selected) {
       return {
         validMove: false,
-        newState: state,
+        newState,
         nodeStatus: "incorrect",
         message: "Edge already selected!",
       };
@@ -74,7 +86,7 @@ const KruskalsGamePage = () => {
     if (unselectedEdges.length === 0) {
       return {
         validMove: false,
-        newState: state,
+        newState,
         nodeStatus: "incorrect",
         message: "No more edges available.",
       };
@@ -86,43 +98,31 @@ const KruskalsGamePage = () => {
     if (selectedEdge.weight > minWeight) {
       return {
         validMove: false,
-        newState: {
-          ...state,
-          edges: state.edges.map((edge, idx) => ({
-            ...edge,
-            state: idx === edgeIndex ? EDGE_STATES.CONSIDERING : edge.state,
-          })),
-        },
+        newState,
         nodeStatus: "incorrect",
         message: `Incorrect! Choose the edge with minimum weight (${minWeight}) first.`,
       };
     }
 
-    // Create new state with deep copy
-    const newState = JSON.parse(JSON.stringify(state));
-    const components = new Map(state.components);
-
     // Check for cycle
-    const sourceRoot = findRoot(components, selectedEdge.source);
-    const targetRoot = findRoot(components, selectedEdge.target);
+    const sourceRoot = findRoot(newState.components, selectedEdge.source);
+    const targetRoot = findRoot(newState.components, selectedEdge.target);
 
     if (sourceRoot === targetRoot) {
       return {
         validMove: false,
-        newState: {
-          ...state,
-          edges: state.edges.map((edge, idx) => ({
-            ...edge,
-            state: idx === edgeIndex ? EDGE_STATES.CYCLE : edge.state,
-          })),
-        },
+        newState,
         nodeStatus: "incorrect",
         message: `Adding edge ${selectedEdge.source}-${selectedEdge.target} would create a cycle!`,
       };
     }
 
     // Valid move - update state
-    unionComponents(components, selectedEdge.source, selectedEdge.target);
+    unionComponents(
+      newState.components,
+      selectedEdge.source,
+      selectedEdge.target
+    );
     newState.edges[edgeIndex].selected = true;
     newState.edges[edgeIndex].state = EDGE_STATES.MST;
 
@@ -143,7 +143,6 @@ const KruskalsGamePage = () => {
         ),
     }));
 
-    newState.components = components;
     newState.currentEdge = edgeIndex;
 
     const isComplete = newState.mstEdges.length === newState.nodes.length - 1;
@@ -151,7 +150,15 @@ const KruskalsGamePage = () => {
 
     return {
       validMove: true,
-      newState,
+      newState: {
+        ...newState,
+        edges: newState.edges.map((edge, idx) => ({
+          ...edge,
+          state: edge.selected ? EDGE_STATES.SELECTED : EDGE_STATES.NORMAL,
+          // Ensure weight is always visible
+          weight: edge.weight,
+        })),
+      },
       nodeStatus: isComplete ? "final-move" : "correct",
       message: isComplete
         ? `Congratulations! MST completed with total weight ${totalWeight}!`

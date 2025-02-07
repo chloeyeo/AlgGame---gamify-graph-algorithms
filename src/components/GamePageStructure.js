@@ -362,15 +362,17 @@ export default function GamePageStructure({
       });
 
       setTimeout(() => {
-        console.log(title);
-        handleRoundComplete(
-          score,
-          title.toLowerCase().includes("dijkstra")
-            ? "dijkstra"
-            : title.toLowerCase().includes("a*")
-            ? "astar"
-            : "default"
-        );
+        const algorithm = title.toLowerCase().includes("kruskal")
+          ? "kruskal"
+          : title.toLowerCase().includes("dijkstra")
+          ? "dijkstra"
+          : title.toLowerCase().includes("a*")
+          ? "astar"
+          : "default";
+
+        handleRoundComplete(score, algorithm);
+        setScore(0);
+        setMoves(0);
       }, 2000);
     }
   }, [graphState, isGameComplete, round, score]);
@@ -407,14 +409,15 @@ export default function GamePageStructure({
 
   const handleRoundComplete = async (currentScore, algorithm) => {
     const token = localStorage.getItem("token");
-
     console.log("algorithm:", algorithm);
 
     let newState;
-    if (algorithm === "dijkstra") {
-      newState = generateInitialGraphState(nodeCount, "dijkstra", difficulty);
-    } else if (algorithm === "astar") {
-      newState = generateInitialGraphState(nodeCount, "astar", difficulty);
+    if (
+      algorithm === "kruskal" ||
+      algorithm === "dijkstra" ||
+      algorithm === "astar"
+    ) {
+      newState = generateInitialGraphState(nodeCount, algorithm, difficulty);
     } else {
       // Keep existing BFS/DFS logic unchanged
       const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
