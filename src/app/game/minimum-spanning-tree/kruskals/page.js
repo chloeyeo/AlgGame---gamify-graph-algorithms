@@ -59,6 +59,16 @@ const KruskalsGamePage = () => {
 
     const selectedEdge = state.edges[edgeIndex];
 
+    // Check if edge is already selected
+    if (selectedEdge.selected) {
+      return {
+        validMove: false,
+        newState: state,
+        nodeStatus: "incorrect",
+        message: "Edge already selected!",
+      };
+    }
+
     // Find minimum weight among unselected edges
     const unselectedEdges = state.edges.filter((e) => !e.selected);
     if (unselectedEdges.length === 0) {
@@ -113,8 +123,8 @@ const KruskalsGamePage = () => {
 
     // Valid move - update state
     unionComponents(components, selectedEdge.source, selectedEdge.target);
-    selectedEdge.selected = true;
-    selectedEdge.state = EDGE_STATES.MST;
+    newState.edges[edgeIndex].selected = true;
+    newState.edges[edgeIndex].state = EDGE_STATES.MST;
 
     newState.mstEdges.push({
       source: selectedEdge.source,
