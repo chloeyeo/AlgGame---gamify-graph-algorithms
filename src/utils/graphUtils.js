@@ -239,6 +239,73 @@ export const generateInitialGraphState = (
       currentNode: null,
     };
   }
+  if (type === "astar") {
+    // Use circular layout for consistent positioning
+    const nodes = Array.from({ length: nodeCount }, (_, i) => {
+      const angle = (2 * Math.PI * i) / nodeCount;
+      const radius = 150; // Fixed radius for consistent spacing
+
+      return {
+        id: String.fromCharCode(65 + i),
+        x: 300 + radius * Math.cos(angle),
+        y: 300 + radius * Math.sin(angle),
+        visited: false,
+        current: false,
+        recentlyUpdated: false,
+        g: Infinity,
+        h: 0,
+        f: Infinity,
+        displayText: "∞",
+      };
+    });
+
+    const edges = [];
+    // Ensure graph is connected
+    for (let i = 1; i < nodes.length; i++) {
+      const parent = Math.floor(Math.random() * i);
+      edges.push({
+        source: nodes[parent].id,
+        target: nodes[i].id,
+        weight: Math.floor(Math.random() * 8) + 1, // Random weight 1-9
+      });
+    }
+
+    // Add extra edges based on difficulty
+    const maxExtraEdges =
+      {
+        easy: 1,
+        medium: 2,
+        hard: 3,
+      }[difficulty] || 1;
+
+    for (let i = 0; i < maxExtraEdges; i++) {
+      const source = Math.floor(Math.random() * nodes.length);
+      const target = Math.floor(Math.random() * nodes.length);
+
+      if (
+        source !== target &&
+        !edges.some(
+          (e) =>
+            (e.source === nodes[source].id && e.target === nodes[target].id) ||
+            (e.source === nodes[target].id && e.target === nodes[source].id)
+        )
+      ) {
+        edges.push({
+          source: nodes[source].id,
+          target: nodes[target].id,
+          weight: Math.floor(Math.random() * 8) + 1,
+        });
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+      startNode: null,
+      currentNode: null,
+      goalNode: nodes[nodes.length - 1].id, // Last node is the goal
+    };
+  }
 
   return {
     nodes: [],
