@@ -59,13 +59,12 @@ const KruskalsGamePage = () => {
 
     const selectedEdge = state.edges[edgeIndex];
 
-    // Create a new state object to avoid mutating the original
+    // Create a new state object
     const newState = {
       ...state,
-      edges: state.edges.map((edge, idx) => ({
+      edges: state.edges.map((edge) => ({
         ...edge,
-        // Set edge state to show weights for all unselected edges
-        state: edge.selected ? EDGE_STATES.SELECTED : EDGE_STATES.NORMAL,
+        state: edge.selected ? EDGE_STATES.MST : EDGE_STATES.NORMAL,
       })),
       components: new Map(state.components),
       mstEdges: [...state.mstEdges],
@@ -81,28 +80,15 @@ const KruskalsGamePage = () => {
       };
     }
 
-    // Find minimum weight among unselected edges
-    const unselectedEdges = state.edges.filter((e) => !e.selected);
-    if (unselectedEdges.length === 0) {
-      return {
-        validMove: false,
-        newState,
-        nodeStatus: "incorrect",
-        message: "No more edges available.",
-      };
-    }
+    // Find minimum weight among unselected edges that don't create cycles
+    const validEdges = state.edges.filter((edge) => {
+      if (edge.selected) return false;
+      const srcRoot = findRoot(newState.components, edge.source);
+      const tgtRoot = findRoot(newState.components, edge.target);
+      return srcRoot !== tgtRoot;
+    });
 
-    const minWeight = Math.min(...unselectedEdges.map((e) => e.weight));
-
-    // Check if selected edge has minimum weight
-    if (selectedEdge.weight > minWeight) {
-      return {
-        validMove: false,
-        newState,
-        nodeStatus: "incorrect",
-        message: `Incorrect! Choose the edge with minimum weight (${minWeight}) first.`,
-      };
-    }
+    const minWeight = Math.min(...validEdges.map((e) => e.weight));
 
     // Check for cycle
     const sourceRoot = findRoot(newState.components, selectedEdge.source);
@@ -111,9 +97,31 @@ const KruskalsGamePage = () => {
     if (sourceRoot === targetRoot) {
       return {
         validMove: false,
-        newState,
+        newState: {
+          ...newState,
+          edges: newState.edges.map((edge, idx) => ({
+            ...edge,
+            state: idx === edgeIndex ? EDGE_STATES.CYCLE : edge.state,
+          })),
+        },
         nodeStatus: "incorrect",
         message: `Adding edge ${selectedEdge.source}-${selectedEdge.target} would create a cycle!`,
+      };
+    }
+
+    // Check if selected edge has minimum weight
+    if (selectedEdge.weight > minWeight) {
+      return {
+        validMove: false,
+        newState: {
+          ...newState,
+          edges: newState.edges.map((edge, idx) => ({
+            ...edge,
+            state: idx === edgeIndex ? EDGE_STATES.CONSIDERING : edge.state,
+          })),
+        },
+        nodeStatus: "incorrect",
+        message: `Incorrect! Choose the edge with minimum weight (${minWeight}) first.`,
       };
     }
 
@@ -123,6 +131,7 @@ const KruskalsGamePage = () => {
       selectedEdge.source,
       selectedEdge.target
     );
+
     newState.edges[edgeIndex].selected = true;
     newState.edges[edgeIndex].state = EDGE_STATES.MST;
 
@@ -130,6 +139,7 @@ const KruskalsGamePage = () => {
       source: selectedEdge.source,
       target: selectedEdge.target,
       weight: selectedEdge.weight,
+      state: EDGE_STATES.MST,
     });
 
     // Update node visited status
@@ -143,22 +153,12 @@ const KruskalsGamePage = () => {
         ),
     }));
 
-    newState.currentEdge = edgeIndex;
-
     const isComplete = newState.mstEdges.length === newState.nodes.length - 1;
     const totalWeight = newState.mstEdges.reduce((sum, e) => sum + e.weight, 0);
 
     return {
       validMove: true,
-      newState: {
-        ...newState,
-        edges: newState.edges.map((edge, idx) => ({
-          ...edge,
-          state: edge.selected ? EDGE_STATES.SELECTED : EDGE_STATES.NORMAL,
-          // Ensure weight is always visible
-          weight: edge.weight,
-        })),
-      },
+      newState,
       nodeStatus: isComplete ? "final-move" : "correct",
       message: isComplete
         ? `Congratulations! MST completed with total weight ${totalWeight}!`
