@@ -138,24 +138,20 @@ const AStarGamePage = () => {
 
     // Process neighbors
     const neighbors = state.edges
-      .filter(
-        (e) => e.source === state.currentNode || e.target === state.currentNode
-      )
+      .filter((e) => e.source === nodeId || e.target === nodeId)
       .map((e) => ({
-        id: e.source === state.currentNode ? e.target : e.source,
+        id: e.source === nodeId ? e.target : e.source,
         weight: e.weight,
       }))
       .filter((n) => !visited.has(n.id));
 
     // Update neighbors' scores
     for (const neighbor of neighbors) {
-      const tentativeGScore = roundToTwo(
-        gScore.get(state.currentNode) + neighbor.weight
-      );
+      const tentativeGScore = roundToTwo(gScore.get(nodeId) + neighbor.weight);
       const currentNeighborGScore = gScore.get(neighbor.id);
 
       if (tentativeGScore < currentNeighborGScore) {
-        cameFrom.set(neighbor.id, state.currentNode);
+        cameFrom.set(neighbor.id, nodeId);
         gScore.set(neighbor.id, tentativeGScore);
         const h = roundToTwo(
           calculateHeuristic(state.nodes.find((n) => n.id === neighbor.id))
