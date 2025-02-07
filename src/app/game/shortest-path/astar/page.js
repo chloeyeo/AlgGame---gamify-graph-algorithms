@@ -56,10 +56,33 @@ const AStarGamePage = () => {
 
     // First move handling
     if (!state.startNode) {
+      // Process neighbors for the first node
+      const neighbors = state.edges
+        .filter((e) => e.source === nodeId || e.target === nodeId)
+        .map((e) => ({
+          id: e.source === nodeId ? e.target : e.source,
+          weight: e.weight,
+        }));
+
+      // Update neighbors' scores for the first node
+      for (const neighbor of neighbors) {
+        const tentativeGScore = neighbor.weight; // Since start node has g=0
+        gScore.set(neighbor.id, tentativeGScore);
+        const h = roundToTwo(
+          calculateHeuristic(state.nodes.find((n) => n.id === neighbor.id))
+        );
+        const newF = roundToTwo(tentativeGScore + h);
+        fScore.set(neighbor.id, newF);
+        openSet.add(neighbor.id);
+      }
+
       const newNodes = state.nodes.map((node) => {
+        const isNeighbor = neighbors.some((n) => n.id === node.id);
         const h = calculateHeuristic(node);
-        const g = node.id === nodeId ? 0 : Infinity;
-        const f = node.id === nodeId ? h : Infinity;
+        const g =
+          node.id === nodeId ? 0 : isNeighbor ? gScore.get(node.id) : Infinity;
+        const f =
+          node.id === nodeId ? h : isNeighbor ? fScore.get(node.id) : Infinity;
 
         return {
           ...node,
@@ -68,8 +91,8 @@ const AStarGamePage = () => {
           f,
           visited: node.id === nodeId,
           current: node.id === nodeId,
-          recentlyUpdated: false,
-          displayText: node.id === nodeId ? `f=${h}` : "∞",
+          recentlyUpdated: isNeighbor,
+          displayText: f === Infinity ? "∞" : `f=${roundToTwo(f)}`,
         };
       });
 
