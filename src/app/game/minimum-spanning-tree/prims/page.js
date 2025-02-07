@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 import { generateInitialGraphState } from "@/utils/graphUtils";
 import { EDGE_STATES } from "@/utils/graphUtils";
+import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
 
 const PrimsGamePage = () => {
   const [difficulty, setDifficulty] = useState(null);
