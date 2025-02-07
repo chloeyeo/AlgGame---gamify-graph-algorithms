@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 import { generateInitialGraphState } from "@/utils/graphUtils.js";
 import { DIFFICULTY_SETTINGS } from "@/constants/gameSettings";
-import GraphVisualisation from "@/components/GraphVisualisation";
 
 const roundToTwo = (num) => {
   if (num === Infinity) return "∞";
@@ -46,38 +45,19 @@ const AStarGamePage = () => {
 
     // First move - selecting start node
     if (!state.startNode) {
-      console.log("First move - Selecting start node:", nodeId);
       const goalNode = state.nodes.find((n) => n.id === state.goalNode);
-      console.log("Goal node:", goalNode);
 
       const calculateHeuristic = (node) => {
-        console.log(`\nCalculating heuristic for ${node.id}:`);
-        console.log(`Node coordinates: (${node.x}, ${node.y})`);
-        console.log(`Goal coordinates: (${goalNode.x}, ${goalNode.y})`);
-
         const dx = Math.abs(node.x - goalNode.x);
         const dy = Math.abs(node.y - goalNode.y);
-        console.log(`dx: ${dx}, dy: ${dy}`);
-
-        // Scale down the Manhattan distance to be comparable to edge weights
-        const scaleFactor = 0.02; // This will make 300 -> 6
-        const h = roundToTwo((dx + dy) * scaleFactor);
-        console.log(`Final h value: ${h}`);
-        return h;
+        const scaleFactor = 0.02;
+        return roundToTwo((dx + dy) * scaleFactor);
       };
 
-      console.log("Initializing nodes with heuristics...");
       const newNodes = state.nodes.map((node) => {
         const h = roundToTwo(calculateHeuristic(node));
         const g = node.id === nodeId ? 0 : Infinity;
         const f = node.id === nodeId ? h : Infinity;
-
-        console.log(`Node ${node.id} initial values:`, {
-          h: h,
-          g: g,
-          f: f,
-          isStart: node.id === nodeId,
-        });
 
         return {
           ...node,
@@ -90,9 +70,6 @@ const AStarGamePage = () => {
           displayText: node.id === nodeId ? `f=${h}` : "∞",
         };
       });
-
-      // After calculating new nodes
-      console.log("New nodes:", newNodes);
 
       return {
         validMove: true,
@@ -107,12 +84,14 @@ const AStarGamePage = () => {
     }
 
     // Regular moves
-    console.log("\nProcessing regular move...");
+    state.nodes.forEach((node) => {
+      if (node.visited) visited.add(node.id);
+      gScore.set(node.id, node.g);
+      fScore.set(node.id, node.f);
+    });
 
     // Check if node is already visited
-    const isVisited = state.nodes.find((n) => n.id === nodeId).visited;
-    if (isVisited) {
-      console.log("Invalid move: Node already visited!");
+    if (visited.has(nodeId)) {
       return {
         validMove: false,
         newState: state,
@@ -123,25 +102,12 @@ const AStarGamePage = () => {
 
     // Find unvisited node with minimum f-value
     const unvisitedNodes = state.nodes.filter((n) => !n.visited);
-    console.log(
-      "Unvisited nodes:",
-      unvisitedNodes.map((n) => ({
-        id: n.id,
-        f: n.f,
-        g: n.g,
-        h: n.h,
-      }))
-    );
-
     const minFNode = unvisitedNodes.reduce(
       (min, node) => (!min || node.f < min.f ? node : min),
       null
     );
-    console.log("Node with minimum f:", minFNode);
-    console.log("Selected node:", nodeId);
 
     if (!minFNode || nodeId !== minFNode.id) {
-      console.log("Invalid move: Not the node with minimum f-value!");
       return {
         validMove: false,
         newState: state,
@@ -153,15 +119,15 @@ const AStarGamePage = () => {
 
     const currentNode = state.nodes.find((n) => n.id === state.currentNode);
     const goalNode = state.nodes.find((n) => n.id === state.goalNode);
-    console.log("Current node:", currentNode);
 
     const calculateHeuristic = (node) => {
-      const h = Math.abs(node.x - goalNode.x) + Math.abs(node.y - goalNode.y);
-      console.log(`Calculating heuristic for node ${node.id}:`, h);
-      return h;
+      const dx = Math.abs(node.x - goalNode.x);
+      const dy = Math.abs(node.y - goalNode.y);
+      const scaleFactor = 0.02;
+      return roundToTwo((dx + dy) * scaleFactor);
     };
 
-    // Find neighbors through edges
+    // Process neighbors
     const neighbors = state.edges
       .filter(
         (e) => e.source === state.currentNode || e.target === state.currentNode
@@ -171,73 +137,39 @@ const AStarGamePage = () => {
         weight: e.weight,
       }));
 
-    console.log("Found neighbors:", neighbors);
+    // Update g and f scores for neighbors
+    for (const neighbor of neighbors) {
+      const tentativeGScore = roundToTwo(
+        gScore.get(currentNode.id) + neighbor.weight
+      );
+
+      if (tentativeGScore < gScore.get(neighbor.id)) {
+        cameFrom.set(neighbor.id, currentNode.id);
+        gScore.set(neighbor.id, tentativeGScore);
+        const h = calculateHeuristic(
+          state.nodes.find((n) => n.id === neighbor.id)
+        );
+        fScore.set(neighbor.id, roundToTwo(tentativeGScore + h));
+        openSet.add(neighbor.id);
+      }
+    }
 
     const newNodes = state.nodes.map((node) => {
-      const neighbor = neighbors.find((n) => n.id === node.id);
-      if (neighbor) {
-        const tentativeGScore = roundToTwo(currentNode.g + neighbor.weight);
-        console.log("Node:", node.id);
-        console.log("Current g:", node.g);
-        console.log("Tentative g:", tentativeGScore);
-        const h = roundToTwo(calculateHeuristic(node));
-        const newF = roundToTwo(tentativeGScore + h);
-        console.log("h value:", h);
-        console.log("New f value:", newF);
-
-        if (tentativeGScore < node.g) {
-          console.log(`Updating node ${node.id} values:`, {
-            oldG: node.g,
-            newG: tentativeGScore,
-            h: h,
-            newF: newF,
-          });
-
-          return {
-            ...node,
-            g: tentativeGScore,
-            h,
-            f: newF,
-            recentlyUpdated: true,
-            displayText: `f=${newF}`,
-          };
-        }
-      }
       return {
         ...node,
-        recentlyUpdated: false,
+        g: gScore.get(node.id),
+        h: calculateHeuristic(node),
+        f: fScore.get(node.id),
+        recentlyUpdated: openSet.has(node.id),
         visited: node.id === nodeId ? true : node.visited,
         current: node.id === nodeId,
+        displayText: `f=${roundToTwo(fScore.get(node.id))}`,
       };
     });
 
     const isComplete =
       nodeId === state.goalNode ||
       newNodes.every((node) => node.visited || node.f === Infinity);
-
-    console.log("\nMove validation complete:");
-    console.log("Is complete:", isComplete);
-    console.log(
-      "Updated nodes:",
-      newNodes.map((n) => ({
-        id: n.id,
-        f: n.f,
-        g: n.g,
-        h: n.h,
-        visited: n.visited,
-        current: n.current,
-      }))
-    );
-
-    // Before returning state
-    console.log("Returning state:", {
-      validMove: true,
-      newState: {
-        ...state,
-        nodes: newNodes,
-        currentNode: nodeId,
-      },
-    });
 
     return {
       validMove: true,
@@ -255,10 +187,7 @@ const AStarGamePage = () => {
     <GamePageStructure
       title="A* Algorithm Game"
       graphState={graphState}
-      setGraphState={(newState) => {
-        console.log("Setting new graph state:", newState);
-        setGraphState(newState);
-      }}
+      setGraphState={setGraphState}
       isValidMove={isValidMove}
       algorithm="astar"
       getNodeStatus={(node) => {
@@ -269,7 +198,6 @@ const AStarGamePage = () => {
           : node.recentlyUpdated
           ? "updated"
           : "unvisited";
-        console.log(`Node ${node.id} status:`, status);
         return status;
       }}
       getScore={(status) => (status === "correct" ? 15 : -5)}
