@@ -79,8 +79,8 @@ const PersonalStats = () => {
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">
+      <div className="px-2 sm:px-4 py-3 sm:py-5">
+        <h3 className="text-base sm:text-lg leading-6 font-medium text-gray-900">
           Your Personal Stats
         </h3>
       </div>
@@ -91,7 +91,7 @@ const PersonalStats = () => {
           <button
             key={difficulty}
             onClick={() => setActiveTab(difficulty)}
-            className={`px-4 py-2 border-b-2 font-medium text-sm capitalize
+            className={`px-2 sm:px-4 py-2 border-b-2 font-medium text-xs sm:text-sm capitalize
               ${
                 activeTab === difficulty
                   ? "border-blue-500 text-blue-600"
@@ -106,54 +106,56 @@ const PersonalStats = () => {
       <div className="border-t border-gray-200">
         <div className="divide-y divide-gray-200">
           {filteredStats.map((stat) => (
-            <div key={stat._id} className="px-4 py-5 sm:p-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">
+            <div key={stat._id} className="px-2 sm:px-4 py-3 sm:py-5">
+              <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-4">
                 {stat._id.toUpperCase()} Top Scores
               </h4>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                      Rank
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                      Score
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                      Moves
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {(stat.scores || [])
-                    .filter((score) => score.difficulty === activeTab)
-                    .slice(0, 5)
-                    .map((score, index) => (
-                      <tr
-                        key={score._id}
-                        className={index % 2 === 0 ? "bg-gray-50" : ""}
-                      >
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className="text-sm text-gray-800">
-                            {getMedalIcon(index + 1)} {index + 1}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
-                          {score.score}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
-                          {Math.floor(score.timeSpent / 1000)}s
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
-                          {score.movesCount}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto -mx-2 sm:mx-0">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-2 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-16">
+                        Rank
+                      </th>
+                      <th className="px-2 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-16">
+                        Score
+                      </th>
+                      <th className="px-2 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-16">
+                        Time
+                      </th>
+                      <th className="px-2 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-16">
+                        Moves
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stat.scores
+                      .filter((score) => score.difficulty === activeTab)
+                      .slice(0, 5)
+                      .map((score, index) => (
+                        <tr
+                          key={score._id}
+                          className={index % 2 === 0 ? "bg-gray-50" : ""}
+                        >
+                          <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap">
+                            <span className="text-xs sm:text-sm text-gray-800">
+                              {getMedalIcon(index + 1)} {index + 1}
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-800">
+                            {score.score}
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-800">
+                            {Math.floor(score.timeSpent / 1000)}s
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-800">
+                            {score.movesCount}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ))}
         </div>

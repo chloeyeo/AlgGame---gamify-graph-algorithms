@@ -39,16 +39,16 @@ export default function LeaderboardPage() {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto px-4 py-20 mb-8">
-      <div className="space-y-8">
-        <div className="bg-blue-50 rounded-lg shadow-lg p-6 mt-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+    <div className="container mx-auto px-2 sm:px-4 py-20 mb-8">
+      <div className="space-y-4 sm:space-y-8">
+        <div className="bg-blue-50 rounded-lg shadow-lg p-3 sm:p-6 mt-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
             Welcome, {user.username}!
           </h1>
           <PersonalStats />
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-8 md:grid-cols-2">
           {Array.isArray(algorithms) &&
             algorithms.map((algorithm) => (
               <Leaderboard key={algorithm} algorithm={algorithm} />
