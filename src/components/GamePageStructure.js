@@ -134,6 +134,18 @@ const generateAlgorithmSpecificGraph = (nodeCount, difficulty, algorithm) => {
 // Export both functions
 export { generateRandomGraph, generateAlgorithmSpecificGraph };
 
+const getAlgorithmFromTitle = (title) => {
+  const titleLower = title.toLowerCase();
+  if (titleLower.includes("dfs")) return "dfs";
+  if (titleLower.includes("bfs")) return "bfs";
+  if (titleLower.includes("dijkstra")) return "dijkstra";
+  if (titleLower.includes("a*")) return "astar";
+  if (titleLower.includes("kruskal")) return "kruskal";
+  if (titleLower.includes("prim")) return "prim";
+  if (titleLower.includes("ford-fulkerson")) return "fordFulkerson";
+  return titleLower.split(" ")[0];
+};
+
 export default function GamePageStructure({
   title = "Graph Traversal Game",
   graphState,
@@ -242,7 +254,7 @@ export default function GamePageStructure({
         },
         credentials: "include",
         body: JSON.stringify({
-          algorithm: title.split(" ")[0].toLowerCase(),
+          algorithm: getAlgorithmFromTitle(title),
           score,
           timeSpent: Date.now() - startTime,
           movesCount: moves,
