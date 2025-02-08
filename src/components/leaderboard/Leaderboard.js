@@ -18,12 +18,15 @@ const Leaderboard = ({ algorithm }) => {
         const token = localStorage.getItem("token");
         console.log(`Fetching leaderboard for ${algorithm}...`);
 
-        const response = await fetch(`/api/scores/leaderboard/${algorithm}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-        });
+        const response = await fetch(
+          `/api/scores/leaderboard/${algorithm}?difficulty=${activeTab}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -124,34 +127,19 @@ const Leaderboard = ({ algorithm }) => {
         <table className="min-w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-16"
-              >
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-16">
                 Rank
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase"
-              >
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase">
                 Player
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20"
-              >
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
                 Score
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20"
-              >
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
                 Time
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20"
-              >
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
                 Moves
               </th>
             </tr>
@@ -162,23 +150,23 @@ const Leaderboard = ({ algorithm }) => {
                 key={entry._id}
                 className={index % 2 === 0 ? "bg-gray-50" : ""}
               >
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <span className="text-sm text-gray-800">
                     {getMedalIcon(index + 1)} {index + 1}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {entry.userId.username}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
                   {entry.score}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
                   {Math.floor(entry.timeSpent / 1000)}s
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
                   {entry.movesCount}
                 </td>
               </tr>

@@ -20,6 +20,11 @@ const scoreSchema = new mongoose.Schema({
       "hungarianKuhnMunkres",
     ],
   },
+  difficulty: {
+    type: String,
+    required: true,
+    enum: ["easy", "medium", "hard"],
+  },
   score: {
     type: Number,
     required: true,

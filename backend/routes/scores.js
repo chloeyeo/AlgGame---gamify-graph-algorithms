@@ -34,11 +34,14 @@ router.get("/leaderboard/:algorithm", async (req, res) => {
 
     console.log(`Fetching leaderboard for ${algorithm}`); // Debug log
 
-    const leaderboard = await Score.find({ algorithm })
+    const leaderboard = await Score.find({
+      algorithm,
+      difficulty: req.query.difficulty || "easy",
+    })
       .sort({ score: -1 })
       .limit(Number(limit))
       .populate("userId", "username")
-      .select("score timeSpent movesCount createdAt");
+      .select("score timeSpent movesCount difficulty createdAt");
 
     console.log(`Found ${leaderboard.length} scores`); // Debug log
 
