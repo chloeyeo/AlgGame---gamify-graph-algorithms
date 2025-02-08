@@ -358,6 +358,12 @@ export default function EducationPageStructure({
   );
 
   const renderGraphSection = (isDesktop = false) => {
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+      setIsMounted(true);
+    }, []);
+
     const graphContent = (
       <div className="w-full h-full flex flex-col">
         <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4">
@@ -495,6 +501,12 @@ export default function EducationPageStructure({
       </div>
     );
 
+    if (!isMounted) {
+      return (
+        <div className="h-full relative bg-white bg-opacity-50 rounded-lg" />
+      );
+    }
+
     return (
       <div
         className={`${
@@ -508,9 +520,13 @@ export default function EducationPageStructure({
             graphContent={graphContent}
             pseudocode={pseudocode}
             pseudoCodeHighlight={pseudoCodeHighlight}
-            isMobile={window.innerWidth < 1024}
+            isMobile={
+              typeof window !== "undefined" ? window.innerWidth < 1024 : false
+            }
             playControls={
-              window.innerWidth < 1024 ? playControlsComponent : null
+              typeof window !== "undefined" && window.innerWidth < 1024
+                ? playControlsComponent
+                : null
             }
           />
         )}
