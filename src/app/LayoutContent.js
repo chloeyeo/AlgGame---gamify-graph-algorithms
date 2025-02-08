@@ -91,11 +91,11 @@ export default function LayoutContent({ children }) {
   return (
     <>
       <header className="fixed top-0 w-screen z-50">
-        <div className="sm:max-w-[576px] sm:mx-auto">
+        <div className="w-full max-w-[576px] mx-auto">
           <Header toggleSidebar={toggleSidebar} />
         </div>
       </header>
-      <div className="relative flex-grow overflow-hidden pt-16">
+      <div className="relative flex-grow overflow-hidden pt-16 sm:pt-20">
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose}
