@@ -50,6 +50,29 @@ const SwipeableGraphView = ({
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-full overflow-hidden"
     >
+      {isMobile && !showPseudocode && (
+        <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
+          <div className="animate-pulse flex items-center gap-2">
+            <span className="text-blue-500 text-lg font-semibold opacity-70">
+              swipe
+            </span>
+            <svg
+              className="w-12 h-8 text-blue-500 opacity-70"
+              fill="none"
+              viewBox="0 0 24 12"
+              stroke="currentColor"
+            >
+              <path
+                d="M1 6h18M15 1l5 5-5 5"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      )}
+
       <div
         className={`absolute w-full h-full transition-transform duration-300 ${
           showPseudocode ? "-translate-x-full" : "translate-x-0"
