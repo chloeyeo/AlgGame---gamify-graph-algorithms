@@ -508,9 +508,9 @@ export default function EducationPageStructure({
             graphContent={graphContent}
             pseudocode={pseudocode}
             pseudoCodeHighlight={pseudoCodeHighlight}
-            isMobile={window.innerWidth <= 375}
+            isMobile={window.innerWidth < 1024}
             playControls={
-              window.innerWidth <= 375 ? playControlsComponent : null
+              window.innerWidth < 1024 ? playControlsComponent : null
             }
           />
         )}

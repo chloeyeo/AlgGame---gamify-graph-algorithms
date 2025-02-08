@@ -18,7 +18,7 @@ const SwipeableGraphView = ({
 
   useEffect(() => {
     const checkMobile = () => {
-      return window.innerWidth <= 375;
+      return window.innerWidth < 1024;
     };
 
     if (!checkMobile()) {
