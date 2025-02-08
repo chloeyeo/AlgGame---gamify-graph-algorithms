@@ -15,22 +15,24 @@ import { generateGameGraph as generateDijkstraGraph } from "./GraphGenerator";
 const API_URL = BACKEND_URL;
 
 const DifficultySelector = ({ onSelect }) => (
-  <main className="hidden lg:flex flex-col h-[calc(100vh-4rem)] items-center justify-center">
+  <div className="flex flex-col h-full items-center justify-center p-4">
     <div className="flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-8">Choose Difficulty Level</h1>
-      <div className="flex gap-4">
+      <h1 className="text-xl lg:text-3xl font-bold mb-4 lg:mb-8">
+        Choose Difficulty Level
+      </h1>
+      <div className="flex flex-wrap gap-2 lg:gap-4 justify-center">
         {Object.keys(DIFFICULTY_SETTINGS).map((level) => (
           <button
             key={level}
             onClick={() => onSelect(level)}
-            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize"
+            className="px-3 py-2 lg:px-6 lg:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize text-sm lg:text-base"
           >
             {level}
           </button>
         ))}
       </div>
     </div>
-  </main>
+  </div>
 );
 
 const generateRandomGraph = (nodeCount = 6, difficulty = "medium") => {
@@ -407,30 +409,6 @@ export default function GamePageStructure({
     }
   }, [score]);
 
-  const DifficultyModal = ({ onClose, onSelect }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-8 rounded-lg shadow-xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Select Difficulty
-        </h2>
-        <div className="flex gap-4 justify-center">
-          {Object.keys(DIFFICULTY_SETTINGS).map((level) => (
-            <button
-              key={level}
-              onClick={() => {
-                onSelect(level);
-                onClose();
-              }}
-              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg capitalize"
-            >
-              {level}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
   const handleRoundComplete = async (currentScore, algorithm) => {
     const token = localStorage.getItem("token");
 
@@ -511,8 +489,8 @@ export default function GamePageStructure({
     );
 
   const renderMainContent = () => (
-    <main className="hidden lg:flex flex-col h-[calc(100vh-4rem)] p-4">
-      <h1 className="text-2xl text-center md:text-3xl font-bold mb-2">
+    <main className="flex flex-col h-full p-2 lg:p-4">
+      <h1 className="text-lg lg:text-2xl text-center md:text-3xl font-bold mb-1 lg:mb-2">
         {title}
       </h1>
 
@@ -597,14 +575,20 @@ export default function GamePageStructure({
   );
 
   return (
-    <>
+    <div className="h-[calc(100vh-4rem)]">
       {renderMainContent()}
       {showDifficultyModal && (
-        <DifficultyModal
-          onClose={() => setShowDifficultyModal(false)}
-          onSelect={onDifficultySelect}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 m-4 max-w-md w-full">
+            <DifficultySelector
+              onSelect={(level) => {
+                onDifficultySelect(level);
+                setShowDifficultyModal(false);
+              }}
+            />
+          </div>
+        </div>
       )}
-    </>
+    </div>
   );
 }
