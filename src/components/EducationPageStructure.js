@@ -364,9 +364,9 @@ export default function EducationPageStructure({
         } relative bg-white bg-opacity-50 rounded-lg`}
       >
         <div className="w-full h-full flex flex-col">
-          <div className="flex items-center gap-4 mb-4 p-4">
-            <div>
-              <label className="mr-2">Number of nodes:</label>
+          <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm">Nodes:</label>
               <input
                 type="range"
                 min="3"
@@ -377,9 +377,9 @@ export default function EducationPageStructure({
                     ? onNodeCountChange(parseInt(e.target.value))
                     : setNodeCount(parseInt(e.target.value))
                 }
-                className="w-48"
+                className="w-24 lg:w-48"
               />
-              <span className="ml-2">
+              <span className="text-sm">
                 {isFordFulkerson ? nodeCountProp : nodeCount}
               </span>
             </div>
@@ -395,15 +395,15 @@ export default function EducationPageStructure({
                 setCurrentGraphStates([steps]);
                 setCurrentStep(0);
               }}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-2 py-1 lg:px-4 lg:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
             >
-              Generate New Graph
+              New Graph
             </button>
 
             <div className="flex gap-2">
               <button
                 onClick={runTraversal}
-                className={`p-2 rounded-full ${
+                className={`p-1 lg:p-2 rounded-full ${
                   !isRunning || isPaused
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-yellow-500 hover:bg-yellow-600"
@@ -411,9 +411,9 @@ export default function EducationPageStructure({
                 title={!isRunning || isPaused ? "Start" : "Pause"}
               >
                 {!isRunning || isPaused ? (
-                  <FaPlay size={20} />
+                  <FaPlay size={16} className="lg:w-5 lg:h-5" />
                 ) : (
-                  <FaPause size={20} />
+                  <FaPause size={16} className="lg:w-5 lg:h-5" />
                 )}
               </button>
 
@@ -422,18 +422,17 @@ export default function EducationPageStructure({
                   if (animationController) {
                     animationController.abort();
                   }
-                  // Reset all states including pause states
                   setAnimationController(null);
                   setIsRunning(false);
                   setIsPaused(false);
-                  isPausedRef.current = false; // Important: Reset the pause ref
+                  isPausedRef.current = false;
                   setCurrentStep(0);
                   setPseudoCodeHighlight([]);
                 }}
-                className="p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+                className="p-1 lg:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
                 title="Restart"
               >
-                <FaRedo size={20} />
+                <FaRedo size={16} className="lg:w-5 lg:h-5" />
               </button>
             </div>
 
@@ -446,7 +445,7 @@ export default function EducationPageStructure({
                 step="100"
                 value={animationSpeed}
                 onChange={(e) => setAnimationSpeed(Number(e.target.value))}
-                className="w-32"
+                className="w-24 lg:w-32"
               />
               <span className="text-sm">{animationSpeed}ms</span>
             </div>
@@ -635,15 +634,17 @@ export default function EducationPageStructure({
 
   // Desktop content
   const desktopContent = (
-    <div className="hidden lg:flex flex-row h-[calc(100vh-4rem)]">
-      <div className="w-1/2 p-4 flex flex-col">
+    <div className="hidden lg:flex flex-row h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="w-1/2 p-4 flex flex-col overflow-hidden">
         <h1 className="text-2xl font-bold mb-2 text-center">Learn {title}</h1>
 
         {/* Graph Section - Set to take remaining height */}
-        <div className="flex-1 mb-2">{renderGraphSection(true)}</div>
+        <div className="flex-1 mb-2 overflow-hidden">
+          {renderGraphSection(true)}
+        </div>
 
-        {/* Explanation Section - Set to auto height */}
-        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-2">
+        {/* Explanation Section - Set to fixed height */}
+        <div className="h-32 bg-white bg-opacity-50 rounded-lg shadow-md p-2 overflow-y-auto no-scrollbar my-4">
           <div className="flex items-center mb-1">
             <h2 className="text-xl font-bold">Explanation</h2>
             <button
@@ -661,31 +662,33 @@ export default function EducationPageStructure({
         </div>
       </div>
 
-      <div className="w-1/2 p-4 overflow-y-auto no-scrollbar border-l border-gray-300">
-        {pseudocode && (
-          <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 mt-2">
-            <h2 className="text-xl font-bold mb-2">Pseudocode</h2>
-            <CodeEditorPseudocode
-              pseudocode={pseudocode}
-              highlightedLines={pseudoCodeHighlight}
-            />
+      <div className="w-1/2 p-4 flex flex-col h-full overflow-hidden border-l border-gray-300">
+        <div className="flex-1 overflow-y-auto no-scrollbar">
+          {pseudocode && (
+            <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 mb-4">
+              <h2 className="text-xl font-bold mb-2">Pseudocode</h2>
+              <CodeEditorPseudocode
+                pseudocode={pseudocode}
+                highlightedLines={pseudoCodeHighlight}
+              />
+            </div>
+          )}
+          <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 my-4">
+            <div className="flex items-center mb-2">
+              <h2 className="text-xl font-bold">{title} Concept</h2>
+              <button
+                onClick={() =>
+                  conceptText && toggleSpeech(conceptText, "concept")
+                }
+                className="ml-2 p-2 rounded-full hover:bg-gray-100"
+              >
+                🔊
+              </button>
+            </div>
+            {conceptText
+              ? renderConceptText(conceptText)
+              : "No concept text available"}
           </div>
-        )}
-        <div className="bg-white bg-opacity-50 rounded-lg shadow-md p-4 mt-4">
-          <div className="flex items-center mb-2">
-            <h2 className="text-xl font-bold">{title} Concept</h2>
-            <button
-              onClick={() =>
-                conceptText && toggleSpeech(conceptText, "concept")
-              }
-              className="ml-2 p-2 rounded-full hover:bg-gray-100"
-            >
-              🔊
-            </button>
-          </div>
-          {conceptText
-            ? renderConceptText(conceptText)
-            : "No concept text available"}
         </div>
       </div>
     </div>
