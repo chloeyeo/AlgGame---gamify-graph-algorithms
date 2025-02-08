@@ -8,6 +8,8 @@ const ModeToggle = ({ onToggle, validPaths }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState(null);
+  const [isLongPress, setIsLongPress] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -43,28 +45,43 @@ const ModeToggle = ({ onToggle, validPaths }) => {
 
   if (!isEducationMode && !isGameMode) return null;
 
-  const handleClick = (e) => {
+  const handleTouchStart = () => {
     if (isMobile) {
-      if (isCollapsed) {
-        setIsCollapsed(false);
-      } else {
-        onToggle();
-      }
-    } else {
-      onToggle();
+      setIsLongPress(false);
+      const timer = setTimeout(() => {
+        setIsLongPress(true);
+        setIsCollapsed(!isCollapsed);
+      }, 500);
+      setLongPressTimer(timer);
     }
   };
 
-  const handleCollapse = () => {
+  const handleTouchEnd = (e) => {
     if (isMobile) {
-      setIsCollapsed(!isCollapsed);
+      e.preventDefault();
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+      }
+      // Only trigger mode toggle if it wasn't a long press
+      if (!isLongPress) {
+        onToggle();
+      }
+      setIsLongPress(false);
+    }
+  };
+
+  const handleClick = (e) => {
+    if (!isMobile) {
+      onToggle();
     }
   };
 
   return (
     <div className="fixed top-24 right-4 z-40">
       <button
-        onClick={handleCollapse}
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         className={`bg-white shadow-lg rounded-lg flex items-center transition-all duration-300 ${
           isMobile && isCollapsed
             ? "w-[40px] h-[40px] p-2 justify-center"
