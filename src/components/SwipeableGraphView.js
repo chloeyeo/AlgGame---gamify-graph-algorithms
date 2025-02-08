@@ -8,6 +8,7 @@ const SwipeableGraphView = ({
   pseudocode,
   pseudoCodeHighlight,
   isMobile,
+  playControls,
 }) => {
   const [showPseudocode, setShowPseudocode] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
@@ -117,7 +118,10 @@ const SwipeableGraphView = ({
         }`}
       >
         <div className="p-4 h-full overflow-y-auto">
-          <h2 className="text-xl font-semibold mb-4">Pseudocode</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Pseudocode</h2>
+            {isMobile && playControls}
+          </div>
           <CodeEditorPseudocode
             pseudocode={pseudocode}
             highlightedLines={pseudoCodeHighlight}

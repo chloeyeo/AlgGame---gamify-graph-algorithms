@@ -457,6 +457,44 @@ export default function EducationPageStructure({
       </div>
     );
 
+    const playControlsComponent = (
+      <div className="flex gap-2">
+        <button
+          onClick={runTraversal}
+          className={`p-1 lg:p-2 rounded-full ${
+            !isRunning || isPaused
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-yellow-500 hover:bg-yellow-600"
+          } text-white`}
+          title={!isRunning || isPaused ? "Start" : "Pause"}
+        >
+          {!isRunning || isPaused ? (
+            <FaPlay size={16} className="lg:w-5 lg:h-5" />
+          ) : (
+            <FaPause size={16} className="lg:w-5 lg:h-5" />
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            if (animationController) {
+              animationController.abort();
+            }
+            setAnimationController(null);
+            setIsRunning(false);
+            setIsPaused(false);
+            isPausedRef.current = false;
+            setCurrentStep(0);
+            setPseudoCodeHighlight([]);
+          }}
+          className="p-1 lg:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+          title="Restart"
+        >
+          <FaRedo size={16} className="lg:w-5 lg:h-5" />
+        </button>
+      </div>
+    );
+
     return (
       <div
         className={`${
@@ -471,6 +509,9 @@ export default function EducationPageStructure({
             pseudocode={pseudocode}
             pseudoCodeHighlight={pseudoCodeHighlight}
             isMobile={window.innerWidth <= 375}
+            playControls={
+              window.innerWidth <= 375 ? playControlsComponent : null
+            }
           />
         )}
       </div>
