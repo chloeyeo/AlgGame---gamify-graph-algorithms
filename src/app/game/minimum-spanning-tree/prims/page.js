@@ -66,12 +66,16 @@ const PrimsGamePage = () => {
 
     // Check if this is the first move
     if (visitedNodes.size === 0) {
-      // Allow starting from any node - just mark the nodes as visited
-      newState.nodes = newState.nodes.map((node) => ({
-        ...node,
-        visited:
-          node.id === selectedEdge.source || node.id === selectedEdge.target,
-      }));
+      // For first move, should still pick lowest weight edge
+      const minWeight = Math.min(...state.edges.map((e) => e.weight));
+      if (selectedEdge.weight > minWeight) {
+        return {
+          validMove: false,
+          newState,
+          nodeStatus: "incorrect",
+          message: `Incorrect! Choose the edge with minimum weight (${minWeight}) first.`,
+        };
+      }
     } else {
       // Rest of the validation logic for subsequent moves
       const connectsToVisited =
