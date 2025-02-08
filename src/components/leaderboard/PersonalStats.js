@@ -64,12 +64,18 @@ const PersonalStats = () => {
     }
   };
 
-  const filteredStats = personalStats.map((stat) => ({
-    ...stat,
-    scores: (stat.scores || []).filter(
-      (score) => score.difficulty === activeTab
-    ),
-  }));
+  const filteredStats = personalStats
+    .filter(
+      (stat) =>
+        (stat.scores || []).filter((score) => score.difficulty === activeTab)
+          .length > 0
+    )
+    .map((stat) => ({
+      ...stat,
+      scores: (stat.scores || []).filter(
+        (score) => score.difficulty === activeTab
+      ),
+    }));
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
