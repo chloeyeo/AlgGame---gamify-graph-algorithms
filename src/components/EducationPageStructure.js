@@ -4,6 +4,7 @@ import CodeEditorPseudocode from "./CodeEditorPseudocode";
 import { FaPlay, FaPause, FaRedo } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { incrementGraphCounter } from "@/store/slices/graphSlice";
+import SwipeableGraphView from "./SwipeableGraphView";
 
 const ExplanationSection = ({ step }) => {
   if (!step) {
@@ -357,114 +358,121 @@ export default function EducationPageStructure({
   );
 
   const renderGraphSection = (isDesktop = false) => {
+    const graphContent = (
+      <div className="w-full h-full flex flex-col">
+        <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm">Nodes:</label>
+            <input
+              type="range"
+              min="3"
+              max={isFordFulkerson ? "6" : "7"}
+              value={isFordFulkerson ? nodeCountProp : nodeCount}
+              onChange={(e) =>
+                isFordFulkerson
+                  ? onNodeCountChange(parseInt(e.target.value))
+                  : setNodeCount(parseInt(e.target.value))
+              }
+              className="w-24 lg:w-48"
+            />
+            <span className="text-sm">
+              {isFordFulkerson ? nodeCountProp : nodeCount}
+            </span>
+          </div>
+
+          <button
+            onClick={() => {
+              dispatch(incrementGraphCounter());
+              const { nodes, edges } = generateRandomGraph(
+                nodeCount,
+                isFordFulkerson
+              );
+              const steps = generateSteps(nodes, edges);
+              setCurrentGraphStates([steps]);
+              setCurrentStep(0);
+            }}
+            className="px-2 py-1 lg:px-4 lg:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+          >
+            New Graph
+          </button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={runTraversal}
+              className={`p-1 lg:p-2 rounded-full ${
+                !isRunning || isPaused
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-yellow-500 hover:bg-yellow-600"
+              } text-white`}
+              title={!isRunning || isPaused ? "Start" : "Pause"}
+            >
+              {!isRunning || isPaused ? (
+                <FaPlay size={16} className="lg:w-5 lg:h-5" />
+              ) : (
+                <FaPause size={16} className="lg:w-5 lg:h-5" />
+              )}
+            </button>
+
+            <button
+              onClick={() => {
+                if (animationController) {
+                  animationController.abort();
+                }
+                setAnimationController(null);
+                setIsRunning(false);
+                setIsPaused(false);
+                isPausedRef.current = false;
+                setCurrentStep(0);
+                setPseudoCodeHighlight([]);
+              }}
+              className="p-1 lg:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+              title="Restart"
+            >
+              <FaRedo size={16} className="lg:w-5 lg:h-5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-sm">Speed:</label>
+            <input
+              type="range"
+              min="100"
+              max="2000"
+              step="100"
+              value={animationSpeed}
+              onChange={(e) => setAnimationSpeed(Number(e.target.value))}
+              className="w-24 lg:w-32"
+            />
+            <span className="text-sm">{animationSpeed}ms</span>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <GraphVisualisationComponent
+            graphState={getCurrentGraphState()}
+            isGraphA={activeTab === 0}
+            graphIndex={activeTab}
+          />
+        </div>
+      </div>
+    );
+
     return (
       <div
         className={`${
           isDesktop ? "h-full" : "h-[400px]"
         } relative bg-white bg-opacity-50 rounded-lg`}
       >
-        <div className="w-full h-full flex flex-col">
-          <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm">Nodes:</label>
-              <input
-                type="range"
-                min="3"
-                max={isFordFulkerson ? "6" : "7"}
-                value={isFordFulkerson ? nodeCountProp : nodeCount}
-                onChange={(e) =>
-                  isFordFulkerson
-                    ? onNodeCountChange(parseInt(e.target.value))
-                    : setNodeCount(parseInt(e.target.value))
-                }
-                className="w-24 lg:w-48"
-              />
-              <span className="text-sm">
-                {isFordFulkerson ? nodeCountProp : nodeCount}
-              </span>
-            </div>
-
-            <button
-              onClick={() => {
-                dispatch(incrementGraphCounter());
-                const { nodes, edges } = generateRandomGraph(
-                  nodeCount,
-                  isFordFulkerson
-                );
-                const steps = generateSteps(nodes, edges);
-                setCurrentGraphStates([steps]);
-                setCurrentStep(0);
-              }}
-              className="px-2 py-1 lg:px-4 lg:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-            >
-              New Graph
-            </button>
-
-            <div className="flex gap-2">
-              <button
-                onClick={runTraversal}
-                className={`p-1 lg:p-2 rounded-full ${
-                  !isRunning || isPaused
-                    ? "bg-green-500 hover:bg-green-600"
-                    : "bg-yellow-500 hover:bg-yellow-600"
-                } text-white`}
-                title={!isRunning || isPaused ? "Start" : "Pause"}
-              >
-                {!isRunning || isPaused ? (
-                  <FaPlay size={16} className="lg:w-5 lg:h-5" />
-                ) : (
-                  <FaPause size={16} className="lg:w-5 lg:h-5" />
-                )}
-              </button>
-
-              <button
-                onClick={() => {
-                  if (animationController) {
-                    animationController.abort();
-                  }
-                  setAnimationController(null);
-                  setIsRunning(false);
-                  setIsPaused(false);
-                  isPausedRef.current = false;
-                  setCurrentStep(0);
-                  setPseudoCodeHighlight([]);
-                }}
-                className="p-1 lg:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
-                title="Restart"
-              >
-                <FaRedo size={16} className="lg:w-5 lg:h-5" />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-sm">Speed:</label>
-              <input
-                type="range"
-                min="100"
-                max="2000"
-                step="100"
-                value={animationSpeed}
-                onChange={(e) => setAnimationSpeed(Number(e.target.value))}
-                className="w-24 lg:w-32"
-              />
-              <span className="text-sm">{animationSpeed}ms</span>
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <div className="h-full flex items-center justify-center">
-              {isLoading ? (
-                <p>Loading graph...</p>
-              ) : (
-                <GraphVisualisationComponent
-                  graphState={getCurrentGraphState()}
-                  isGraphA={activeTab === 0}
-                  graphIndex={activeTab}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+        {isDesktop ? (
+          graphContent
+        ) : (
+          <SwipeableGraphView
+            graphContent={graphContent}
+            pseudocode={pseudocode}
+            pseudoCodeHighlight={pseudoCodeHighlight}
+            isMobile={window.innerWidth <= 375}
+          />
+        )}
       </div>
     );
   };
