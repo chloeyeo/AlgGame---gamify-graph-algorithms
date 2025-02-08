@@ -495,23 +495,22 @@ export default function GamePageStructure({
       </h1>
 
       <div className="flex flex-col flex-1">
-        {/* Top Controls Bar */}
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex gap-6">
-            <div className="text-lg">Round: {round}</div>
-            <div className="text-lg">Total Score: {totalScore}</div>
-            <div className="text-lg">Best Round Score: {bestScore}</div>
-            <div className="flex gap-4">
-              <div>Score: {score}</div>
-              <div>Moves: {moves}</div>
-            </div>
+        {/* Top Controls Bar - Reorganized for mobile */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-2">
+          {/* Scores Section */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 lg:flex lg:gap-6 text-xs lg:text-lg mb-2 lg:mb-0">
+            <div>Round: {round}</div>
+            <div>Total: {totalScore}</div>
+            <div>Best: {bestScore}</div>
+            <div>Score: {score}</div>
+            <div>Moves: {moves}</div>
           </div>
 
-          {/* Compact Feedback Section */}
-          <div className="mx-4 flex-shrink-0 w-64">
-            <div className="bg-white border border-gray-300 rounded-lg p-2">
-              <div className="flex items-center justify-between mb-1">
-                <h2 className="text-sm font-semibold">Feedback</h2>
+          {/* Feedback Section */}
+          <div className="w-full lg:w-64 lg:mx-4 mb-2 lg:mb-0">
+            <div className="bg-white border border-gray-300 rounded-lg p-1 lg:p-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs lg:text-sm font-semibold">Feedback</h2>
                 <button
                   onClick={() => toggleSpeech(message)}
                   className={`p-1 rounded-full hover:bg-gray-100 ${
@@ -521,28 +520,29 @@ export default function GamePageStructure({
                   🔊
                 </button>
               </div>
-              <p className="text-sm text-center">{message}</p>
+              <p className="text-xs lg:text-sm text-center">{message}</p>
             </div>
           </div>
 
-          <div className="flex gap-4">
+          {/* Game Control Buttons */}
+          <div className="flex gap-2 lg:gap-4">
             <button
               onClick={resetGame}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors"
+              className="flex-1 lg:flex-none bg-yellow-500 hover:bg-yellow-600 text-white px-2 lg:px-4 py-1 lg:py-2 rounded text-xs lg:text-base"
             >
-              Reset Game
+              Reset
             </button>
             <button
               onClick={() => setShowDifficultyModal(true)}
-              className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded"
+              className="flex-1 lg:flex-none px-2 lg:px-4 py-1 lg:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs lg:text-base"
             >
-              Change Difficulty
+              Difficulty
             </button>
           </div>
         </div>
 
-        {/* Centered Graph Section */}
-        <div className="flex-1 relative mx-auto w-4/5 mb-4">
+        {/* Rest of the content remains the same */}
+        <div className="flex-1 relative mx-auto w-full lg:w-4/5 mb-4">
           <div className="h-full bg-white border border-gray-300 rounded-lg overflow-hidden">
             {renderGraphTabs()}
             <div className="flex items-center justify-center h-[calc(100%-2rem)]">
@@ -562,7 +562,7 @@ export default function GamePageStructure({
                       : "bg-red-500"
                   } bg-opacity-75`}
                 >
-                  <p className="text-white text-2xl font-bold">
+                  <p className="text-white text-sm lg:text-2xl font-bold">
                     {overlayState.content.text}
                   </p>
                 </div>
