@@ -73,8 +73,8 @@ export default function MyAccountPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto bg-gray-50 bg-opacity-40 rounded-lg shadow-md p-6">
+      <div className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        <div className="max-w-4xl mx-auto bg-gray-50 bg-opacity-40 rounded-lg shadow-md p-4 lg:p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">My Account</h1>
             <button
@@ -143,13 +143,13 @@ export default function MyAccountPage() {
               <div className="mt-8">
                 <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
                 <div className="space-y-4">
-                  <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
+                  <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Change Password
                   </button>
-                  <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
+                  <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Update Profile
                   </button>
-                  <button className="w-full px-4 py-2 text-left border rounded hover:bg-gray-50">
+                  <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Notification Settings
                   </button>
                 </div>

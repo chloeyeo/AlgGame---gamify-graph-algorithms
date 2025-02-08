@@ -95,7 +95,13 @@ export default function LayoutContent({ children }) {
           <Header toggleSidebar={toggleSidebar} />
         </div>
       </header>
-      <div className="relative flex-grow overflow-hidden pt-16 sm:pt-20 lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
+      <div
+        className={`relative flex-grow overflow-hidden pt-16 sm:pt-20 ${
+          pathname === "/myaccount" || pathname === "/leaderboard"
+            ? "lg:h-auto lg:overflow-visible"
+            : "lg:h-[calc(100vh-4rem)] lg:overflow-hidden"
+        }`}
+      >
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={handleSidebarClose}
