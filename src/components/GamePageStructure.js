@@ -151,6 +151,8 @@ export default function GamePageStructure({
   difficulty,
   onDifficultySelect,
   initialMessage = "Start from any node!",
+  GraphVisualisationComponent = GraphVisualisation,
+  isFordFulkerson = false,
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
@@ -411,10 +413,23 @@ export default function GamePageStructure({
 
   const handleRoundComplete = async (currentScore, algorithm) => {
     const token = localStorage.getItem("token");
-    console.log("algorithm:", algorithm);
 
     let newState;
-    if (
+    if (isFordFulkerson) {
+      newState = {
+        ...graphState,
+        currentPath: [],
+        maxFlow: 0,
+        gamePhase: "SHOW_PATH",
+        currentPathIndex: 0,
+        flowOptions: [],
+        currentEdgeIndex: 0,
+        userAnswers: {},
+        correctAnswers: {},
+        pathFlow: 0,
+        feedback: null,
+      };
+    } else if (
       algorithm === "kruskal" ||
       algorithm === "prim" ||
       algorithm === "dijkstra" ||
@@ -533,12 +548,13 @@ export default function GamePageStructure({
           <div className="h-full bg-white border border-gray-300 rounded-lg overflow-hidden">
             {renderGraphTabs()}
             <div className="flex items-center justify-center h-[calc(100%-2rem)]">
-              <GraphVisualisation
+              <GraphVisualisationComponent
                 graphState={getCurrentGraphState()}
                 onNodeClick={handleNodeClick}
                 mode="game"
                 isGraphA={activeTab === 0}
                 graphIndex={activeTab}
+                isFordFulkerson={isFordFulkerson}
               />
               {overlayState.show && (
                 <div
