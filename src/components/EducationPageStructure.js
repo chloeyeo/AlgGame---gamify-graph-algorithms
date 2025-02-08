@@ -222,6 +222,11 @@ export default function EducationPageStructure({
   const [animationController, setAnimationController] = useState(null);
   const animationSpeedRef = useRef(animationSpeed);
   const dispatch = useDispatch();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Generate initial graph on mount
   useEffect(() => {
@@ -358,12 +363,6 @@ export default function EducationPageStructure({
   );
 
   const renderGraphSection = (isDesktop = false) => {
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-      setIsMounted(true);
-    }, []);
-
     const graphContent = (
       <div className="w-full h-full flex flex-col">
         <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4">
@@ -501,19 +500,15 @@ export default function EducationPageStructure({
       </div>
     );
 
-    if (!isMounted) {
-      return (
-        <div className="h-full relative bg-white bg-opacity-50 rounded-lg" />
-      );
-    }
-
     return (
       <div
         className={`${
           isDesktop ? "h-full" : "h-[400px]"
         } relative bg-white bg-opacity-50 rounded-lg`}
       >
-        {isDesktop ? (
+        {!isMounted ? (
+          <div className="h-full relative bg-white bg-opacity-50 rounded-lg" />
+        ) : isDesktop ? (
           graphContent
         ) : (
           <SwipeableGraphView
