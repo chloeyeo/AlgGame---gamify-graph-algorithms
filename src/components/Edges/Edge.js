@@ -231,6 +231,10 @@ const Edges = {
 
     // Add edge weight labels
     if (isDijkstraPage || isAStarPage || isKruskalsPage || isPrimsPage) {
+      // First remove any existing edge weight labels
+      edgeGroups.selectAll(".edge-weight").remove();
+
+      // Add new edge weight labels
       edgeGroups
         .append("text")
         .attr("class", "edge-weight")
@@ -238,38 +242,44 @@ const Edges = {
           const sourceNode = nodes.find((n) => n.id === d.source);
           const targetNode = nodes.find((n) => n.id === d.target);
           if (!sourceNode || !targetNode) return 0;
-          if (
-            (isPrimsPage || isKruskalsPage) &&
-            ((d.source === "A" && d.target === "F") ||
-              (d.source === "F" && d.target === "A"))
-          ) {
-            return (sourceNode.x + targetNode.x) / 2;
-          }
-          return (sourceNode.x + targetNode.x) / 2;
+
+          // Calculate midpoint
+          const midX = (sourceNode.x + targetNode.x) / 2;
+
+          // Add offset based on edge angle to avoid overlaps
+          const angle = Math.atan2(
+            targetNode.y - sourceNode.y,
+            targetNode.x - sourceNode.x
+          );
+          const offset = 15;
+          return midX + offset * Math.sin(angle);
         })
         .attr("y", (d) => {
           const sourceNode = nodes.find((n) => n.id === d.source);
           const targetNode = nodes.find((n) => n.id === d.target);
           if (!sourceNode || !targetNode) return 0;
-          if (
-            (isPrimsPage || isKruskalsPage) &&
-            ((d.source === "A" && d.target === "F") ||
-              (d.source === "F" && d.target === "A"))
-          ) {
-            return (sourceNode.y + targetNode.y) / 2 - 120;
-          }
-          return (sourceNode.y + targetNode.y) / 2 - 10;
+
+          // Calculate midpoint
+          const midY = (sourceNode.y + targetNode.y) / 2;
+
+          // Add offset based on edge angle to avoid overlaps
+          const angle = Math.atan2(
+            targetNode.y - sourceNode.y,
+            targetNode.x - sourceNode.x
+          );
+          const offset = 15;
+          return midY - offset * Math.cos(angle);
         })
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .text((d) => d.weight || d.distance || "")
-        .attr("fill", COLORS.EDGE_WEIGHT)
+        .text((d) => d.weight)
+        .attr("fill", "black")
         .attr("font-size", "15px")
         .attr("font-weight", "bold")
-        .attr("dy", -5)
         .attr("stroke", "white")
-        .attr("stroke-width", "10px")
-        .attr("paint-order", "stroke");
+        .attr("stroke-width", "5px")
+        .attr("paint-order", "stroke")
+        .raise();
     }
 
     // Add floating edges list for Kruskal's algorithm
