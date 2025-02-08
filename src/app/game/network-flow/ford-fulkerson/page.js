@@ -12,6 +12,7 @@ import {
   EDGE_TYPES,
   getEdgeStyle,
   FordFulkersonGraphVisualisation,
+  generateRandomGraph,
 } from "@/app/education/network-flow/ford-fulkerson/page";
 
 const FordFulkersonGamePage = () => {
@@ -20,7 +21,7 @@ const FordFulkersonGamePage = () => {
   const [totalScore, setTotalScore] = useState(0);
   const [nodeCount, setNodeCount] = useState(5);
   const [graphState, setGraphState] = useState(() => {
-    const initialGraph = generateFordFulkersonGraph(nodeCount);
+    const initialGraph = generateRandomGraph(nodeCount);
     return {
       ...initialGraph,
       currentPath: [],
@@ -71,7 +72,7 @@ const FordFulkersonGamePage = () => {
         ? 6
         : 8;
     setNodeCount(newNodeCount);
-    const newGraph = generateFordFulkersonGraph(newNodeCount);
+    const newGraph = generateRandomGraph(newNodeCount);
     setGraphState({
       ...newGraph,
       currentPath: [],
@@ -89,7 +90,7 @@ const FordFulkersonGamePage = () => {
 
   // Reset graph for new round
   useEffect(() => {
-    const newGraph = generateFordFulkersonGraph(nodeCount);
+    const newGraph = generateRandomGraph(nodeCount);
     setGraphState({
       ...newGraph,
       currentPath: [],
