@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import EducationPageStructure from "@/components/EducationPageStructure";
 import { useSelector } from "react-redux";
 
 // Helper functions
-const isEdgeInPath = (edge, path) => {
+export const isEdgeInPath = (edge, path) => {
   if (!path || path.length < 2) return false;
   for (let i = 0; i < path.length - 1; i++) {
     if (
@@ -18,7 +18,7 @@ const isEdgeInPath = (edge, path) => {
   return false;
 };
 
-const findPath = (source, sink, edges, flows) => {
+export const findPath = (source, sink, edges, flows) => {
   const visited = new Set();
   const path = [];
 
@@ -55,7 +55,7 @@ const findPath = (source, sink, edges, flows) => {
   return null;
 };
 
-const calculateBottleneck = (path, edges, flows) => {
+export const calculateBottleneck = (path, edges, flows) => {
   let bottleneck = Infinity;
 
   for (let i = 0; i < path.length - 1; i++) {
@@ -83,26 +83,7 @@ const calculateBottleneck = (path, edges, flows) => {
   return bottleneck;
 };
 
-const updateFlows = (path, bottleneck, flows) => {
-  for (let i = 0; i < path.length - 1; i++) {
-    const current = path[i];
-    const next = path[i + 1];
-
-    const forwardKey = `${current}-${next}`;
-    const backwardKey = `${next}-${current}`;
-
-    const existingForwardFlow = flows.get(forwardKey) || 0;
-    const existingBackwardFlow = flows.get(backwardKey) || 0;
-
-    if (existingBackwardFlow > 0) {
-      flows.set(backwardKey, existingBackwardFlow - bottleneck);
-    } else {
-      flows.set(forwardKey, existingForwardFlow + bottleneck);
-    }
-  }
-};
-
-const calculateNodeFlows = (nodes, edges) => {
+export const calculateNodeFlows = (nodes, edges) => {
   return nodes.map((node) => {
     const inFlow = edges
       .filter((e) => e.target === node.id)
@@ -120,7 +101,7 @@ const calculateNodeFlows = (nodes, edges) => {
   });
 };
 
-const generateSteps = (initialNodes, initialEdges) => {
+export const generateSteps = (initialNodes, initialEdges) => {
   const steps = [];
   const flows = new Map();
 
@@ -290,7 +271,7 @@ const generateSteps = (initialNodes, initialEdges) => {
   return steps;
 };
 
-const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
+export const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
   const nodes = [];
   const width = 800; // Increased canvas size
   const height = 600;
@@ -409,50 +390,22 @@ const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
     );
     if (connectedNode) addEdge(id, connectedNode);
   });
-
-  // // Ensure path from source to sink exists
-  // let current = "S";
-  // const visited = new Set([current]);
-
-  // while (current !== "T") {
-  //   const availableNodes = nodes
-  //     .filter((n) => !visited.has(n.id) && n.id !== "S")
-  //     .sort(() => Math.random() - 0.5);
-
-  //   const next = availableNodes[0].id;
-  //   addEdge(current, next);
-  //   visited.add(next);
-  //   current = next;
-  // }
-
-  // // Add random additional edges based on density
-  // nodes.forEach((node1) => {
-  //   nodes.forEach((node2) => {
-  //     if (node1.id !== node2.id && Math.random() < edgeDensity) {
-  //       // Prevent backwards flow to source and forward flow from sink
-  //       if (node2.id !== "S" && node1.id !== "T") {
-  //         addEdge(node1.id, node2.id);
-  //       }
-  //     }
-  //   });
-  // });
-
   return { nodes, edges };
 };
 
-const NODE_TYPES = {
+export const NODE_TYPES = {
   SOURCE: { color: "#90EE90" }, // Light green
   SINK: { color: "#FFB6C1" }, // Light pink
   NORMAL: { color: "#FFFFFF" }, // White
 };
 
-const EDGE_TYPES = {
+export const EDGE_TYPES = {
   CURRENT_PATH: { color: "#4169E1" }, // Royal blue
   CURRENT_EDGE: { color: "#FF69B4" }, // Hot pink
   NORMAL: { color: "#000000" }, // Black
 };
 
-const getEdgeStyle = (edge, graphState) => {
+export const getEdgeStyle = (edge, graphState) => {
   const isCurrentEdge =
     graphState?.currentEdge &&
     ((edge.source === graphState.currentEdge.source &&
@@ -481,13 +434,7 @@ const getEdgeStyle = (edge, graphState) => {
   }
 };
 
-const FordFulkersonGraphVisualisation = ({ graphState }) => {
-  const getFlowLabel = (edge) => {
-    const flow = edge.flow || 0;
-    const capacity = edge.capacity || "undefined";
-    return `${flow}/${capacity}`;
-  };
-
+export const FordFulkersonGraphVisualisation = ({ graphState }) => {
   const drawArrowPath = (source, target) => {
     // Calculate the direction vector
     console.log("target:", target);

@@ -1,47 +1,68 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GamePageStructure from "@/components/GamePageStructure";
 import { generateFordFulkersonGraph } from "@/utils/graphGenerator";
+import {
+  generateSteps,
+  isEdgeInPath,
+  findPath,
+  calculateBottleneck,
+  calculateNodeFlows,
+  generateRandomGraph,
+  NODE_TYPES,
+  EDGE_TYPES,
+  getEdgeStyle,
+  FordFulkersonGraphVisualisation,
+} from "@/app/education/network-flow/ford-fulkerson/page";
 
 const FordFulkersonGamePage = () => {
   const [difficulty, setDifficulty] = useState(null);
+  const [nodeCount, setNodeCount] = useState(5);
   const [graphState, setGraphState] = useState(() => {
-    const initialGraph = generateFordFulkersonGraph(6);
+    const initialGraph = generateRandomGraph(nodeCount);
     return {
       ...initialGraph,
       currentPath: [],
+      currentEdge: null,
       maxFlow: 0,
-      gamePhase: "SHOW_PATH",
-      currentPathIndex: 0,
-      flowOptions: [],
-      currentEdgeIndex: 0,
-      userAnswers: {},
-      correctAnswers: {},
-      pathFlow: 0,
-      feedback: null,
+      isRunning: false,
+      // gamePhase: "SHOW_PATH",
+      // currentPathIndex: 0,
+      // flowOptions: [],
+      // currentEdgeIndex: 0,
+      // userAnswers: {},
+      // correctAnswers: {},
+      // pathFlow: 0,
+      // feedback: null,
     };
   });
 
-  const findEdge = (state, source, target) => {
-    return state.edges.find(
-      (e) =>
-        (e.source === source && e.target === target) ||
-        (e.source === target && e.target === source)
-    );
+  const handleNodeCountChange = (newCount) => {
+    setNodeCount(newCount);
+    const newGraph = generateRandomGraph(newCount);
+    setGraphState({
+      ...newGraph,
+      currentPath: [],
+      currentEdge: null,
+      maxFlow: 0,
+      isRunning: false,
+    });
   };
 
-  const getResidualCapacity = (edge, source, target) => {
-    if (edge.source === source) {
-      return edge.capacity - edge.flow;
-    }
-    return edge.flow;
-  };
+  // after difficulty change or page reload or round end this useEffect should run
+  useEffect(() => {
+    const newGraph = generateRandomGraph(nodeCount);
+    setGraphState({
+      ...newGraph,
+      currentPath: [],
+      currentEdge: null,
+      maxFlow: 0,
+      isRunning: false,
+    });
+  }, [nodeCount]);
 
-  const isValidMove = (state, edgeIndex) => {
-    // Your existing flow validation logic here
-    // Return object with validMove, newState, nodeStatus, message
-  };
+  const initialSteps = generateSteps(graphState.nodes, graphState.edges);
 
   return (
     <GamePageStructure
