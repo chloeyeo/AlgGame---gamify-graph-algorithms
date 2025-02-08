@@ -39,20 +39,17 @@ const ModeToggle = ({ onToggle, validPaths }) => {
   return (
     <div className="fixed top-24 right-4 z-40">
       <button
-        // onClick={handleModeToggle}
-        // onClick={onToggle}
         onClick={handleClick}
-        className={`bg-white shadow-lg rounded-lg px-4 py-2 flex items-center space-x-2 transition-colors ${
+        className={`bg-white shadow-lg rounded-lg px-2 py-1 sm:px-4 sm:py-2 flex items-center space-x-1 sm:space-x-2 transition-colors ${
           targetPathExists ? "hover:bg-gray-50" : "hover:bg-red-50"
         }`}
         title={!targetPathExists ? "This mode is not yet implemented" : ""}
-        // className="bg-white shadow-lg rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-50 transition-colors"
       >
-        <span className="text-sm font-medium">
+        <span className="text-xs sm:text-sm font-medium">
           Switch to {isEducationMode ? "Game" : "Education"} Mode
         </span>
         <svg
-          className="w-5 h-5"
+          className="w-4 h-4 sm:w-5 sm:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
