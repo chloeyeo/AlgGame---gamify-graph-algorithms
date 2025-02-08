@@ -74,7 +74,7 @@ export default function MyAccountPage() {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 p-4 lg:p-8 overflow-y-auto">
-        <div className="max-w-4xl mx-auto bg-gray-50 bg-opacity-40 rounded-lg shadow-md p-4 lg:p-6 mb-8">
+        <div className="max-w-4xl mx-auto bg-gray-50 bg-opacity-40 rounded-lg shadow-md p-4 lg:p-6 mb-2">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">My Account</h1>
             <button
