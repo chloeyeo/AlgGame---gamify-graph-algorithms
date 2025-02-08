@@ -9,13 +9,15 @@ export async function GET(request, { params }) {
   try {
     const { algorithm } = params;
     const token = request.cookies.get("token")?.value;
+    const searchParams = new URL(request.url).searchParams;
+    const difficulty = searchParams.get("difficulty") || "easy";
 
     if (!token) {
       return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
 
     const response = await axios.get(
-      `${API_URL}/api/scores/leaderboard/${algorithm}`,
+      `${API_URL}/api/scores/leaderboard/${algorithm}?difficulty=${difficulty}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

@@ -234,12 +234,13 @@ export default function GamePageStructure({
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(`${BACKEND_URL}/api/scores`, {
+      const response = await fetch("/api/scores", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           algorithm: title.split(" ")[0].toLowerCase(),
           score,
@@ -249,15 +250,22 @@ export default function GamePageStructure({
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Score submission failed:", errorData);
-        throw new Error(errorData.message || "Failed to submit score");
+      const contentType = response.headers.get("content-type");
+      let data;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        throw new Error("Received non-JSON response from server");
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit score");
+      }
+
       setScoreSubmitted(true);
       setMessage("Score submitted successfully!");
+      submitAttempted.current = true;
     } catch (error) {
       console.error("Score submission error:", error);
       setMessage(

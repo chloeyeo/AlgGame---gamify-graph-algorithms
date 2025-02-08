@@ -11,14 +11,21 @@ export async function POST(request) {
     }
 
     const body = await request.json();
+    console.log("Submitting score:", body);
 
     const response = await axios.post(`${API_URL}/api/scores`, body, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    console.log("Score submission response:", response.data);
     return NextResponse.json(response.data);
   } catch (error) {
-    console.error("Score submission error:", error);
+    console.error("Score submission error details:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+
     return NextResponse.json(
       { error: error.response?.data?.message || "Failed to submit score" },
       { status: error.response?.status || 500 }

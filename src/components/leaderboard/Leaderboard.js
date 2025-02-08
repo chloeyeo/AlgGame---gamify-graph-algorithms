@@ -16,7 +16,7 @@ const Leaderboard = ({ algorithm }) => {
     const fetchLeaderboard = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log(`Fetching leaderboard for ${algorithm}...`);
+        console.log(`Fetching leaderboard for ${algorithm} (${activeTab})...`);
 
         const response = await fetch(
           `/api/scores/leaderboard/${algorithm}?difficulty=${activeTab}`,
@@ -60,7 +60,7 @@ const Leaderboard = ({ algorithm }) => {
     };
 
     fetchLeaderboard();
-  }, [algorithm]);
+  }, [algorithm, activeTab]);
 
   const filteredData = leaderboardData.filter(
     (entry) => entry.difficulty === activeTab

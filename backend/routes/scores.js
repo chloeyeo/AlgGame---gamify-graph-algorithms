@@ -8,8 +8,12 @@ const router = express.Router();
 // Submit new score (protected route)
 router.post("/", auth, async (req, res) => {
   try {
-    const { algorithm, score, timeSpent, movesCount } = req.body;
+    const { algorithm, score, timeSpent, movesCount, difficulty } = req.body;
     const userId = req.user.userId;
+
+    if (!difficulty || !["easy", "medium", "hard"].includes(difficulty)) {
+      return res.status(400).json({ message: "Invalid difficulty level" });
+    }
 
     const newScore = new Score({
       userId,
@@ -17,11 +21,13 @@ router.post("/", auth, async (req, res) => {
       score,
       timeSpent,
       movesCount,
+      difficulty,
     });
 
     await newScore.save();
     res.status(201).json(newScore);
   } catch (error) {
+    console.error("Score submission error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
