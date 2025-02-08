@@ -11,6 +11,8 @@ const SwipeableGraphView = ({
 }) => {
   const [showPseudocode, setShowPseudocode] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
+  const [hasShownPseudocode, setHasShownPseudocode] = useState(false);
+  const [showReturnIndicator, setShowReturnIndicator] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -36,6 +38,11 @@ const SwipeableGraphView = ({
 
     if (swipeDistance > 50 && !showPseudocode) {
       setShowPseudocode(true);
+      if (!hasShownPseudocode) {
+        setHasShownPseudocode(true);
+        setShowReturnIndicator(true);
+        setTimeout(() => setShowReturnIndicator(false), 3000);
+      }
     } else if (swipeDistance < -50 && showPseudocode) {
       setShowPseudocode(false);
     }
@@ -50,20 +57,43 @@ const SwipeableGraphView = ({
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-full overflow-hidden"
     >
-      {isMobile && !showPseudocode && (
+      {isMobile && !showPseudocode && !hasShownPseudocode && (
+        <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
+          <div className="animate-pulse flex items-center gap-2">
+            <svg
+              className="w-8 h-8 text-blue-500 opacity-70 rotate-180"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-blue-500 text-lg font-semibold opacity-70">
+              swipe
+            </span>
+          </div>
+        </div>
+      )}
+
+      {isMobile && showPseudocode && showReturnIndicator && (
         <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
           <div className="animate-pulse flex items-center gap-2">
             <span className="text-blue-500 text-lg font-semibold opacity-70">
               swipe
             </span>
             <svg
-              className="w-12 h-8 text-blue-500 opacity-70"
+              className="w-8 h-8 text-blue-500 opacity-70"
               fill="none"
-              viewBox="0 0 24 12"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
               <path
-                d="M1 6h18M15 1l5 5-5 5"
+                d="M13 5l7 7-7 7M5 5l7 7-7 7"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
