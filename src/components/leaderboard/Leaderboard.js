@@ -9,6 +9,8 @@ const Leaderboard = ({ algorithm }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("easy");
+  const difficulties = ["easy", "medium", "hard"];
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -30,9 +32,7 @@ const Leaderboard = ({ algorithm }) => {
         const data = await response.json();
         console.log(`Received data for ${algorithm}:`, data);
 
-        // Ensure we're working with valid data
         if (Array.isArray(data)) {
-          // Map the data to ensure all required fields exist
           const processedData = data.map((entry) => ({
             _id: entry._id || `temp-${Math.random()}`,
             userId: {
@@ -41,6 +41,7 @@ const Leaderboard = ({ algorithm }) => {
             score: entry.score || 0,
             timeSpent: entry.timeSpent || 0,
             movesCount: entry.movesCount || 0,
+            difficulty: entry.difficulty || "easy",
           }));
           setLeaderboardData(processedData);
         } else {
@@ -57,6 +58,10 @@ const Leaderboard = ({ algorithm }) => {
 
     fetchLeaderboard();
   }, [algorithm]);
+
+  const filteredData = leaderboardData.filter(
+    (entry) => entry.difficulty === activeTab
+  );
 
   const getMedalIcon = (rank) => {
     switch (rank) {
@@ -96,6 +101,25 @@ const Leaderboard = ({ algorithm }) => {
           {algorithm.toUpperCase()} Leaderboard
         </h3>
       </div>
+
+      {/* Difficulty Tabs */}
+      <div className="flex border-b border-gray-200">
+        {difficulties.map((difficulty) => (
+          <button
+            key={difficulty}
+            onClick={() => setActiveTab(difficulty)}
+            className={`px-4 py-2 border-b-2 font-medium text-sm capitalize
+              ${
+                activeTab === difficulty
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-800 hover:text-gray-700 hover:border-gray-700"
+              }`}
+          >
+            {difficulty}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-gray-50">
@@ -130,16 +154,10 @@ const Leaderboard = ({ algorithm }) => {
               >
                 Moves
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-24"
-              >
-                Difficulty
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {leaderboardData.slice(0, 5).map((entry, index) => (
+            {filteredData.slice(0, 5).map((entry, index) => (
               <tr
                 key={entry._id}
                 className={index % 2 === 0 ? "bg-gray-50" : ""}
@@ -162,9 +180,6 @@ const Leaderboard = ({ algorithm }) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
                   {entry.movesCount}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 capitalize">
-                  {entry.difficulty}
                 </td>
               </tr>
             ))}
