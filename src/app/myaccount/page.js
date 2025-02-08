@@ -85,9 +85,9 @@ export default function MyAccountPage() {
             </button>
           </div>
 
-          <div className="mb-6 border-b">
+          <div className="mb-6 border-b flex">
             <button
-              className={`px-4 py-2 ${
+              className={`flex-1 px-2 lg:px-4 py-2 text-sm lg:text-base ${
                 activeTab === "details" ? "border-b-2 border-blue-500" : ""
               }`}
               onClick={() => setActiveTab("details")}
@@ -95,7 +95,7 @@ export default function MyAccountPage() {
               Account Details
             </button>
             <button
-              className={`px-4 py-2 ${
+              className={`flex-1 px-2 lg:px-4 py-2 text-sm lg:text-base ${
                 activeTab === "achievements" ? "border-b-2 border-blue-500" : ""
               }`}
               onClick={() => setActiveTab("achievements")}
@@ -107,11 +107,11 @@ export default function MyAccountPage() {
           {activeTab === "details" ? (
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-gray-200 flex items-center justify-center">
                   <img
                     src="/images/lion.png"
                     alt="Profile"
-                    className="w-16 h-16 rounded-full"
+                    className="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-contain"
                   />
                 </div>
                 <div>
