@@ -273,9 +273,9 @@ export const generateSteps = (initialNodes, initialEdges) => {
 
 export const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
   const nodes = [];
-  const width = 800; // Increased canvas size
+  const width = 700;
   const height = 600;
-  const padding = 150; // Increased padding
+  const padding = 100;
   const centerX = width / 2;
   const centerY = height / 2;
 
@@ -292,7 +292,7 @@ export const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
     const angle = baseAngle + randomOffset;
 
     // Randomize radius within a range to prevent nodes from forming perfect circle
-    const minRadius = (height - 2 * padding) / 3;
+    const minRadius = (height - 2 * padding) / 2.5;
     const maxRadius = (height - 2 * padding) / 2;
     const radius = minRadius + Math.random() * (maxRadius - minRadius);
 
@@ -472,7 +472,7 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
   };
 
   return (
-    <svg width="800" height="380">
+    <svg width="100%" height="100%" viewBox="0 0 700 500">
       <defs>
         <marker
           id="arrowhead"
@@ -579,7 +579,7 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
           </text>
         </g>
       </g>
-      <g transform="translate(40, -100)">
+      <g transform="translate(0, 0)">
         {(graphState?.edges || []).map((edge, idx) => {
           const source = graphState?.nodes?.find((n) => n.id === edge.source);
           const target = graphState?.nodes?.find((n) => n.id === edge.target);
