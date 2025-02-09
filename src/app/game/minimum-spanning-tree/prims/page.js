@@ -109,7 +109,7 @@ const PrimsGamePage = () => {
 
       const minWeight = Math.min(...validEdges.map((e) => e.weight));
 
-      if (selectedEdge.weight > minWeight) {
+      if (selectedEdge.weight !== minWeight) {
         return {
           validMove: false,
           newState: {
@@ -120,7 +120,7 @@ const PrimsGamePage = () => {
             })),
           },
           nodeStatus: "incorrect",
-          message: `Incorrect! Choose the edge with minimum weight (${minWeight}) first.`,
+          message: `Incorrect! Choose an edge with minimum weight (${minWeight}) first.`,
         };
       }
     }
