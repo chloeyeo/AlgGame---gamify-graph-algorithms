@@ -96,11 +96,13 @@ export default function LayoutContent({ children }) {
         </div>
       </header>
       <div
-        className={`relative flex-grow overflow-hidden pt-16 sm:pt-20 ${
+        className={`relative flex-grow pt-16 sm:pt-20 ${
           pathname === "/myaccount" ||
           pathname === "/leaderboard" ||
           pathname === "/about"
-            ? "lg:h-auto lg:overflow-visible"
+            ? "lg:h-auto"
+            : pathname === "/"
+            ? "h-auto"
             : "lg:h-[calc(100vh-4rem)] lg:overflow-hidden"
         }`}
       >
