@@ -28,6 +28,12 @@ const SwipeableGraphView = ({
 
   const handleTouchStart = (e) => {
     if (!isMobile) return;
+
+    // Check if the touch started within the pseudocode pre element
+    const target = e.target;
+    const isPseudocodeContent = target.closest("pre");
+    if (isPseudocodeContent) return;
+
     setTouchStart(e.touches[0].clientX);
   };
 
