@@ -129,7 +129,7 @@ const SwipeableGraphView = ({
           showPseudocode ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="p-4 h-full overflow-y-auto">
+        <div className="p-4 h-full overflow-y-auto no-scrollbar">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Pseudocode</h2>
             {isMobile && playControls}
