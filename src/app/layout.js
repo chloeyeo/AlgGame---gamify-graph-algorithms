@@ -13,7 +13,9 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`h-full ${pathname === "/auth" ? "no-scroll" : ""}`}
+      className={`h-full no-scrollbar ${
+        pathname === "/auth" ? "no-scroll" : ""
+      }`}
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />

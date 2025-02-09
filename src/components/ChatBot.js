@@ -10,6 +10,9 @@ const ChatBot = () => {
     "How do I navigate the page?",
     "What are the different algorithms available?",
     "How do I switch between education and game mode?",
+    "How does the scoring system work?",
+    "What are the different difficulty levels?",
+    "How do I use the chatbot?",
   ];
 
   useEffect(() => {
@@ -35,19 +38,56 @@ const ChatBot = () => {
     switch (question) {
       case "How do I navigate the page?":
         answer =
-          "Use the sidebar menu to navigate between different sections of the site. Click on the menu icon in the top left corner to open the sidebar.";
+          "Use the sidebar menu (☰) in the top-left corner to navigate between different algorithms. Each algorithm has both education and game modes available.";
         break;
       case "What are the different algorithms available?":
         answer =
-          "We offer various graph algorithms including Dijkstra's, A*, Prim's, and Kruskal's algorithms. You can select these from the sidebar menu.";
+          "We offer several graph algorithms:\n\n" +
+          "• Traversal:\n" +
+          "  - BFS\n" +
+          "  - DFS\n\n" +
+          "• Shortest Path:\n" +
+          "  - Dijkstra's\n" +
+          "  - A*\n\n" +
+          "• Minimum Spanning Tree:\n" +
+          "  - Prim's\n" +
+          "  - Kruskal's\n\n" +
+          "• Network Flow:\n" +
+          "  - Ford-Fulkerson";
         break;
       case "How do I switch between education and game mode?":
         answer =
-          "You can switch between education and game mode using the toggle in the sidebar menu. Education mode provides detailed explanations, while game mode offers interactive challenges.";
+          "Use the toggle button (<svg class='inline-block w-4 h-4' viewBox='0 0 24 24'><path fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'></path></svg>) in the top-right corner of any algorithm page to switch between education and game modes.\n\nEducation mode helps you learn the algorithm step by step, while game mode tests your understanding through interactive challenges.";
+        break;
+      case "How does the scoring system work?":
+        answer =
+          "The scoring system works as follows:\n\n" +
+          "• Correct moves: +10-15 points\n" +
+          "• Incorrect moves: -5 points\n" +
+          "• Completing a round: +20 bonus points\n\n" +
+          "Your scores are saved to the leaderboard if you're logged in.";
+        break;
+      case "What are the different difficulty levels?":
+        answer =
+          "There are three difficulty levels:\n\n" +
+          "• Easy: Fewer nodes and simpler graph structures\n" +
+          "• Medium: More nodes and moderate complexity\n" +
+          "• Hard: Maximum nodes and challenging configurations\n\n" +
+          "You can change difficulty during gameplay using the Difficulty button.";
+        break;
+      case "How do I use the chatbot?":
+        answer =
+          "I'm here to help! You can:\n\n" +
+          "• Click on any preset questions above\n" +
+          "• Type your own question about:\n" +
+          "  - Algorithms\n" +
+          "  - Gameplay\n" +
+          "  - Navigation\n" +
+          "  - Features";
         break;
       default:
         answer =
-          "I'm sorry, I don't have an answer for that question. Is there anything else I can help you with?";
+          "I'm sorry, I don't have an answer for that question. Please try one of the suggested questions above, or rephrase your question.";
     }
 
     setTimeout(() => {
