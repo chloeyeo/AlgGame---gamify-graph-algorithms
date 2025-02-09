@@ -6,26 +6,39 @@ const CodeEditorPseudocode = ({ pseudocode, highlightedLines = [] }) => {
 
   useEffect(() => {
     if (containerRef.current) {
+      // Check if we're on mobile or tablet screen
+      const isMobileOrTablet = window.innerWidth < 1024;
+
       const contentDiv = containerRef.current.querySelector(".content-wrapper");
       if (contentDiv) {
-        // Calculate max width from actual line content widths
         const maxWidth = Array.from(contentDiv.children).reduce((max, line) => {
           const lineContent = line.querySelector(".line-content");
           return Math.max(max, lineContent?.scrollWidth || 0);
         }, 0);
 
-        // Add small padding to prevent text from touching the edge
         const paddedWidth = maxWidth + 10;
 
-        // Set width explicitly on the pre element to constrain scrolling
-        containerRef.current.style.width = `${paddedWidth}px`;
-        contentDiv.style.width = `${paddedWidth}px`;
+        // Only set constrained width for mobile and tablet screens
+        if (isMobileOrTablet) {
+          contentDiv.style.width = `${paddedWidth}px`;
 
-        // Set width for highlight containers
-        const highlights = contentDiv.querySelectorAll(".highlight-container");
-        highlights.forEach((highlight) => {
-          highlight.style.width = `${paddedWidth}px`;
-        });
+          const highlights = contentDiv.querySelectorAll(
+            ".highlight-container"
+          );
+          highlights.forEach((highlight) => {
+            highlight.style.width = `${paddedWidth}px`;
+          });
+        } else {
+          // For desktop, let it take full width
+          contentDiv.style.width = "100%";
+
+          const highlights = contentDiv.querySelectorAll(
+            ".highlight-container"
+          );
+          highlights.forEach((highlight) => {
+            highlight.style.width = "100%";
+          });
+        }
       }
     }
   }, [pseudocode, highlightedLines]);
