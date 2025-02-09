@@ -365,8 +365,9 @@ export default function EducationPageStructure({
   const renderGraphSection = (isDesktop = false) => {
     const graphContent = (
       <div className="w-full h-full flex flex-col">
-        <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 min-w-fit">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-2 p-2 md:p-4 overflow-x-auto overflow-y-hidden whitespace-nowrap no-scrollbar">
+          {/* Nodes Control */}
+          <div className="flex items-center gap-2 shrink-0">
             <label className="text-sm">Nodes:</label>
             <input
               type="range"
@@ -378,13 +379,14 @@ export default function EducationPageStructure({
                   ? onNodeCountChange(parseInt(e.target.value))
                   : setNodeCount(parseInt(e.target.value))
               }
-              className="w-24 lg:w-48"
+              className="w-24 md:w-32 lg:w-48"
             />
             <span className="text-sm">
               {isFordFulkerson ? nodeCountProp : nodeCount}
             </span>
           </div>
 
+          {/* New Graph Button */}
           <button
             onClick={() => {
               dispatch(incrementGraphCounter());
@@ -396,15 +398,16 @@ export default function EducationPageStructure({
               setCurrentGraphStates([steps]);
               setCurrentStep(0);
             }}
-            className="px-2 py-1 lg:px-4 lg:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 min-w-fit"
+            className="px-2 py-1 md:px-3 md:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 shrink-0"
           >
             New Graph
           </button>
 
-          <div className="flex gap-2 min-w-fit">
+          {/* Play Controls */}
+          <div className="flex gap-2 shrink-0">
             <button
               onClick={runTraversal}
-              className={`p-1 lg:p-2 rounded-full ${
+              className={`p-1 md:p-2 rounded-full ${
                 !isRunning || isPaused
                   ? "bg-green-500 hover:bg-green-600"
                   : "bg-yellow-500 hover:bg-yellow-600"
@@ -412,9 +415,9 @@ export default function EducationPageStructure({
               title={!isRunning || isPaused ? "Start" : "Pause"}
             >
               {!isRunning || isPaused ? (
-                <FaPlay size={16} className="lg:w-5 lg:h-5" />
+                <FaPlay size={16} className="md:w-5 md:h-5" />
               ) : (
-                <FaPause size={16} className="lg:w-5 lg:h-5" />
+                <FaPause size={16} className="md:w-5 md:h-5" />
               )}
             </button>
 
@@ -430,14 +433,15 @@ export default function EducationPageStructure({
                 setCurrentStep(0);
                 setPseudoCodeHighlight([]);
               }}
-              className="p-1 lg:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+              className="p-1 md:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
               title="Restart"
             >
-              <FaRedo size={16} className="lg:w-5 lg:h-5" />
+              <FaRedo size={16} className="md:w-5 md:h-5" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 min-w-fit">
+          {/* Speed Control */}
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
             <label className="text-sm">Speed:</label>
             <input
               type="range"
@@ -446,7 +450,7 @@ export default function EducationPageStructure({
               step="100"
               value={animationSpeed}
               onChange={(e) => setAnimationSpeed(Number(e.target.value))}
-              className="w-24 lg:w-32"
+              className="w-24 md:w-32 lg:w-36"
             />
             <span className="text-sm">{animationSpeed}ms</span>
           </div>
@@ -466,7 +470,7 @@ export default function EducationPageStructure({
       <div className="flex gap-2">
         <button
           onClick={runTraversal}
-          className={`p-1 lg:p-2 rounded-full ${
+          className={`p-1 md:p-2 rounded-full ${
             !isRunning || isPaused
               ? "bg-green-500 hover:bg-green-600"
               : "bg-yellow-500 hover:bg-yellow-600"
@@ -474,9 +478,9 @@ export default function EducationPageStructure({
           title={!isRunning || isPaused ? "Start" : "Pause"}
         >
           {!isRunning || isPaused ? (
-            <FaPlay size={16} className="lg:w-5 lg:h-5" />
+            <FaPlay size={16} className="md:w-5 md:h-5" />
           ) : (
-            <FaPause size={16} className="lg:w-5 lg:h-5" />
+            <FaPause size={16} className="md:w-5 md:h-5" />
           )}
         </button>
 
@@ -492,10 +496,10 @@ export default function EducationPageStructure({
             setCurrentStep(0);
             setPseudoCodeHighlight([]);
           }}
-          className="p-1 lg:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
+          className="p-1 md:p-2 rounded-full bg-gray-500 hover:bg-gray-600 text-white"
           title="Restart"
         >
-          <FaRedo size={16} className="lg:w-5 lg:h-5" />
+          <FaRedo size={16} className="md:w-5 md:h-5" />
         </button>
       </div>
     );
