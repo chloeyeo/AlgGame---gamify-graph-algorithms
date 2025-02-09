@@ -477,10 +477,10 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
         <marker
           id="arrowhead"
           viewBox="0 0 16 16"
-          refX="16"
+          refX="8"
           refY="8"
-          markerWidth="12"
-          markerHeight="12"
+          markerWidth="8"
+          markerHeight="8"
           orient="auto-start-reverse"
         >
           <path d="M 0 0 L 16 8 L 0 16 z" fill="#64748b" />
@@ -488,10 +488,10 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
         <marker
           id="arrowhead-highlighted"
           viewBox="0 0 16 16"
-          refX="16"
+          refX="8"
           refY="8"
-          markerWidth="12"
-          markerHeight="12"
+          markerWidth="8"
+          markerHeight="8"
           orient="auto-start-reverse"
         >
           <path d="M 0 0 L 16 8 L 0 16 z" fill="#4169E1" />
@@ -499,10 +499,10 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
         <marker
           id="arrowhead-current"
           viewBox="0 0 16 16"
-          refX="16"
+          refX="8"
           refY="8"
-          markerWidth="12"
-          markerHeight="12"
+          markerWidth="8"
+          markerHeight="8"
           orient="auto-start-reverse"
         >
           <path d="M 0 0 L 16 8 L 0 16 z" fill="#FF69B4" />
@@ -549,13 +549,13 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
           <line
             x1="0"
             y1="0"
-            x2="40"
+            x2="30"
             y2="0"
             stroke={EDGE_TYPES.CURRENT_PATH.color}
-            strokeWidth="3"
+            strokeWidth="2"
             markerEnd="url(#arrowhead-highlighted)"
           />
-          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+          <text x="40" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
             current path
           </text>
         </g>
@@ -563,13 +563,13 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
           <line
             x1="0"
             y1="0"
-            x2="40"
+            x2="30"
             y2="0"
             stroke={EDGE_TYPES.CURRENT_EDGE.color}
-            strokeWidth="3"
+            strokeWidth="2"
             markerEnd="url(#arrowhead-current)"
           />
-          <text x="50" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
+          <text x="40" y="5" fill="#1a365d" fontSize="14" fontWeight="600">
             current edge
           </text>
         </g>
