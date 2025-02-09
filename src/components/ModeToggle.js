@@ -10,6 +10,7 @@ const ModeToggle = ({ onToggle, validPaths }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState(null);
   const [isLongPress, setIsLongPress] = useState(false);
+  const [hasTriedLongPress, setHasTriedLongPress] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -52,6 +53,7 @@ const ModeToggle = ({ onToggle, validPaths }) => {
       const timer = setTimeout(() => {
         setIsLongPress(true);
         setIsCollapsed(!isCollapsed);
+        setHasTriedLongPress(true);
       }, 500);
       setLongPressTimer(timer);
     }
@@ -79,6 +81,13 @@ const ModeToggle = ({ onToggle, validPaths }) => {
 
   return (
     <div className="fixed top-24 right-4 z-40">
+      {isMobile && !hasTriedLongPress && (
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+          <span className="text-xs bg-blue-100 opacity-80 px-2 py-1 rounded-full text-white animate-bounce">
+            Long press to collapse
+          </span>
+        </div>
+      )}
       <button
         onClick={handleClick}
         onTouchStart={handleTouchStart}
@@ -87,7 +96,11 @@ const ModeToggle = ({ onToggle, validPaths }) => {
           isMobile && isCollapsed
             ? "w-[40px] h-[40px] p-2 justify-center"
             : "px-2 py-1 md:px-3 md:py-2 lg:px-4 lg:py-2 space-x-1 md:space-x-2"
-        } ${targetPathExists ? "hover:bg-gray-50" : "hover:bg-red-50"}`}
+        } ${targetPathExists ? "hover:bg-gray-50" : "hover:bg-red-50"} ${
+          !hasTriedLongPress && isMobile
+            ? "ring-2 ring-blue-300 ring-opacity-50"
+            : ""
+        }`}
         title={!targetPathExists ? "This mode is not yet implemented" : ""}
       >
         {isMobile && isCollapsed ? (
