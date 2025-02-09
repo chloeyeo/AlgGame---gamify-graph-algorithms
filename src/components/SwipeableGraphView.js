@@ -31,8 +31,14 @@ const SwipeableGraphView = ({
 
     // Check if the touch started within the pseudocode pre element
     const target = e.target;
-    const isPseudocodeContent = target.closest("pre");
-    if (isPseudocodeContent) return;
+    const preElement = target.closest("pre");
+
+    if (preElement) {
+      // Only prevent swipe if horizontal scrolling is needed
+      const needsHorizontalScroll =
+        preElement.scrollWidth > preElement.clientWidth;
+      if (needsHorizontalScroll) return;
+    }
 
     setTouchStart(e.touches[0].clientX);
   };
