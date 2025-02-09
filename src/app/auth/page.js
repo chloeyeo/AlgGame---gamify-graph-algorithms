@@ -78,8 +78,8 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+    <div className="fixed inset-0 flex justify-center items-center bg-gradient-to-br from-blue-200 to-purple-200">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4 overflow-hidden">
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
           {isLogin ? "Welcome Back!" : "Create Account"}
         </h2>

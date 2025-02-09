@@ -134,7 +134,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="flex flex-col items-center justify-center px-8 py-4 md:py-0 text-center min-h-screen">
+    <main className="flex flex-col items-center justify-start px-8 py-4 min-h-screen overflow-y-auto">
       <AnimatedTetrahedron />
       <div className="mt-8 space-y-8 max-w-2xl py-6 px-8 md:px-6 bg-white rounded-lg shadow-lg">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">

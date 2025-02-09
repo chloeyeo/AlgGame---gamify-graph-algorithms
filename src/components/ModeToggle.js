@@ -13,7 +13,7 @@ const ModeToggle = ({ onToggle, validPaths }) => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 375);
+      setIsMobile(window.innerWidth <= 768);
     };
 
     checkMobile();
