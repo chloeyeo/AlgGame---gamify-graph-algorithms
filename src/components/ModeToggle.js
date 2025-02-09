@@ -11,6 +11,7 @@ const ModeToggle = ({ onToggle, validPaths }) => {
   const [longPressTimer, setLongPressTimer] = useState(null);
   const [isLongPress, setIsLongPress] = useState(false);
   const [hasTriedLongPress, setHasTriedLongPress] = useState(false);
+  const [hasTriedUncollapse, setHasTriedUncollapse] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -53,7 +54,11 @@ const ModeToggle = ({ onToggle, validPaths }) => {
       const timer = setTimeout(() => {
         setIsLongPress(true);
         setIsCollapsed(!isCollapsed);
-        setHasTriedLongPress(true);
+        if (!isCollapsed) {
+          setHasTriedLongPress(true);
+        } else {
+          setHasTriedUncollapse(true);
+        }
       }, 500);
       setLongPressTimer(timer);
     }
@@ -81,13 +86,24 @@ const ModeToggle = ({ onToggle, validPaths }) => {
 
   return (
     <div className="fixed top-24 right-4 z-40">
-      {isMobile && !hasTriedLongPress && (
+      {/* Hint for collapsing */}
+      {isMobile && !hasTriedLongPress && !isCollapsed && (
         <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <span className="text-xs bg-blue-100 opacity-80 px-2 py-1 rounded-full text-white animate-bounce">
+          <span className="text-xs bg-blue-100 px-2 py-1 rounded-full text-white animate-fade-pulse">
             Long press to collapse
           </span>
         </div>
       )}
+
+      {/* Hint for uncollapsing */}
+      {isMobile && isCollapsed && !hasTriedUncollapse && (
+        <div className="absolute -top-6 right-0 whitespace-nowrap">
+          <span className="text-xs bg-blue-100 px-2 py-1 rounded-full text-white animate-fade-pulse">
+            Long press to expand
+          </span>
+        </div>
+      )}
+
       <button
         onClick={handleClick}
         onTouchStart={handleTouchStart}
@@ -97,7 +113,8 @@ const ModeToggle = ({ onToggle, validPaths }) => {
             ? "w-[40px] h-[40px] p-2 justify-center"
             : "px-2 py-1 md:px-3 md:py-2 lg:px-4 lg:py-2 space-x-1 md:space-x-2"
         } ${targetPathExists ? "hover:bg-gray-50" : "hover:bg-red-50"} ${
-          !hasTriedLongPress && isMobile
+          (!hasTriedLongPress && !isCollapsed) ||
+          (isCollapsed && !hasTriedUncollapse)
             ? "ring-2 ring-blue-300 ring-opacity-50"
             : ""
         }`}

@@ -59,6 +59,7 @@ module.exports = {
         "fade-in-2": "fadeIn 1s ease-out 1s forwards",
         bounce: "bounce 1s infinite",
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "fade-pulse": "fade-pulse 2s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -72,6 +73,10 @@ module.exports = {
         pulse: {
           "0%, 100%": { opacity: 0.7 },
           "50%": { opacity: 0.3 },
+        },
+        "fade-pulse": {
+          "0%, 100%": { opacity: "0.5" },
+          "50%": { opacity: "1" },
         },
       },
     },
