@@ -274,7 +274,7 @@ export const generateSteps = (initialNodes, initialEdges) => {
 export const generateRandomGraph = (nodeCount = 6, edgeDensity = 0.4) => {
   const nodes = [];
   const width = 700;
-  const height = 600;
+  const height = 560;
   const padding = 100;
   const centerX = width / 2;
   const centerY = height / 2;
