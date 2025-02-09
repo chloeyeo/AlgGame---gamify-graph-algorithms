@@ -36,24 +36,36 @@ export default function MyAccountPage() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
-      const [achievementsRes, statsRes] = await Promise.all([
-        fetch("/api/achievements", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("/api/scores/stats", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const [achievementsRes, statsRes] = await Promise.all([
+          fetch("/api/achievements", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch("/api/scores/stats", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-      if (achievementsRes.ok) {
-        const data = await achievementsRes.json();
-        setAchievements(data.achievements || []);
-      }
+        if (achievementsRes.ok) {
+          const data = await achievementsRes.json();
+          setAchievements(data.achievements || []);
+        } else {
+          console.error(
+            "Failed to fetch achievements:",
+            await achievementsRes.text()
+          );
+        }
 
-      if (statsRes.ok) {
-        const data = await statsRes.json();
-        setStats(data);
+        if (statsRes.ok) {
+          const data = await statsRes.json();
+          setStats(data);
+        } else {
+          console.error("Failed to fetch stats:", await statsRes.text());
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
     };
 

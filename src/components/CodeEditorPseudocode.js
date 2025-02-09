@@ -8,9 +8,9 @@ const CodeEditorPseudocode = ({ pseudocode, highlightedLines = [] }) => {
       {lines.map((line, index) => (
         <div
           key={index}
-          className={`font-mono transition-colors duration-200 ${
+          className={`font-mono transition-colors duration-200 w-full ${
             highlightedLines.includes(index + 1)
-              ? "bg-yellow-400 bg-opacity-25"
+              ? "bg-yellow-500 bg-opacity-50"
               : ""
           } px-2 -mx-2`}
         >

@@ -21,6 +21,22 @@
   }
 }
 
+.font-mono div {
+  width: 100%;
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  .font-mono div.bg-yellow-500 {
+    background-color: rgba(
+      250,
+      204,
+      21,
+      0.4
+    ) !important; /* Brighter yellow with higher opacity for dark mode */
+  }
+}
+
 /* to fix the non homepage having vertical extra space above header and below footer on mobile screen - start */
 * {
   margin: 0;
