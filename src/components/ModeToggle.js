@@ -13,7 +13,8 @@ const ModeToggle = ({ onToggle, validPaths }) => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      // Update breakpoint to include tablets
+      setIsMobile(window.innerWidth <= 1024);
     };
 
     checkMobile();
@@ -85,7 +86,7 @@ const ModeToggle = ({ onToggle, validPaths }) => {
         className={`bg-white shadow-lg rounded-lg flex items-center transition-all duration-300 ${
           isMobile && isCollapsed
             ? "w-[40px] h-[40px] p-2 justify-center"
-            : "px-2 py-1 sm:px-4 sm:py-2 space-x-1 sm:space-x-2"
+            : "px-2 py-1 md:px-3 md:py-2 lg:px-4 lg:py-2 space-x-1 md:space-x-2"
         } ${targetPathExists ? "hover:bg-gray-50" : "hover:bg-red-50"}`}
         title={!targetPathExists ? "This mode is not yet implemented" : ""}
       >
