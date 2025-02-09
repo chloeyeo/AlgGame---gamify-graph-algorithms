@@ -12,13 +12,12 @@ const SwipeableGraphView = ({
 }) => {
   const [showPseudocode, setShowPseudocode] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
-  const [hasShownPseudocode, setHasShownPseudocode] = useState(false);
-  const [showReturnIndicator, setShowReturnIndicator] = useState(false);
+  const [hasSwipedRight, setHasSwipedRight] = useState(false);
+  const [hasSwipedLeft, setHasSwipedLeft] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
     const checkScreenSize = () => {
-      // Allow swipe functionality for both mobile and tablet sizes
       return window.innerWidth < 1024;
     };
 
@@ -39,7 +38,14 @@ const SwipeableGraphView = ({
     const swipeDistance = touchStart - touchEnd;
 
     if (Math.abs(swipeDistance) > 50) {
-      setShowPseudocode(swipeDistance > 0);
+      const isSwipingLeft = swipeDistance > 0;
+      setShowPseudocode(isSwipingLeft);
+
+      if (isSwipingLeft) {
+        setHasSwipedRight(true);
+      } else {
+        setHasSwipedLeft(true);
+      }
     }
 
     setTouchStart(null);
@@ -52,7 +58,7 @@ const SwipeableGraphView = ({
       onTouchEnd={handleTouchEnd}
       className="relative w-full h-full overflow-hidden"
     >
-      {isMobile && !showPseudocode && !hasShownPseudocode && (
+      {isMobile && !showPseudocode && !hasSwipedRight && (
         <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
           <div className="animate-pulse flex items-center gap-2">
             <svg
@@ -75,7 +81,7 @@ const SwipeableGraphView = ({
         </div>
       )}
 
-      {isMobile && showPseudocode && showReturnIndicator && (
+      {isMobile && showPseudocode && !hasSwipedLeft && (
         <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
           <div className="animate-pulse flex items-center gap-2">
             <span className="text-blue-500 text-lg font-semibold opacity-70">
