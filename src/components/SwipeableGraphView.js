@@ -12,6 +12,7 @@ const SwipeableGraphView = ({
 }) => {
   const [showPseudocode, setShowPseudocode] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
+  const [touchStartTime, setTouchStartTime] = useState(null);
   const [hasSwipedRight, setHasSwipedRight] = useState(false);
   const [hasSwipedLeft, setHasSwipedLeft] = useState(false);
   const containerRef = useRef(null);
@@ -29,15 +30,22 @@ const SwipeableGraphView = ({
   const handleTouchStart = (e) => {
     if (window.innerWidth >= 1024) return;
     setTouchStart(e.touches[0].clientX);
+    setTouchStartTime(Date.now());
   };
 
   const handleTouchEnd = (e) => {
-    if (window.innerWidth >= 1024 || !touchStart) return;
+    if (window.innerWidth >= 1024 || !touchStart || !touchStartTime) return;
 
     const touchEnd = e.changedTouches[0].clientX;
     const swipeDistance = touchStart - touchEnd;
+    const swipeTime = Date.now() - touchStartTime;
+    const swipeSpeed = Math.abs(swipeDistance) / swipeTime;
 
-    if (Math.abs(swipeDistance) > 50) {
+    // Fast swipe indicates intent to change views
+    // Slow swipe indicates intent to scroll pseudocode
+    const isFastSwipe = swipeSpeed > 0.5; // Threshold in pixels per millisecond
+
+    if (Math.abs(swipeDistance) > 50 && isFastSwipe) {
       const isSwipingLeft = swipeDistance > 0;
       setShowPseudocode(isSwipingLeft);
 
@@ -49,6 +57,7 @@ const SwipeableGraphView = ({
     }
 
     setTouchStart(null);
+    setTouchStartTime(null);
   };
 
   return (
