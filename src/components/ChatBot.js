@@ -12,7 +12,6 @@ const ChatBot = () => {
     "How do I switch between education and game mode?",
     "How does the scoring system work?",
     "What are the different difficulty levels?",
-    "How do I use the chatbot?",
   ];
 
   useEffect(() => {
@@ -42,70 +41,23 @@ const ChatBot = () => {
         break;
       case "What are the different algorithms available?":
         answer =
-          "We offer several graph algorithms:\n\n" +
-          "Traversal:\n" +
-          "• BFS\n" +
-          "• DFS\n\n" +
-          "Shortest Path:\n" +
-          "• Dijkstra's\n" +
-          "• A*\n\n" +
-          "Minimum Spanning Tree:\n" +
-          "• Prim's\n" +
-          "• Kruskal's\n\n" +
-          "Network Flow:\n" +
-          "• Ford-Fulkerson";
+          "We offer several graph algorithms:\n\nTraversal:\n• BFS\n• DFS\n\nShortest Path:\n• Dijkstra's\n• A*\n\nMinimum Spanning Tree:\n• Prim's\n• Kruskal's\n\nNetwork Flow:\n• Ford-Fulkerson";
         break;
       case "How do I switch between education and game mode?":
         answer =
-          "Use the toggle button (↔) in the top-right corner of any algorithm page to switch between modes:\n\n" +
-          "Education Mode:\n" +
-          "• Learn step-by-step\n" +
-          "• View detailed explanations\n\n" +
-          "Game Mode:\n" +
-          "• Test your understanding\n" +
-          "• Earn points and compete";
+          "Use the toggle button (↔) in the top-right corner of any algorithm page to switch between modes:\n\nEducation Mode:\n• Learn step-by-step\n• View detailed explanations\n\nGame Mode:\n• Test your understanding\n• Earn points and compete";
         break;
       case "How does the scoring system work?":
         answer =
-          "Points System:\n\n" +
-          "Correct Moves:\n" +
-          "• +10-15 points\n\n" +
-          "Incorrect Moves:\n" +
-          "• -5 points\n\n" +
-          "Round Completion:\n" +
-          "• +20 bonus points\n\n" +
-          "Note: Scores are saved to leaderboard when logged in";
+          "Points System:\n\nCorrect Moves:\n• +10-15 points\n\nIncorrect Moves:\n• -5 points\n\nRound Completion:\n• +20 bonus points\n\nNote: Scores are saved to leaderboard when logged in";
         break;
       case "What are the different difficulty levels?":
         answer =
-          "Choose your challenge level:\n\n" +
-          "Easy:\n" +
-          "• Fewer nodes\n" +
-          "• Simple graph structures\n\n" +
-          "Medium:\n" +
-          "• More nodes\n" +
-          "• Moderate complexity\n\n" +
-          "Hard:\n" +
-          "• Maximum nodes\n" +
-          "• Complex configurations";
-        break;
-      case "How do I use the chatbot?":
-        answer =
-          "Chat Options:\n\n" +
-          "Quick Questions:\n" +
-          "• Click preset options above\n\n" +
-          "Custom Questions:\n" +
-          "• Algorithms\n" +
-          "• Gameplay\n" +
-          "• Navigation\n" +
-          "• Features";
+          "Choose your challenge level:\n\nEasy:\n• Fewer nodes\n• Simple graph structures\n\nMedium:\n• More nodes\n• Moderate complexity\n\nHard:\n• Maximum nodes\n• Complex configurations";
         break;
       default:
         answer =
-          "I'm sorry, I don't have an answer for that question.\n\n" +
-          "Please try:\n" +
-          "• One of the suggested questions above\n" +
-          "• Rephrasing your question";
+          "I'm sorry, I don't have an answer for that question.\n\nPlease try:\n• One of the suggested questions above\n• Rephrasing your question";
     }
 
     setTimeout(() => {
@@ -160,7 +112,7 @@ const ChatBot = () => {
                 }`}
               >
                 <span
-                  className={`inline-block p-2 rounded-md ${
+                  className={`inline-block p-2 rounded-md whitespace-pre-line ${
                     message.type === "user"
                       ? "bg-blue-500 text-white"
                       : "bg-gray-100 text-black"
