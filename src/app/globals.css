@@ -27,7 +27,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .font-mono div.bg-yellow-200 {
+  .font-mono div.bg-yellow-500 {
     background-color: rgba(
       250,
       204,
