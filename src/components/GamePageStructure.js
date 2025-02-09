@@ -542,8 +542,12 @@ export default function GamePageStructure({
         </div>
 
         {/* Rest of the content remains the same */}
-        <div className="flex-1 relative mx-auto w-full lg:w-4/5 mb-4">
-          <div className="h-full bg-white border border-gray-300 rounded-lg overflow-hidden">
+        <div className={`flex-1 relative mx-auto w-full lg:w-4/5 mb-4`}>
+          <div
+            className={`h-full bg-white border border-gray-300 rounded-lg overflow-hidden ${
+              isFordFulkerson ? "lg:max-h-[calc(100vh-16rem)]" : ""
+            }`}
+          >
             {renderGraphTabs()}
             <div className="flex items-center justify-center h-[calc(100%-2rem)]">
               <GraphVisualisationComponent
