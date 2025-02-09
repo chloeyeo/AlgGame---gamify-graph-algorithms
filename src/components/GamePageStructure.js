@@ -549,7 +549,11 @@ export default function GamePageStructure({
             }`}
           >
             {renderGraphTabs()}
-            <div className="flex items-center justify-center h-[calc(100%-2rem)]">
+            <div
+              className={`flex items-center justify-center h-[calc(100%-2rem)] ${
+                isFordFulkerson ? "lg:pt-12" : ""
+              }`}
+            >
               <GraphVisualisationComponent
                 graphState={getCurrentGraphState()}
                 onNodeClick={handleNodeClick}
