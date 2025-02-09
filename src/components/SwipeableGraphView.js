@@ -17,47 +17,29 @@ const SwipeableGraphView = ({
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const checkScreenSize = () => {
+      // Allow swipe functionality for both mobile and tablet sizes
       return window.innerWidth < 1024;
     };
 
-    if (!checkMobile()) {
+    if (!checkScreenSize()) {
       setShowPseudocode(false);
     }
   }, []);
 
   const handleTouchStart = (e) => {
-    if (!isMobile) return;
-
-    // Check if the touch started within the pseudocode pre element
-    const target = e.target;
-    const preElement = target.closest("pre");
-
-    if (preElement) {
-      // Only prevent swipe if horizontal scrolling is needed
-      const needsHorizontalScroll =
-        preElement.scrollWidth > preElement.clientWidth;
-      if (needsHorizontalScroll) return;
-    }
-
+    if (window.innerWidth >= 1024) return;
     setTouchStart(e.touches[0].clientX);
   };
 
   const handleTouchEnd = (e) => {
-    if (!isMobile || !touchStart) return;
+    if (window.innerWidth >= 1024 || !touchStart) return;
 
     const touchEnd = e.changedTouches[0].clientX;
     const swipeDistance = touchStart - touchEnd;
 
-    if (swipeDistance > 50 && !showPseudocode) {
-      setShowPseudocode(true);
-      if (!hasShownPseudocode) {
-        setHasShownPseudocode(true);
-        setShowReturnIndicator(true);
-        setTimeout(() => setShowReturnIndicator(false), 3000);
-      }
-    } else if (swipeDistance < -50 && showPseudocode) {
-      setShowPseudocode(false);
+    if (Math.abs(swipeDistance) > 50) {
+      setShowPseudocode(swipeDistance > 0);
     }
 
     setTouchStart(null);
@@ -132,7 +114,7 @@ const SwipeableGraphView = ({
         <div className="p-4 h-full overflow-y-auto no-scrollbar">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Pseudocode</h2>
-            {isMobile && playControls}
+            {window.innerWidth < 1024 && playControls}
           </div>
           <CodeEditorPseudocode
             pseudocode={pseudocode}

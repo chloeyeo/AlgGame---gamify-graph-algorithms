@@ -26,11 +26,11 @@ const CodeEditorPseudocode = ({ pseudocode, highlightedLines = [] }) => {
   return (
     <pre
       ref={containerRef}
-      className="bg-black text-white p-4 rounded-lg overflow-x-auto relative"
+      className="bg-black text-white p-4 rounded-lg overflow-x-auto no-scrollbar"
     >
-      <div className="content-wrapper relative">
+      <div className="content-wrapper relative min-w-fit">
         {lines.map((line, index) => (
-          <div key={index} className="relative">
+          <div key={index} className="relative whitespace-nowrap">
             {highlightedLines.includes(index + 1) && (
               <div className="highlight-container absolute inset-y-0 left-0 bg-yellow-500 bg-opacity-50" />
             )}

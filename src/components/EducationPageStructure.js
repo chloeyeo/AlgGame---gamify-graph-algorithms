@@ -365,8 +365,8 @@ export default function EducationPageStructure({
   const renderGraphSection = (isDesktop = false) => {
     const graphContent = (
       <div className="w-full h-full flex flex-col">
-        <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 p-2 lg:flex-row lg:items-center lg:gap-4 lg:p-4 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 min-w-fit">
             <label className="text-sm">Nodes:</label>
             <input
               type="range"
@@ -396,12 +396,12 @@ export default function EducationPageStructure({
               setCurrentGraphStates([steps]);
               setCurrentStep(0);
             }}
-            className="px-2 py-1 lg:px-4 lg:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+            className="px-2 py-1 lg:px-4 lg:py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 min-w-fit"
           >
             New Graph
           </button>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 min-w-fit">
             <button
               onClick={runTraversal}
               className={`p-1 lg:p-2 rounded-full ${
@@ -437,7 +437,7 @@ export default function EducationPageStructure({
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-fit">
             <label className="text-sm">Speed:</label>
             <input
               type="range"
@@ -452,7 +452,7 @@ export default function EducationPageStructure({
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 overflow-x-auto no-scrollbar">
           <GraphVisualisationComponent
             graphState={getCurrentGraphState()}
             isGraphA={activeTab === 0}
