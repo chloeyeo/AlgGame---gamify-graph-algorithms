@@ -406,9 +406,13 @@ export const EDGE_TYPES = {
 };
 
 export const getEdgeStyle = (edge, isCorrect) => ({
-  stroke: edge.isHighlighted ? "#4CAF50" : "#999",
-  strokeWidth: edge.isHighlighted ? 3 : 1,
-  // ... rest of the style properties
+  stroke: edge.isHighlighted
+    ? "#4CAF50"
+    : edge.state === "current path"
+    ? "#FFA726"
+    : "#999",
+  strokeWidth: edge.isHighlighted ? 3 : edge.state === "current path" ? 2 : 1,
+  strokeDasharray: edge.state === "current path" ? "5,5" : "none",
 });
 
 export const FordFulkersonGraphVisualisation = ({ graphState }) => {

@@ -183,10 +183,10 @@ const FordFulkersonGamePage = () => {
   };
 
   const handlePathSelect = (selectedPath) => {
-    // Update edges to highlight the selected path
     const updatedEdges = graphState.edges.map((edge) => ({
       ...edge,
-      isHighlighted: isEdgeInPath(edge, selectedPath),
+      state: isEdgeInPath(edge, selectedPath) ? "current path" : undefined,
+      isHighlighted: false,
     }));
 
     const flows = new Map(
@@ -211,30 +211,23 @@ const FordFulkersonGamePage = () => {
   };
 
   const handleFlowSelect = (selectedFlow) => {
-    const flows = new Map(
-      graphState.edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
-    );
-
-    const correctFlow = calculateBottleneck(
+    const bottleneck = calculateBottleneck(
       graphState.selectedPath,
-      graphState.edges,
-      flows
+      graphState.edges
     );
-    const isCorrect = selectedFlow === correctFlow;
 
-    if (isCorrect) {
+    if (selectedFlow === bottleneck) {
       setGraphState((prev) => ({
         ...prev,
         selectedFlow,
         gamePhase: "UPDATE_EDGE_FLOWS",
-        currentEdgeIndex: 0,
         edgeFlowOptions: generateEdgeFlowOptions(selectedFlow),
-        feedback: "Correct! Now let's update each edge's flow.",
+        currentEdgeIndex: 0,
+        feedback: "Correct! Now update each edge's flow.",
       }));
     } else {
       setGraphState((prev) => ({
         ...prev,
-        score: prev.score - 5,
         feedback: "Incorrect flow value selected.",
       }));
     }

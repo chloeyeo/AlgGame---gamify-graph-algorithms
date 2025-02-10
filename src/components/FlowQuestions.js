@@ -71,15 +71,17 @@ export const FlowQuestions = ({
           What is the maximum flow we can push through this path?
         </h3>
         <div className="space-y-2">
-          {[...new Set(flowOptions)].map((flow, index) => (
-            <button
-              key={index}
-              onClick={() => onFlowSelect(flow)}
-              className="w-full p-3 text-left border rounded hover:bg-blue-50 transition-colors duration-200"
-            >
-              <span className="font-medium">Flow value:</span> {flow} units
-            </button>
-          ))}
+          {[...new Set(flowOptions)]
+            .filter((flow) => flow !== Infinity)
+            .map((flow, index) => (
+              <button
+                key={index}
+                onClick={() => onFlowSelect(flow)}
+                className="w-full p-3 text-left border rounded hover:bg-blue-50 transition-colors duration-200"
+              >
+                <span className="font-medium">Flow value:</span> {flow} units
+              </button>
+            ))}
         </div>
       </>
     );
