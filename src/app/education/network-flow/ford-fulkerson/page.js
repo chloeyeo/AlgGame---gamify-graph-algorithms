@@ -405,34 +405,11 @@ export const EDGE_TYPES = {
   NORMAL: { color: "#000000" }, // Black
 };
 
-export const getEdgeStyle = (edge, graphState) => {
-  const isCurrentEdge =
-    graphState?.currentEdge &&
-    ((edge.source === graphState.currentEdge.source &&
-      edge.target === graphState.currentEdge.target) ||
-      (edge.source === graphState.currentEdge.target &&
-        edge.target === graphState.currentEdge.source));
-
-  if (isCurrentEdge) {
-    return {
-      color: EDGE_TYPES.CURRENT_EDGE.color, // Pink
-      marker: "url(#arrowhead-current)",
-      width: "3",
-    };
-  } else if (edge.highlight) {
-    return {
-      color: EDGE_TYPES.CURRENT_PATH.color, // Blue
-      marker: "url(#arrowhead-highlighted)",
-      width: "3",
-    };
-  } else {
-    return {
-      color: EDGE_TYPES.NORMAL.color,
-      marker: "url(#arrowhead)",
-      width: "1.5",
-    };
-  }
-};
+export const getEdgeStyle = (edge, isCorrect) => ({
+  stroke: edge.isHighlighted ? "#4CAF50" : "#999",
+  strokeWidth: edge.isHighlighted ? 3 : 1,
+  // ... rest of the style properties
+});
 
 export const FordFulkersonGraphVisualisation = ({ graphState }) => {
   const drawArrowPath = (source, target) => {
@@ -583,18 +560,18 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
         {(graphState?.edges || []).map((edge, idx) => {
           const source = graphState?.nodes?.find((n) => n.id === edge.source);
           const target = graphState?.nodes?.find((n) => n.id === edge.target);
-          const style = getEdgeStyle(edge, graphState);
+          const style = getEdgeStyle(edge, false);
           const paths = drawArrowPath(source, target);
 
           return (
             <g key={`edge-${idx}`}>
               <path
                 d={paths.line}
-                stroke={style.color}
-                strokeWidth={style.width}
+                stroke={style.stroke}
+                strokeWidth={style.strokeWidth}
                 fill="none"
               />
-              <path d={paths.arrow} fill={style.color} stroke="none" />
+              <path d={paths.arrow} fill={style.stroke} stroke="none" />
               <g
                 transform={`translate(${(source.x + target.x) / 2}, ${
                   (source.y + target.y) / 2

@@ -415,12 +415,6 @@ export default function GamePageStructure({
 
     // Special handling for Ford-Fulkerson
     if (isFordFulkerson) {
-      // Don't start new round if game is complete
-      if (graphState.isComplete) {
-        setTotalScore((prev) => prev + currentScore);
-        return;
-      }
-
       // Generate new graph for next round
       const newGraph = generateRandomGraph(nodeCount, true);
       const newPathOptions = findAllPaths(newGraph.edges, "S", "T")

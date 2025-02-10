@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { isEdgeInPath } from "@/app/education/network-flow/ford-fulkerson/page";
 
 export const FlowQuestions = ({
   graphState,
@@ -17,18 +18,27 @@ export const FlowQuestions = ({
     currentPath,
     currentEdgeIndex,
     selectedPath,
+    edges,
   } = graphState;
+
+  useEffect(() => {
+    if (feedback?.includes("Correct")) {
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 1000);
+    }
+  }, [feedback]);
 
   if (!gamePhase || !pathOptions) {
     return null;
   }
 
-  const renderPathQuestion = () => {
-    const pathChoices = pathOptions.map((path) => ({
-      text: path.join(" → "),
-      value: path,
-    }));
+  const pathChoices = pathOptions.map((path) => ({
+    text: path.join(" → "),
+    value: path,
+  }));
 
+  const renderPathQuestion = () => {
     return (
       <>
         <h3 className="text-lg font-semibold mb-3">
@@ -38,8 +48,12 @@ export const FlowQuestions = ({
           {pathChoices.map((choice, index) => (
             <button
               key={index}
-              onClick={() => onPathSelect(choice.value)}
-              className="w-full p-3 text-left border rounded hover:bg-blue-50 transition-colors duration-200"
+              onClick={() => {
+                onPathSelect(choice.value);
+              }}
+              className={`w-full p-3 text-left border rounded hover:bg-blue-50 transition-colors duration-200 ${
+                selectedPath === choice.value ? "bg-green-50" : ""
+              }`}
             >
               <span className="font-medium">Option {index + 1}:</span>{" "}
               {choice.text}

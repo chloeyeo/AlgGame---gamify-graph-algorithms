@@ -183,35 +183,30 @@ const FordFulkersonGamePage = () => {
   };
 
   const handlePathSelect = (selectedPath) => {
+    // Update edges to highlight the selected path
+    const updatedEdges = graphState.edges.map((edge) => ({
+      ...edge,
+      isHighlighted: isEdgeInPath(edge, selectedPath),
+    }));
+
     const flows = new Map(
       graphState.edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
     );
 
-    const isCorrect = isValidAugmentingPath(
+    const bottleneck = calculateBottleneck(
       selectedPath,
       graphState.edges,
       flows
     );
-    const correctPath = findOptimalPath(graphState.edges, flows);
+    const flowOptions = generateFlowOptions(bottleneck);
 
     setGraphState((prev) => ({
       ...prev,
       selectedPath,
+      edges: updatedEdges,
       gamePhase: "UPDATE_FLOWS",
-      flowOptions: generateFlowOptions(selectedPath, prev.edges, flows),
-      userAnswers: {
-        ...prev.userAnswers,
-        pathSelection: selectedPath,
-      },
-      correctAnswers: {
-        ...prev.correctAnswers,
-        pathSelection: correctPath,
-      },
-      flows,
-      score: prev.score + (isCorrect ? 10 : -5),
-      feedback: isCorrect
-        ? "Correct! Now select the flow value."
-        : "Incorrect. This path is not optimal.",
+      flowOptions,
+      feedback: null,
     }));
   };
 
@@ -254,51 +249,88 @@ const FordFulkersonGamePage = () => {
       const isLastEdge =
         graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
 
+      // Update the graph visualization immediately
+      const updatedEdges = graphState.edges.map((edge) => {
+        if (
+          (edge.source === currentEdge.source &&
+            edge.target === currentEdge.target) ||
+          (edge.source === currentEdge.target &&
+            edge.target === currentEdge.source)
+        ) {
+          return {
+            ...edge,
+            flow: edge.flow ? edge.flow + selectedEdgeFlow : selectedEdgeFlow,
+            style: getEdgeStyle(edge, true),
+            isHighlighted: true,
+          };
+        }
+        return edge;
+      });
+
       if (isLastEdge) {
         const newEdges = updateEdgeFlows(
-          graphState.edges,
+          updatedEdges,
           graphState.selectedPath,
           graphState.selectedFlow
         );
-
         const newState = {
           ...graphState,
           edges: newEdges,
           maxFlow: graphState.maxFlow + graphState.selectedFlow,
         };
-
         const gameComplete = isGameComplete(newState);
 
-        if (gameComplete) {
-          setGraphState((prev) => ({
-            ...prev,
-            edges: newEdges,
-            gamePhase: "GAME_OVER",
-            pathOptions: [],
-            maxFlow: prev.maxFlow + prev.selectedFlow,
-            score: prev.score + 15,
-            feedback: "Game Complete! Maximum flow achieved.",
-            isComplete: true,
-          }));
-        } else {
-          const newPathOptions = findAllPaths(newEdges, "S", "T")
-            .filter((path) => calculateResidualCapacity(path, newEdges) > 0)
-            .slice(0, 3);
+        setGraphState((prev) => ({
+          ...prev,
+          edges: newEdges,
+          gamePhase: "SELECT_PATH",
+          pathOptions: gameComplete ? [] : generatePathOptions(newState),
+          maxFlow: prev.maxFlow + prev.selectedFlow,
+          score: prev.score + 15,
+          feedback: gameComplete
+            ? "Game Complete! Maximum flow achieved."
+            : "Correct! Select the next augmenting path.",
+          isComplete: gameComplete,
+          currentEdgeIndex: 0,
+          selectedPath: null,
+          selectedFlow: null,
+        }));
 
-          setGraphState((prev) => ({
-            ...prev,
-            edges: newEdges,
-            gamePhase: "SELECT_PATH",
-            pathOptions: newPathOptions,
-            maxFlow: prev.maxFlow + prev.selectedFlow,
-            score: prev.score + 15,
-            feedback: "Correct! Select the next augmenting path.",
-            currentEdgeIndex: 0,
-          }));
+        if (!gameComplete) {
+          // Call the parent component's handleRoundComplete
+          const parentHandleRoundComplete = async () => {
+            const newGraph = generateRandomGraph(nodeCount, true);
+            const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
+              .filter(
+                (path) => calculateResidualCapacity(path, newGraph.edges) > 0
+              )
+              .slice(0, 3);
+
+            setGraphState((prev) => ({
+              ...newGraph,
+              currentPath: [],
+              maxFlow: 0,
+              gamePhase: "SELECT_PATH",
+              pathOptions: newPathOptions,
+              flowOptions: [],
+              currentEdgeIndex: 0,
+              userAnswers: {},
+              correctAnswers: {},
+              pathFlow: 0,
+              feedback: "New round started!",
+              flows: new Map(),
+              isComplete: false,
+              score: 0,
+            }));
+            setRound((prev) => prev + 1);
+          };
+
+          parentHandleRoundComplete();
         }
       } else {
         setGraphState((prev) => ({
           ...prev,
+          edges: updatedEdges,
           currentEdgeIndex: prev.currentEdgeIndex + 1,
           score: prev.score + 5,
           feedback: "Correct! Next edge.",
