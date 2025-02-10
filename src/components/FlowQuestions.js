@@ -22,7 +22,7 @@ export const FlowQuestions = ({
   } = graphState;
 
   useEffect(() => {
-    if (feedback?.includes("Correct")) {
+    if (feedback && !feedback.includes("Incorrect")) {
       setTimeout(() => {
         setIsVisible(false);
       }, 1000);
