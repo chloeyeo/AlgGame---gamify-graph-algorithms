@@ -378,6 +378,18 @@ export default function GamePageStructure({
 
   useEffect(() => {
     if (isGameComplete(graphState)) {
+      // For Ford-Fulkerson, only show completion when the last edge of the path is updated
+      if (isFordFulkerson) {
+        const currentPath = graphState.currentPath;
+        if (!currentPath || currentPath.length < 2) return;
+
+        // Check if we're on the last edge of the path
+        const isLastEdge =
+          graphState.currentEdgeIndex === currentPath.length - 2;
+
+        if (!isLastEdge) return;
+      }
+
       setOverlayState({
         show: true,
         content: {
