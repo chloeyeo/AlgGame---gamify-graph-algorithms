@@ -254,6 +254,7 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       const isLastEdge =
         graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
 
+      // Update only the current edge with the selected flow
       const updatedEdges = graphState.edges.map((edge) => {
         if (
           (edge.source === currentEdge.source &&
@@ -261,20 +262,15 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
           (edge.source === currentEdge.target &&
             edge.target === currentEdge.source)
         ) {
+          const currentFlow = edge.flow || 0;
           return {
             ...edge,
-            flow: edge.flow ? edge.flow + selectedEdgeFlow : selectedEdgeFlow,
+            flow: currentFlow + selectedEdgeFlow,
             currentEdge: true,
             state: "current edge",
           };
         }
-        return {
-          ...edge,
-          currentEdge: false,
-          state: isEdgeInPath(edge, graphState.selectedPath)
-            ? "current path"
-            : undefined,
-        };
+        return edge;
       });
 
       setGraphState((prev) => ({
@@ -498,33 +494,53 @@ const updateEdgeFlows = (edges, path, flow) => {
 
 const generateSpacedGraph = (nodeCount) => {
   const graph = generateRandomGraph(nodeCount, true);
-
-  // Calculate positions for evenly spaced nodes in a wider layout
   const width = 900;
   const height = 500;
-  const centerY = height / 2;
-  const startX = 100;
-  const endX = width - 100;
+  const padding = 100;
 
-  // Position nodes in a more spread out manner
-  const middleNodes = graph.nodes.filter((n) => n.id !== "S" && n.id !== "T");
-  const spacing = (endX - startX) / (middleNodes.length + 1);
+  // Random positions with minimum spacing constraints
+  const usedPositions = new Set();
+  const minSpacing = 120; // Minimum distance between nodes
 
+  const getRandomPosition = () => {
+    let attempts = 0;
+    while (attempts < 100) {
+      const x = padding + Math.random() * (width - 2 * padding);
+      const y = padding + Math.random() * (height - 2 * padding);
+
+      // Check if position is far enough from all used positions
+      let isFarEnough = true;
+      for (const pos of usedPositions) {
+        const [px, py] = pos.split(",").map(Number);
+        const distance = Math.sqrt(Math.pow(x - px, 2) + Math.pow(y - py, 2));
+        if (distance < minSpacing) {
+          isFarEnough = false;
+          break;
+        }
+      }
+
+      if (isFarEnough) {
+        usedPositions.add(`${x},${y}`);
+        return { x, y };
+      }
+      attempts++;
+    }
+    return null;
+  };
+
+  // Position source and sink on opposite sides
+  const sourcePos = { x: padding, y: height / 2 };
+  const sinkPos = { x: width - padding, y: height / 2 };
+  usedPositions.add(`${sourcePos.x},${sourcePos.y}`);
+  usedPositions.add(`${sinkPos.x},${sinkPos.y}`);
+
+  // Position other nodes randomly but spaced out
   graph.nodes = graph.nodes.map((node) => {
-    if (node.id === "S") {
-      return { ...node, x: startX, y: centerY };
-    }
-    if (node.id === "T") {
-      return { ...node, x: endX, y: centerY };
-    }
+    if (node.id === "S") return { ...node, ...sourcePos };
+    if (node.id === "T") return { ...node, ...sinkPos };
 
-    const index = middleNodes.findIndex((n) => n.id === node.id);
-    return {
-      ...node,
-      x: startX + spacing * (index + 1),
-      // Add vertical offset for better edge separation
-      y: centerY + (index % 2 === 0 ? -80 : 80),
-    };
+    const pos = getRandomPosition();
+    return { ...node, ...pos };
   });
 
   return graph;
