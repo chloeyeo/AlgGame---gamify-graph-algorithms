@@ -281,32 +281,57 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         ...prev,
         edges: updatedEdges,
         score: prev.score + 5,
-        feedback: "Correct! Select next edge flow.",
+        feedback: { type: "success", text: "Correct! Select next edge flow." },
         currentEdgeIndex: isLastEdge
           ? prev.currentEdgeIndex
           : prev.currentEdgeIndex + 1,
       }));
 
       if (isLastEdge) {
-        const gameComplete = isGameComplete(graphState);
+        const newEdges = updateEdgeFlows(
+          updatedEdges,
+          graphState.selectedPath,
+          graphState.selectedFlow
+        );
+        const newState = {
+          ...graphState,
+          edges: newEdges,
+          maxFlow: graphState.maxFlow + graphState.selectedFlow,
+        };
+        const gameComplete = isGameComplete(newState);
+
+        setGraphState((prev) => ({
+          ...prev,
+          edges: newEdges,
+          gamePhase: "SELECT_PATH",
+          pathOptions: gameComplete ? [] : generatePathOptions(newState),
+          maxFlow: prev.maxFlow + prev.selectedFlow,
+          score: prev.score + 15,
+          feedback: gameComplete
+            ? {
+                type: "complete",
+                text: "Game Complete! Maximum flow achieved.",
+              }
+            : { type: "success", text: "Path complete! Select next path." },
+          isComplete: gameComplete,
+          currentEdgeIndex: 0,
+          selectedPath: null,
+          selectedFlow: null,
+        }));
+
+        // Only call handleRoundComplete when truly complete
         if (gameComplete) {
-          handleRoundComplete(graphState.score);
-        } else {
-          setGraphState((prev) => ({
-            ...prev,
-            gamePhase: "SELECT_PATH",
-            pathOptions: generatePathOptions(prev),
-            selectedPath: null,
-            selectedFlow: null,
-            feedback: "Path complete! Select next path.",
-          }));
+          // Delay the round completion to allow final state to be shown
+          setTimeout(() => {
+            handleRoundComplete(graphState.score);
+          }, 1500);
         }
       }
     } else {
       setGraphState((prev) => ({
         ...prev,
         score: prev.score - 5,
-        feedback: "Incorrect edge flow value.",
+        feedback: { type: "error", text: "Incorrect edge flow value." },
       }));
     }
   };
