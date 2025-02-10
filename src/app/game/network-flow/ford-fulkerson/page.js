@@ -15,7 +15,7 @@ import {
 } from "@/app/education/network-flow/ford-fulkerson/page";
 import { FlowQuestions } from "@/components/FlowQuestions";
 
-const FordFulkersonGamePage = () => {
+const FordFulkersonGamePage = ({ handleRoundComplete }) => {
   const [difficulty, setDifficulty] = useState(null);
   const [round, setRound] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
@@ -254,34 +254,7 @@ const FordFulkersonGamePage = () => {
       const isLastEdge =
         graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
 
-      // Get the current edge from the graph
-      const edge = graphState.edges.find(
-        (e) =>
-          (e.source === currentEdge.source &&
-            e.target === currentEdge.target) ||
-          (e.source === currentEdge.target && e.target === currentEdge.source)
-      );
-
-      // Check if the new flow would exceed capacity
-      const newFlow = (edge.flow || 0) + selectedEdgeFlow;
-      if (newFlow > edge.capacity) {
-        setGraphState((prev) => ({
-          ...prev,
-          feedback: "Flow cannot exceed capacity!",
-          score: prev.score - 5,
-        }));
-        return;
-      }
-
       const updatedEdges = graphState.edges.map((edge) => {
-        const resetEdge = {
-          ...edge,
-          currentEdge: false,
-          state: isEdgeInPath(edge, graphState.selectedPath)
-            ? "current path"
-            : undefined,
-        };
-
         if (
           (edge.source === currentEdge.source &&
             edge.target === currentEdge.target) ||
@@ -289,50 +262,45 @@ const FordFulkersonGamePage = () => {
             edge.target === currentEdge.source)
         ) {
           return {
-            ...resetEdge,
-            flow: newFlow,
+            ...edge,
+            flow: edge.flow ? edge.flow + selectedEdgeFlow : selectedEdgeFlow,
             currentEdge: true,
             state: "current edge",
           };
         }
-        return resetEdge;
+        return {
+          ...edge,
+          currentEdge: false,
+          state: isEdgeInPath(edge, graphState.selectedPath)
+            ? "current path"
+            : undefined,
+        };
       });
 
+      setGraphState((prev) => ({
+        ...prev,
+        edges: updatedEdges,
+        score: prev.score + 5,
+        feedback: "Correct! Select next edge flow.",
+        currentEdgeIndex: isLastEdge
+          ? prev.currentEdgeIndex
+          : prev.currentEdgeIndex + 1,
+      }));
+
       if (isLastEdge) {
-        const newState = {
-          ...graphState,
-          edges: updatedEdges,
-          maxFlow: graphState.maxFlow + graphState.selectedFlow,
-        };
-        const gameComplete = isGameComplete(newState);
-
-        setGraphState((prev) => ({
-          ...prev,
-          edges: updatedEdges,
-          gamePhase: "SELECT_PATH",
-          pathOptions: gameComplete ? [] : generatePathOptions(newState),
-          maxFlow: prev.maxFlow + prev.selectedFlow,
-          score: prev.score + 15,
-          feedback: gameComplete
-            ? "Game Complete! Maximum flow achieved."
-            : "Correct! Select the next augmenting path.",
-          isComplete: gameComplete,
-          currentEdgeIndex: 0,
-          selectedPath: null,
-          selectedFlow: null,
-        }));
-
+        const gameComplete = isGameComplete(graphState);
         if (gameComplete) {
           handleRoundComplete(graphState.score);
+        } else {
+          setGraphState((prev) => ({
+            ...prev,
+            gamePhase: "SELECT_PATH",
+            pathOptions: generatePathOptions(prev),
+            selectedPath: null,
+            selectedFlow: null,
+            feedback: "Path complete! Select next path.",
+          }));
         }
-      } else {
-        setGraphState((prev) => ({
-          ...prev,
-          edges: updatedEdges,
-          currentEdgeIndex: prev.currentEdgeIndex + 1,
-          score: prev.score + 5,
-          feedback: "Correct! Next edge.",
-        }));
       }
     } else {
       setGraphState((prev) => ({
@@ -401,6 +369,7 @@ const FordFulkersonGamePage = () => {
         initialMessage="Start from source (S) and find augmenting paths to sink (T)!"
         GraphVisualisationComponent={FordFulkersonGraphVisualisation}
         isFordFulkerson={true}
+        handleRoundComplete={handleRoundComplete}
       >
         <div className="absolute bottom-4 left-0 right-0 mx-auto w-full max-w-2xl px-4 z-10">
           <FlowQuestions
