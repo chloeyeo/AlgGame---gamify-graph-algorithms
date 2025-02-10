@@ -303,7 +303,17 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         const newBest = Math.max(bestScore, newScore);
 
         const remainingPaths = findAllPaths(updatedEdges, "S", "T").filter(
-          (path) => calculateResidualCapacity(path, updatedEdges) > 0
+          (path) => {
+            // Create a flows map from the current edge states
+            const currentFlows = new Map(
+              updatedEdges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
+            );
+
+            // Check if this path has any remaining capacity
+            return (
+              calculateResidualCapacity(path, updatedEdges, currentFlows) > 0
+            );
+          }
         );
 
         const gameComplete = remainingPaths.length === 0;
