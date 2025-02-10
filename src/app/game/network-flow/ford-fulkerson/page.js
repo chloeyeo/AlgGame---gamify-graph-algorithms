@@ -54,6 +54,8 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       isComplete: false,
       currentEdgeIndex: 0,
       edgeFlowOptions: [],
+      moves: 0,
+      best: 0,
     };
   });
 
@@ -88,6 +90,8 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       isComplete: false,
       currentEdgeIndex: 0,
       edgeFlowOptions: [],
+      moves: 0,
+      best: 0,
     });
   };
 
@@ -253,8 +257,6 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
     if (isCorrect) {
       const isLastEdge =
         graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
-
-      // Update only the current edge with the selected flow, respecting capacity
       const updatedEdges = graphState.edges.map((edge) => {
         if (
           (edge.source === currentEdge.source &&
@@ -263,13 +265,9 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
             edge.target === currentEdge.source)
         ) {
           const currentFlow = edge.flow || 0;
-          const newFlow = currentFlow + selectedEdgeFlow;
-          // Ensure flow doesn't exceed capacity
-          if (Math.abs(newFlow) > edge.capacity) return edge;
-
           return {
             ...edge,
-            flow: newFlow,
+            flow: currentFlow + selectedEdgeFlow,
             currentEdge: true,
             state: "current edge",
           };
@@ -278,75 +276,88 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       });
 
       if (isLastEdge) {
+        // Check if there are still valid paths AFTER updating all edges in current path
         const newState = {
           ...graphState,
           edges: updatedEdges,
           maxFlow: graphState.maxFlow + graphState.selectedFlow,
         };
 
-        // Check if there are still valid paths available
         const remainingPaths = findAllPaths(newState.edges, "S", "T").filter(
           (path) => calculateResidualCapacity(path, newState.edges) > 0
         );
 
         const gameComplete = remainingPaths.length === 0;
 
-        setGraphState((prev) => ({
-          ...prev,
+        setGraphState((prevState) => ({
+          ...prevState,
           edges: updatedEdges,
           gamePhase: "SELECT_PATH",
           pathOptions: gameComplete ? [] : remainingPaths.slice(0, 3),
-          maxFlow: prev.maxFlow + prev.selectedFlow,
-          score: prev.score + 15,
-          feedback: gameComplete
-            ? {
-                type: "complete",
-                text: "Game Complete! Maximum flow achieved.",
-              }
-            : { type: "success", text: "Path complete! Select next path." },
-          isComplete: gameComplete,
+          maxFlow: prevState.maxFlow + prevState.selectedFlow,
+          score: prevState.score + 15,
+          moves: (prevState.moves || 0) + 1,
+          best: Math.max(prevState.best || 0, prevState.score + 15),
+          feedback: {
+            type: "success",
+            text: "Path complete! Select next path.",
+          },
           currentEdgeIndex: 0,
           selectedPath: null,
           selectedFlow: null,
         }));
 
-        // Only call handleRoundComplete when truly complete
+        // Only trigger round complete if truly no more valid paths
         if (gameComplete) {
           setTimeout(() => {
             handleRoundComplete(graphState.score);
           }, 1500);
         }
       } else {
-        // Update scores immediately for each correct answer
-        setGraphState((prev) => ({
-          ...prev,
+        // Continue with current path
+        setGraphState((prevState) => ({
+          ...prevState,
           edges: updatedEdges,
-          score: prev.score + 5,
+          score: prevState.score + 5,
+          moves: (prevState.moves || 0) + 1,
+          best: Math.max(prevState.best || 0, prevState.score + 5),
           feedback: {
             type: "success",
             text: "Correct! Select next edge flow.",
           },
-          currentEdgeIndex: prev.currentEdgeIndex + 1,
+          currentEdgeIndex: prevState.currentEdgeIndex + 1,
         }));
       }
     } else {
-      setGraphState((prev) => ({
-        ...prev,
-        score: prev.score - 5,
+      setGraphState((prevState) => ({
+        ...prevState,
+        score: prevState.score - 5,
+        moves: (prevState.moves || 0) + 1,
         feedback: { type: "error", text: "Incorrect edge flow value." },
       }));
     }
   };
 
   const generateEdgeFlowOptions = (totalFlow) => {
+    const currentEdge = getCurrentEdgeFromPath();
+    if (!currentEdge) return [];
+
+    const edge = graphState.edges.find(
+      (e) =>
+        (e.source === currentEdge.source && e.target === currentEdge.target) ||
+        (e.source === currentEdge.target && e.target === currentEdge.source)
+    );
+
+    const currentFlow = edge?.flow || 0;
+    const capacity = edge?.capacity || 0;
+    const correctFlow = Math.min(totalFlow, capacity - currentFlow);
+
     return [
       ...new Set([
-        totalFlow,
-        -totalFlow,
-        totalFlow + 1,
-        -(totalFlow + 1),
-        Math.max(1, totalFlow - 1),
-        -Math.max(1, totalFlow - 1),
+        correctFlow,
+        -correctFlow,
+        Math.min(correctFlow + 1, capacity - currentFlow),
+        Math.max(1, correctFlow - 1),
       ]),
     ].sort((a, b) => a - b);
   };
@@ -396,7 +407,10 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         initialMessage="Start from source (S) and find augmenting paths to sink (T)!"
         GraphVisualisationComponent={FordFulkersonGraphVisualisation}
         isFordFulkerson={true}
-        handleRoundComplete={handleRoundComplete}
+        handleRoundComplete={(score) => {
+          setTotalScore((prev) => prev + score);
+          setRound((prev) => prev + 1);
+        }}
       >
         <div className="absolute bottom-4 left-0 right-0 mx-auto w-full max-w-2xl px-4 z-10">
           <FlowQuestions
