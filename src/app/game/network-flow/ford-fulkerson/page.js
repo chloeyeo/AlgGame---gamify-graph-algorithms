@@ -256,6 +256,16 @@ const FordFulkersonGamePage = () => {
 
       // Update the graph visualization immediately
       const updatedEdges = graphState.edges.map((edge) => {
+        // First reset all edges
+        const resetEdge = {
+          ...edge,
+          currentEdge: false,
+          state: isEdgeInPath(edge, graphState.selectedPath)
+            ? "current path"
+            : undefined,
+        };
+
+        // Then highlight the current edge if it matches
         if (
           (edge.source === currentEdge.source &&
             edge.target === currentEdge.target) ||
@@ -263,13 +273,13 @@ const FordFulkersonGamePage = () => {
             edge.target === currentEdge.source)
         ) {
           return {
-            ...edge,
+            ...resetEdge,
             flow: edge.flow ? edge.flow + selectedEdgeFlow : selectedEdgeFlow,
-            style: getEdgeStyle(edge, true),
-            isHighlighted: true,
+            currentEdge: true,
+            state: "current edge",
           };
         }
-        return edge;
+        return resetEdge;
       });
 
       if (isLastEdge) {
