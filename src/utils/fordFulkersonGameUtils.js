@@ -499,3 +499,39 @@ export const getEdgeLabel = (edge) => {
   // Always show flow/capacity format
   return `${Math.abs(flow)}/${edge.capacity}`;
 };
+
+export const generateEdgeFlowOptions = (totalFlow) => {
+  const currentEdge = getCurrentEdgeFromPath();
+  if (!currentEdge) return [];
+
+  const edge = graphState.edges.find(
+    (e) =>
+      (e.source === currentEdge.source && e.target === currentEdge.target) ||
+      (e.source === currentEdge.target && e.target === currentEdge.source)
+  );
+
+  if (!edge) return [];
+
+  const currentFlow = edge.flow || 0;
+  const capacity = edge.capacity || 0;
+
+  // Calculate the correct new flow value
+  const correctFlow = Math.min(currentFlow + totalFlow, capacity);
+
+  // Generate options including the correct flow value
+  const options = [
+    correctFlow,
+    Math.max(0, correctFlow - 2),
+    Math.min(capacity, Math.max(0, correctFlow + 2)),
+    currentFlow,
+  ];
+
+  // Ensure capacity is always included as an option if it's the correct answer
+  if (correctFlow === capacity && !options.includes(capacity)) {
+    options.push(capacity);
+  }
+
+  return [...new Set(options)]
+    .filter((flow) => flow >= 0 && flow <= capacity)
+    .sort((a, b) => a - b);
+};
