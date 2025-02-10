@@ -12,7 +12,7 @@ import {
   getEdgeStyle,
   FordFulkersonGraphVisualisation,
   generateRandomGraph,
-} from "@/app/education/network-flow/ford-fulkerson/page";
+} from "@/utils/fordFulkersonGameUtils";
 import { FlowQuestions } from "@/components/FlowQuestions";
 
 const FordFulkersonGamePage = ({ handleRoundComplete }) => {
