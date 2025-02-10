@@ -223,42 +223,15 @@ const FordFulkersonGamePage = () => {
     const isCorrect = selectedFlow === correctFlow;
 
     if (isCorrect) {
-      const newEdges = updateEdgeFlows(
-        graphState.edges,
-        graphState.selectedPath,
-        selectedFlow
-      );
-
-      // Check if game is complete after this move
-      const newState = {
-        ...graphState,
-        edges: newEdges,
-        maxFlow: graphState.maxFlow + selectedFlow,
-      };
-
-      const gameComplete = isGameComplete(newState);
-
-      if (gameComplete) {
-        setGraphState((prev) => ({
-          ...prev,
-          edges: newEdges,
-          gamePhase: "GAME_OVER",
-          maxFlow: prev.maxFlow + selectedFlow,
-          score: prev.score + 15,
-          feedback: "Game Complete! Maximum flow achieved.",
-          isComplete: true,
-        }));
-      } else {
-        setGraphState((prev) => ({
-          ...prev,
-          edges: newEdges,
-          gamePhase: "SELECT_PATH",
-          pathOptions: generatePathOptions({ ...prev, edges: newEdges }),
-          maxFlow: prev.maxFlow + selectedFlow,
-          score: prev.score + 15,
-          feedback: "Correct! Select the next augmenting path.",
-        }));
-      }
+      // Instead of immediately updating all edges, we'll move to edge-by-edge questions
+      setGraphState((prev) => ({
+        ...prev,
+        selectedFlow,
+        gamePhase: "UPDATE_EDGE_FLOWS",
+        currentEdgeIndex: 0,
+        edgeFlowOptions: generateEdgeFlowOptions(selectedFlow),
+        feedback: "Correct! Now let's update each edge's flow.",
+      }));
     } else {
       setGraphState((prev) => ({
         ...prev,
@@ -266,6 +239,90 @@ const FordFulkersonGamePage = () => {
         feedback: "Incorrect flow value selected.",
       }));
     }
+  };
+
+  // Add new handler for edge flow updates
+  const handleEdgeFlowSelect = (selectedEdgeFlow) => {
+    const currentEdge = getCurrentEdgeFromPath();
+    const correctFlow = calculateCorrectEdgeFlow(currentEdge);
+    const isCorrect = selectedEdgeFlow === correctFlow;
+
+    if (isCorrect) {
+      const isLastEdge =
+        graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
+
+      if (isLastEdge) {
+        const newEdges = updateEdgeFlows(
+          graphState.edges,
+          graphState.selectedPath,
+          graphState.selectedFlow
+        );
+
+        const newState = {
+          ...graphState,
+          edges: newEdges,
+          maxFlow: graphState.maxFlow + graphState.selectedFlow,
+        };
+
+        const gameComplete = isGameComplete(newState);
+
+        setGraphState((prev) => ({
+          ...prev,
+          edges: newEdges,
+          gamePhase: gameComplete ? "GAME_OVER" : "SELECT_PATH",
+          pathOptions: gameComplete
+            ? []
+            : generatePathOptions({ ...prev, edges: newEdges }),
+          maxFlow: prev.maxFlow + prev.selectedFlow,
+          score: prev.score + 15,
+          feedback: gameComplete
+            ? "Game Complete! Maximum flow achieved."
+            : "Correct! Select the next augmenting path.",
+          isComplete: gameComplete,
+        }));
+      } else {
+        setGraphState((prev) => ({
+          ...prev,
+          currentEdgeIndex: prev.currentEdgeIndex + 1,
+          score: prev.score + 5,
+          feedback: "Correct! Next edge.",
+        }));
+      }
+    } else {
+      setGraphState((prev) => ({
+        ...prev,
+        score: prev.score - 5,
+        feedback: "Incorrect edge flow value.",
+      }));
+    }
+  };
+
+  const generateEdgeFlowOptions = (totalFlow) => {
+    return [
+      ...new Set([
+        totalFlow,
+        -totalFlow,
+        totalFlow + 1,
+        -(totalFlow + 1),
+        Math.max(1, totalFlow - 1),
+        -Math.max(1, totalFlow - 1),
+      ]),
+    ].sort((a, b) => a - b);
+  };
+
+  const getCurrentEdgeFromPath = () => {
+    const { selectedPath, currentEdgeIndex } = graphState;
+    return {
+      source: selectedPath[currentEdgeIndex],
+      target: selectedPath[currentEdgeIndex + 1],
+    };
+  };
+
+  const calculateCorrectEdgeFlow = (edge) => {
+    const { selectedFlow, selectedPath } = graphState;
+    const isForward =
+      selectedPath.indexOf(edge.source) < selectedPath.indexOf(edge.target);
+    return isForward ? selectedFlow : -selectedFlow;
   };
 
   return (
@@ -295,6 +352,7 @@ const FordFulkersonGamePage = () => {
             graphState={graphState}
             onPathSelect={handlePathSelect}
             onFlowSelect={handleFlowSelect}
+            onEdgeFlowSelect={handleEdgeFlowSelect}
           />
         </div>
       </GamePageStructure>

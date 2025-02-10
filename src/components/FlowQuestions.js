@@ -1,10 +1,23 @@
 import React, { useState } from "react";
 
-export const FlowQuestions = ({ graphState, onPathSelect, onFlowSelect }) => {
+export const FlowQuestions = ({
+  graphState,
+  onPathSelect,
+  onFlowSelect,
+  onEdgeFlowSelect,
+}) => {
   const [isVisible, setIsVisible] = useState(true);
 
-  const { gamePhase, pathOptions, flowOptions, feedback, currentPath } =
-    graphState;
+  const {
+    gamePhase,
+    pathOptions,
+    flowOptions,
+    edgeFlowOptions,
+    feedback,
+    currentPath,
+    currentEdgeIndex,
+    selectedPath,
+  } = graphState;
 
   if (!gamePhase || !pathOptions) {
     return null;
@@ -62,6 +75,31 @@ export const FlowQuestions = ({ graphState, onPathSelect, onFlowSelect }) => {
     );
   };
 
+  const renderEdgeFlowQuestion = () => {
+    const currentEdge = `${selectedPath[currentEdgeIndex]} → ${
+      selectedPath[currentEdgeIndex + 1]
+    }`;
+
+    return (
+      <>
+        <h3 className="text-lg font-semibold mb-3">
+          What should be the new flow for edge {currentEdge}?
+        </h3>
+        <div className="space-y-2">
+          {[...new Set(edgeFlowOptions)].map((flow, index) => (
+            <button
+              key={index}
+              onClick={() => onEdgeFlowSelect(flow)}
+              className="w-full p-3 text-left border rounded hover:bg-blue-50 transition-colors duration-200"
+            >
+              <span className="font-medium">Flow value:</span> {flow} units
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="relative">
       {/* Toggle button - always visible */}
@@ -76,6 +114,7 @@ export const FlowQuestions = ({ graphState, onPathSelect, onFlowSelect }) => {
         <div className="space-y-4 p-4 bg-white rounded-lg shadow-md">
           {gamePhase === "SELECT_PATH" && renderPathQuestion()}
           {gamePhase === "UPDATE_FLOWS" && renderFlowQuestion()}
+          {gamePhase === "UPDATE_EDGE_FLOWS" && renderEdgeFlowQuestion()}
           {feedback && (
             <div
               className={`mt-4 p-3 rounded ${
