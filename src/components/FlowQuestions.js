@@ -129,12 +129,12 @@ export const FlowQuestions = ({
           {feedback && (
             <div
               className={`mt-4 p-3 rounded ${
-                feedback.includes("Correct")
-                  ? "bg-green-50 text-green-800"
-                  : "bg-red-50 text-red-800"
+                feedback?.type === "error"
+                  ? "bg-red-50 text-red-800"
+                  : "bg-green-50 text-green-800"
               }`}
             >
-              {feedback}
+              {feedback?.text || feedback}
             </div>
           )}
         </div>
