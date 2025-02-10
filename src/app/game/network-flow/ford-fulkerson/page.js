@@ -251,8 +251,16 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
     const currentEdge = getCurrentEdgeFromPath();
     if (!currentEdge) return;
 
+    const edge = graphState.edges.find(
+      (e) =>
+        (e.source === currentEdge.source && e.target === currentEdge.target) ||
+        (e.source === currentEdge.target && e.target === currentEdge.source)
+    );
+
+    const currentFlow = edge?.flow || 0;
     const correctFlow = calculateCorrectEdgeFlow(currentEdge);
-    const isCorrect = selectedEdgeFlow === correctFlow;
+    // Compare with total flow (existing + new)
+    const isCorrect = selectedEdgeFlow === currentFlow + correctFlow;
 
     if (isCorrect) {
       const isLastEdge =
@@ -264,10 +272,9 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
           (edge.source === currentEdge.target &&
             edge.target === currentEdge.source)
         ) {
-          const currentFlow = edge.flow || 0;
           return {
             ...edge,
-            flow: currentFlow + selectedEdgeFlow,
+            flow: selectedEdgeFlow,
             currentEdge: true,
             state: "current edge",
           };
@@ -288,30 +295,28 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
 
         const gameComplete = remainingPaths.length === 0;
 
-        setGraphState((prevState) => {
-          const newScore = prevState.score + 15;
-          return {
-            ...prevState,
-            edges: updatedEdges,
-            gamePhase: "SELECT_PATH",
-            pathOptions: gameComplete ? [] : remainingPaths.slice(0, 3),
-            maxFlow: prevState.maxFlow + prevState.selectedFlow,
-            score: newScore,
-            moves: prevState.moves + 1,
-            best: Math.max(prevState.best || 0, newScore),
-            feedback: {
-              type: "success",
-              text: gameComplete
-                ? "Game Complete!"
-                : "Path complete! Select next path.",
-            },
-            currentEdgeIndex: 0,
-            selectedPath: null,
-            selectedFlow: null,
-            isComplete: gameComplete,
-          };
-        });
+        setGraphState((prevState) => ({
+          ...prevState,
+          edges: updatedEdges,
+          gamePhase: "SELECT_PATH",
+          pathOptions: gameComplete ? [] : remainingPaths.slice(0, 3),
+          maxFlow: prevState.maxFlow + prevState.selectedFlow,
+          score: prevState.score + 15,
+          moves: prevState.moves + 1,
+          best: Math.max(prevState.best || 0, prevState.score + 15),
+          feedback: {
+            type: "success",
+            text: gameComplete
+              ? "Game Complete!"
+              : "Path complete! Select next path.",
+          },
+          currentEdgeIndex: 0,
+          selectedPath: null,
+          selectedFlow: null,
+          isComplete: gameComplete,
+        }));
 
+        // Only trigger round completion when game is complete
         if (gameComplete) {
           setTimeout(() => {
             setTotalScore((prev) => prev + graphState.score);
@@ -319,23 +324,22 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
           }, 1500);
         }
       } else {
-        setGraphState((prevState) => {
-          const newScore = prevState.score + 5;
-          return {
-            ...prevState,
-            edges: updatedEdges,
-            score: newScore,
-            moves: prevState.moves + 1,
-            best: Math.max(prevState.best || 0, newScore),
-            feedback: {
-              type: "success",
-              text: "Correct! Select next edge flow.",
-            },
-            currentEdgeIndex: prevState.currentEdgeIndex + 1,
-          };
-        });
+        // Continue with existing logic for non-last edges
+        setGraphState((prevState) => ({
+          ...prevState,
+          edges: updatedEdges,
+          score: prevState.score + 5,
+          moves: prevState.moves + 1,
+          best: Math.max(prevState.best || 0, prevState.score + 5),
+          feedback: {
+            type: "success",
+            text: "Correct! Select next edge flow.",
+          },
+          currentEdgeIndex: prevState.currentEdgeIndex + 1,
+        }));
       }
     } else {
+      // Incorrect flow handling remains the same
       setGraphState((prevState) => ({
         ...prevState,
         score: prevState.score - 5,
@@ -359,14 +363,15 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
     const capacity = edge?.capacity || 0;
     const correctFlow = Math.min(totalFlow, capacity - currentFlow);
 
-    return [
-      ...new Set([
-        correctFlow,
-        -correctFlow,
-        Math.min(correctFlow + 1, capacity - currentFlow),
-        Math.max(1, correctFlow - 1),
-      ]),
-    ].sort((a, b) => a - b);
+    // Calculate total flows including existing flow
+    const options = [
+      currentFlow + correctFlow,
+      currentFlow - correctFlow,
+      currentFlow + Math.min(correctFlow + 1, capacity - currentFlow),
+      currentFlow + Math.max(1, correctFlow - 1),
+    ];
+
+    return [...new Set(options)].sort((a, b) => a - b);
   };
 
   const getCurrentEdgeFromPath = () => {
