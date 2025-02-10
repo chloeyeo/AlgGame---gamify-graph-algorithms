@@ -129,8 +129,9 @@ export const FlowQuestions = ({
           {feedback && (
             <div
               className={`mt-4 p-3 rounded ${
-                typeof feedback === "string" &&
-                feedback.toLowerCase().includes("incorrect")
+                feedback?.type === "error" ||
+                (typeof feedback === "string" &&
+                  feedback.toLowerCase().includes("incorrect"))
                   ? "bg-red-50 text-red-800"
                   : "bg-green-50 text-green-800"
               }`}
