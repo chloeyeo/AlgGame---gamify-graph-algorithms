@@ -276,7 +276,6 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       });
 
       if (isLastEdge) {
-        // Check if there are still valid paths AFTER updating all edges in current path
         const newState = {
           ...graphState,
           edges: updatedEdges,
@@ -289,50 +288,58 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
 
         const gameComplete = remainingPaths.length === 0;
 
-        setGraphState((prevState) => ({
-          ...prevState,
-          edges: updatedEdges,
-          gamePhase: "SELECT_PATH",
-          pathOptions: gameComplete ? [] : remainingPaths.slice(0, 3),
-          maxFlow: prevState.maxFlow + prevState.selectedFlow,
-          score: prevState.score + 15,
-          moves: (prevState.moves || 0) + 1,
-          best: Math.max(prevState.best || 0, prevState.score + 15),
-          feedback: {
-            type: "success",
-            text: "Path complete! Select next path.",
-          },
-          currentEdgeIndex: 0,
-          selectedPath: null,
-          selectedFlow: null,
-        }));
+        setGraphState((prevState) => {
+          const newScore = prevState.score + 15;
+          return {
+            ...prevState,
+            edges: updatedEdges,
+            gamePhase: "SELECT_PATH",
+            pathOptions: gameComplete ? [] : remainingPaths.slice(0, 3),
+            maxFlow: prevState.maxFlow + prevState.selectedFlow,
+            score: newScore,
+            moves: prevState.moves + 1,
+            best: Math.max(prevState.best || 0, newScore),
+            feedback: {
+              type: "success",
+              text: gameComplete
+                ? "Game Complete!"
+                : "Path complete! Select next path.",
+            },
+            currentEdgeIndex: 0,
+            selectedPath: null,
+            selectedFlow: null,
+            isComplete: gameComplete,
+          };
+        });
 
-        // Only trigger round complete if truly no more valid paths
         if (gameComplete) {
           setTimeout(() => {
-            handleRoundComplete(graphState.score);
+            setTotalScore((prev) => prev + graphState.score);
+            setRound((prev) => prev + 1);
           }, 1500);
         }
       } else {
-        // Continue with current path
-        setGraphState((prevState) => ({
-          ...prevState,
-          edges: updatedEdges,
-          score: prevState.score + 5,
-          moves: (prevState.moves || 0) + 1,
-          best: Math.max(prevState.best || 0, prevState.score + 5),
-          feedback: {
-            type: "success",
-            text: "Correct! Select next edge flow.",
-          },
-          currentEdgeIndex: prevState.currentEdgeIndex + 1,
-        }));
+        setGraphState((prevState) => {
+          const newScore = prevState.score + 5;
+          return {
+            ...prevState,
+            edges: updatedEdges,
+            score: newScore,
+            moves: prevState.moves + 1,
+            best: Math.max(prevState.best || 0, newScore),
+            feedback: {
+              type: "success",
+              text: "Correct! Select next edge flow.",
+            },
+            currentEdgeIndex: prevState.currentEdgeIndex + 1,
+          };
+        });
       }
     } else {
       setGraphState((prevState) => ({
         ...prevState,
         score: prevState.score - 5,
-        moves: (prevState.moves || 0) + 1,
+        moves: prevState.moves + 1,
         feedback: { type: "error", text: "Incorrect edge flow value." },
       }));
     }
@@ -406,11 +413,38 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         onDifficultySelect={handleDifficultySelect}
         initialMessage="Start from source (S) and find augmenting paths to sink (T)!"
         GraphVisualisationComponent={FordFulkersonGraphVisualisation}
-        isFordFulkerson={true}
         handleRoundComplete={(score) => {
           setTotalScore((prev) => prev + score);
           setRound((prev) => prev + 1);
+
+          // Generate new graph for next round
+          const newGraph = generateSpacedGraph(nodeCount);
+          const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
+            .filter(
+              (path) => calculateResidualCapacity(path, newGraph.edges) > 0
+            )
+            .slice(0, 3);
+
+          setGraphState({
+            ...newGraph,
+            currentPath: [],
+            maxFlow: 0,
+            gamePhase: "SELECT_PATH",
+            pathOptions: newPathOptions,
+            flowOptions: [],
+            currentEdgeIndex: 0,
+            userAnswers: {},
+            correctAnswers: {},
+            pathFlow: 0,
+            feedback: null,
+            flows: new Map(),
+            isComplete: false,
+            score: 0,
+            moves: 0,
+            best: 0,
+          });
         }}
+        isFordFulkerson={true}
       >
         <div className="absolute bottom-4 left-0 right-0 mx-auto w-full max-w-2xl px-4 z-10">
           <FlowQuestions
