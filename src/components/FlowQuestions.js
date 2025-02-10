@@ -25,7 +25,7 @@ export const FlowQuestions = ({
     if (feedback || graphState.gamePhase === "UPDATE_FLOWS") {
       setTimeout(() => {
         setIsVisible(false);
-      }, 1000);
+      }, 500);
     }
   }, [feedback, graphState.gamePhase]);
 

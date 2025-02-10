@@ -418,7 +418,8 @@ export const getEdgeStyle = (edge) => ({
 
 export const getEdgeLabel = (edge) => {
   const flow = edge.flow || 0;
-  return `${flow}/${edge.capacity}`;
+  // Always show flow/capacity format
+  return `${Math.abs(flow)}/${edge.capacity}`;
 };
 
 export const FordFulkersonGraphVisualisation = ({ graphState }) => {
