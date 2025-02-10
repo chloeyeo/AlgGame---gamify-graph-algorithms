@@ -22,12 +22,12 @@ export const FlowQuestions = ({
   } = graphState;
 
   useEffect(() => {
-    if (feedback && !feedback.includes("Incorrect")) {
+    if (feedback || graphState.gamePhase === "UPDATE_FLOWS") {
       setTimeout(() => {
         setIsVisible(false);
       }, 1000);
     }
-  }, [feedback]);
+  }, [feedback, graphState.gamePhase]);
 
   if (!gamePhase || !pathOptions) {
     return null;

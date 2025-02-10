@@ -254,6 +254,25 @@ const FordFulkersonGamePage = () => {
       const isLastEdge =
         graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
 
+      // Get the current edge from the graph
+      const edge = graphState.edges.find(
+        (e) =>
+          (e.source === currentEdge.source &&
+            e.target === currentEdge.target) ||
+          (e.source === currentEdge.target && e.target === currentEdge.source)
+      );
+
+      // Check if the new flow would exceed capacity
+      const newFlow = (edge.flow || 0) + selectedEdgeFlow;
+      if (newFlow > edge.capacity) {
+        setGraphState((prev) => ({
+          ...prev,
+          feedback: "Flow cannot exceed capacity!",
+          score: prev.score - 5,
+        }));
+        return;
+      }
+
       const updatedEdges = graphState.edges.map((edge) => {
         const resetEdge = {
           ...edge,
@@ -271,7 +290,7 @@ const FordFulkersonGamePage = () => {
         ) {
           return {
             ...resetEdge,
-            flow: edge.flow ? edge.flow + selectedEdgeFlow : selectedEdgeFlow,
+            flow: newFlow,
             currentEdge: true,
             state: "current edge",
           };
@@ -280,21 +299,16 @@ const FordFulkersonGamePage = () => {
       });
 
       if (isLastEdge) {
-        const newEdges = updateEdgeFlows(
-          updatedEdges,
-          graphState.selectedPath,
-          graphState.selectedFlow
-        );
         const newState = {
           ...graphState,
-          edges: newEdges,
+          edges: updatedEdges,
           maxFlow: graphState.maxFlow + graphState.selectedFlow,
         };
         const gameComplete = isGameComplete(newState);
 
         setGraphState((prev) => ({
           ...prev,
-          edges: newEdges,
+          edges: updatedEdges,
           gamePhase: "SELECT_PATH",
           pathOptions: gameComplete ? [] : generatePathOptions(newState),
           maxFlow: prev.maxFlow + prev.selectedFlow,
@@ -307,6 +321,10 @@ const FordFulkersonGamePage = () => {
           selectedPath: null,
           selectedFlow: null,
         }));
+
+        if (gameComplete) {
+          handleRoundComplete(graphState.score);
+        }
       } else {
         setGraphState((prev) => ({
           ...prev,
