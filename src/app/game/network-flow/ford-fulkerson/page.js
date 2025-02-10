@@ -254,9 +254,7 @@ const FordFulkersonGamePage = () => {
       const isLastEdge =
         graphState.currentEdgeIndex === graphState.selectedPath.length - 2;
 
-      // Update the graph visualization immediately
       const updatedEdges = graphState.edges.map((edge) => {
-        // First reset all edges
         const resetEdge = {
           ...edge,
           currentEdge: false,
@@ -265,7 +263,6 @@ const FordFulkersonGamePage = () => {
             : undefined,
         };
 
-        // Then highlight the current edge if it matches
         if (
           (edge.source === currentEdge.source &&
             edge.target === currentEdge.target) ||
@@ -310,38 +307,6 @@ const FordFulkersonGamePage = () => {
           selectedPath: null,
           selectedFlow: null,
         }));
-
-        // Only start new round if game is complete
-        if (gameComplete) {
-          const parentHandleRoundComplete = async () => {
-            const newGraph = generateRandomGraph(nodeCount, true);
-            const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
-              .filter(
-                (path) => calculateResidualCapacity(path, newGraph.edges) > 0
-              )
-              .slice(0, 3);
-
-            setGraphState((prev) => ({
-              ...newGraph,
-              currentPath: [],
-              maxFlow: 0,
-              gamePhase: "SELECT_PATH",
-              pathOptions: newPathOptions,
-              flowOptions: [],
-              currentEdgeIndex: 0,
-              userAnswers: {},
-              correctAnswers: {},
-              pathFlow: 0,
-              feedback: "New round started!",
-              flows: new Map(),
-              isComplete: false,
-              score: 0,
-            }));
-            setRound((prev) => prev + 1);
-          };
-
-          parentHandleRoundComplete();
-        }
       } else {
         setGraphState((prev) => ({
           ...prev,
