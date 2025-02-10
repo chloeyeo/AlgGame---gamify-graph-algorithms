@@ -211,29 +211,54 @@ const FordFulkersonGamePage = () => {
   };
 
   const handleFlowSelect = (selectedFlow) => {
+    const flows = new Map(
+      graphState.edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
+    );
+
     const correctFlow = calculateBottleneck(
       graphState.selectedPath,
-      graphState.edges
+      graphState.edges,
+      flows
     );
     const isCorrect = selectedFlow === correctFlow;
 
     if (isCorrect) {
-      // Update the graph with new flows
       const newEdges = updateEdgeFlows(
         graphState.edges,
         graphState.selectedPath,
         selectedFlow
       );
 
-      setGraphState((prev) => ({
-        ...prev,
+      // Check if game is complete after this move
+      const newState = {
+        ...graphState,
         edges: newEdges,
-        gamePhase: "SELECT_PATH",
-        pathOptions: generatePathOptions({ ...prev, edges: newEdges }),
-        maxFlow: prev.maxFlow + selectedFlow,
-        score: prev.score + 15,
-        feedback: "Correct! Flow updated successfully.",
-      }));
+        maxFlow: graphState.maxFlow + selectedFlow,
+      };
+
+      const gameComplete = isGameComplete(newState);
+
+      if (gameComplete) {
+        setGraphState((prev) => ({
+          ...prev,
+          edges: newEdges,
+          gamePhase: "GAME_OVER",
+          maxFlow: prev.maxFlow + selectedFlow,
+          score: prev.score + 15,
+          feedback: "Game Complete! Maximum flow achieved.",
+          isComplete: true,
+        }));
+      } else {
+        setGraphState((prev) => ({
+          ...prev,
+          edges: newEdges,
+          gamePhase: "SELECT_PATH",
+          pathOptions: generatePathOptions({ ...prev, edges: newEdges }),
+          maxFlow: prev.maxFlow + selectedFlow,
+          score: prev.score + 15,
+          feedback: "Correct! Select the next augmenting path.",
+        }));
+      }
     } else {
       setGraphState((prev) => ({
         ...prev,
