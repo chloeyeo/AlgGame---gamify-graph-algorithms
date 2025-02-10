@@ -311,8 +311,8 @@ const FordFulkersonGamePage = () => {
           selectedFlow: null,
         }));
 
-        if (!gameComplete) {
-          // Call the parent component's handleRoundComplete
+        // Only start new round if game is complete
+        if (gameComplete) {
           const parentHandleRoundComplete = async () => {
             const newGraph = generateRandomGraph(nodeCount, true);
             const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
