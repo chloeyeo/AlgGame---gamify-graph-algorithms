@@ -166,8 +166,8 @@ const FordFulkersonGamePage = () => {
       .slice(0, 3); // Limit to 3 valid options
   };
 
-  const generateFlowOptions = (path, edges) => {
-    const correctFlow = calculateBottleneck(path, edges);
+  const generateFlowOptions = (path, edges, flows) => {
+    const correctFlow = calculateBottleneck(path, edges, flows);
     return [
       correctFlow,
       correctFlow + 1,
