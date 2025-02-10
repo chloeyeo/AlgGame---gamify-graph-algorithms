@@ -20,6 +20,9 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
   const [round, setRound] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
   const [nodeCount, setNodeCount] = useState(5);
+  const [score, setScore] = useState(0);
+  const [moves, setMoves] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
   const [graphState, setGraphState] = useState(() => {
     const initialGraph = generateSpacedGraph(nodeCount);
     console.log("Initial graph:", initialGraph);
@@ -209,6 +212,10 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       flows
     );
 
+    setScore((prev) => prev + 10);
+    setMoves((prev) => prev + 1);
+    setBestScore((prev) => Math.max(prev, score + 10));
+
     setGraphState((prev) => ({
       ...prev,
       selectedPath,
@@ -216,8 +223,6 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
       gamePhase: "UPDATE_FLOWS",
       flowOptions,
       feedback: null,
-      moves: prev.moves + 1,
-      score: prev.score + 10,
     }));
   };
 
@@ -233,6 +238,10 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
     );
 
     if (selectedFlow === bottleneck) {
+      setScore((prev) => prev + 10);
+      setMoves((prev) => prev + 1);
+      setBestScore((prev) => Math.max(prev, score + 10));
+
       setGraphState((prev) => ({
         ...prev,
         selectedFlow,
@@ -241,15 +250,14 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         currentEdgeIndex: 0,
         feedback: "Correct! Now update each edge's flow.",
         flows: flows,
-        moves: prev.moves + 1,
-        score: prev.score + 10,
       }));
     } else {
+      setScore((prev) => prev - 5);
+      setMoves((prev) => prev + 1);
+
       setGraphState((prev) => ({
         ...prev,
         feedback: "Incorrect flow value selected.",
-        moves: prev.moves + 1,
-        score: prev.score - 5,
       }));
     }
   };
@@ -290,9 +298,9 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
 
       if (isLastEdge) {
         const newMaxFlow = graphState.maxFlow + graphState.selectedFlow;
-        const newScore = graphState.score + 15;
-        const newMoves = graphState.moves + 1;
-        const newBest = Math.max(graphState.best, newScore);
+        const newScore = score + 15;
+        const newMoves = moves + 1;
+        const newBest = Math.max(bestScore, newScore);
 
         const remainingPaths = findAllPaths(updatedEdges, "S", "T").filter(
           (path) => calculateResidualCapacity(path, updatedEdges) > 0
@@ -360,12 +368,16 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
           isComplete: gameComplete,
         }));
       } else {
+        setScore((prev) => prev + 5);
+        setMoves((prev) => prev + 1);
+        setBestScore((prev) => Math.max(prev, score + 5));
+
         setGraphState((prev) => ({
           ...prev,
           edges: updatedEdges,
-          score: prev.score + 5,
-          moves: prev.moves + 1,
-          best: Math.max(prev.best, prev.score + 5),
+          score: score + 5,
+          moves: moves + 1,
+          best: bestScore,
           feedback: {
             type: "success",
             text: "Correct! Select next edge flow.",
@@ -374,10 +386,13 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         }));
       }
     } else {
+      setScore((prev) => prev - 5);
+      setMoves((prev) => prev + 1);
+
       setGraphState((prev) => ({
         ...prev,
-        score: prev.score - 5,
-        moves: prev.moves + 1,
+        score: score - 5,
+        moves: moves + 1,
         feedback: { type: "error", text: "Incorrect edge flow value." },
       }));
     }
@@ -484,6 +499,9 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
           });
         }}
         isFordFulkerson={true}
+        score={score}
+        moves={moves}
+        bestScore={bestScore}
       >
         <div className="absolute bottom-4 left-0 right-0 mx-auto w-full max-w-2xl px-4 z-10">
           <FlowQuestions
