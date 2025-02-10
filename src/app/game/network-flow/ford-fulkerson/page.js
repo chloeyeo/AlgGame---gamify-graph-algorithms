@@ -51,6 +51,9 @@ const FordFulkersonGamePage = () => {
       score: 0,
       feedback: null,
       flows: initialFlows,
+      isComplete: false,
+      currentEdgeIndex: 0,
+      edgeFlowOptions: [],
     };
   });
 
@@ -82,6 +85,9 @@ const FordFulkersonGamePage = () => {
       correctAnswers: {},
       pathFlow: 0,
       flows: new Map(),
+      isComplete: false,
+      currentEdgeIndex: 0,
+      edgeFlowOptions: [],
     });
   };
 
@@ -177,7 +183,6 @@ const FordFulkersonGamePage = () => {
   };
 
   const handlePathSelect = (selectedPath) => {
-    // Create a flows Map from the current edge flows
     const flows = new Map(
       graphState.edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
     );
@@ -223,7 +228,6 @@ const FordFulkersonGamePage = () => {
     const isCorrect = selectedFlow === correctFlow;
 
     if (isCorrect) {
-      // Instead of immediately updating all edges, we'll move to edge-by-edge questions
       setGraphState((prev) => ({
         ...prev,
         selectedFlow,
@@ -241,7 +245,6 @@ const FordFulkersonGamePage = () => {
     }
   };
 
-  // Add new handler for edge flow updates
   const handleEdgeFlowSelect = (selectedEdgeFlow) => {
     const currentEdge = getCurrentEdgeFromPath();
     const correctFlow = calculateCorrectEdgeFlow(currentEdge);
@@ -266,20 +269,33 @@ const FordFulkersonGamePage = () => {
 
         const gameComplete = isGameComplete(newState);
 
-        setGraphState((prev) => ({
-          ...prev,
-          edges: newEdges,
-          gamePhase: gameComplete ? "GAME_OVER" : "SELECT_PATH",
-          pathOptions: gameComplete
-            ? []
-            : generatePathOptions({ ...prev, edges: newEdges }),
-          maxFlow: prev.maxFlow + prev.selectedFlow,
-          score: prev.score + 15,
-          feedback: gameComplete
-            ? "Game Complete! Maximum flow achieved."
-            : "Correct! Select the next augmenting path.",
-          isComplete: gameComplete,
-        }));
+        if (gameComplete) {
+          setGraphState((prev) => ({
+            ...prev,
+            edges: newEdges,
+            gamePhase: "GAME_OVER",
+            pathOptions: [],
+            maxFlow: prev.maxFlow + prev.selectedFlow,
+            score: prev.score + 15,
+            feedback: "Game Complete! Maximum flow achieved.",
+            isComplete: true,
+          }));
+        } else {
+          const newPathOptions = findAllPaths(newEdges, "S", "T")
+            .filter((path) => calculateResidualCapacity(path, newEdges) > 0)
+            .slice(0, 3);
+
+          setGraphState((prev) => ({
+            ...prev,
+            edges: newEdges,
+            gamePhase: "SELECT_PATH",
+            pathOptions: newPathOptions,
+            maxFlow: prev.maxFlow + prev.selectedFlow,
+            score: prev.score + 15,
+            feedback: "Correct! Select the next augmenting path.",
+            currentEdgeIndex: 0,
+          }));
+        }
       } else {
         setGraphState((prev) => ({
           ...prev,

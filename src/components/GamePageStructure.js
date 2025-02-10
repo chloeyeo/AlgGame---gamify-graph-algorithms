@@ -413,22 +413,45 @@ export default function GamePageStructure({
   const handleRoundComplete = async (currentScore, algorithm) => {
     const token = localStorage.getItem("token");
 
-    let newState;
+    // Special handling for Ford-Fulkerson
     if (isFordFulkerson) {
-      newState = {
-        ...graphState,
+      // Don't start new round if game is complete
+      if (graphState.isComplete) {
+        setTotalScore((prev) => prev + currentScore);
+        return;
+      }
+
+      // Generate new graph for next round
+      const newGraph = generateRandomGraph(nodeCount, true);
+      const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
+        .filter((path) => calculateResidualCapacity(path, newGraph.edges) > 0)
+        .slice(0, 3);
+
+      const newState = {
+        ...newGraph,
         currentPath: [],
         maxFlow: 0,
-        gamePhase: "SHOW_PATH",
-        currentPathIndex: 0,
+        gamePhase: "SELECT_PATH",
+        pathOptions: newPathOptions,
         flowOptions: [],
         currentEdgeIndex: 0,
         userAnswers: {},
         correctAnswers: {},
         pathFlow: 0,
         feedback: null,
+        flows: new Map(),
+        isComplete: false,
       };
-    } else if (
+
+      setGraphState(newState);
+      setRound((prev) => prev + 1);
+      setTotalScore((prev) => prev + currentScore);
+      return;
+    }
+
+    // Keep existing logic for other algorithms unchanged
+    let newState;
+    if (
       algorithm === "kruskal" ||
       algorithm === "prim" ||
       algorithm === "dijkstra" ||
@@ -436,7 +459,6 @@ export default function GamePageStructure({
     ) {
       newState = generateInitialGraphState(nodeCount, algorithm, difficulty);
     } else {
-      // Keep existing BFS/DFS logic unchanged
       const { nodes, edges } = generateRandomGraph(nodeCount, difficulty);
       newState = {
         nodes: nodes.map((node) => ({

@@ -29,10 +29,6 @@ export const FlowQuestions = ({
       value: path,
     }));
 
-    console.log("pathChoices", pathChoices);
-    console.log("currentPath", currentPath);
-    console.log("Flow Questions being rendered");
-
     return (
       <>
         <h3 className="text-lg font-semibold mb-3">
@@ -61,7 +57,7 @@ export const FlowQuestions = ({
           What is the maximum flow we can push through this path?
         </h3>
         <div className="space-y-2">
-          {flowOptions.map((flow, index) => (
+          {[...new Set(flowOptions)].map((flow, index) => (
             <button
               key={index}
               onClick={() => onFlowSelect(flow)}
@@ -102,7 +98,6 @@ export const FlowQuestions = ({
 
   return (
     <div className="relative">
-      {/* Toggle button - always visible */}
       <button
         onClick={() => setIsVisible(!isVisible)}
         className="absolute -top-10 right-4 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-t"
