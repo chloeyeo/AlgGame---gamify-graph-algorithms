@@ -416,6 +416,11 @@ export const getEdgeStyle = (edge) => ({
   strokeDasharray: edge.state === "current path" ? "5,5" : "none",
 });
 
+export const getEdgeLabel = (edge) => {
+  const flow = edge.flow || 0;
+  return `${flow}/${edge.capacity}`;
+};
+
 export const FordFulkersonGraphVisualisation = ({ graphState }) => {
   const drawArrowPath = (source, target) => {
     // Calculate the direction vector
@@ -598,7 +603,7 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
                   fontSize="16"
                   fontWeight="700"
                 >
-                  {`${edge.flow}/${edge.capacity}`}
+                  {getEdgeLabel(edge)}
                 </text>
               </g>
             </g>

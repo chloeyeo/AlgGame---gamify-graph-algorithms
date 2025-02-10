@@ -21,7 +21,7 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
   const [totalScore, setTotalScore] = useState(0);
   const [nodeCount, setNodeCount] = useState(5);
   const [graphState, setGraphState] = useState(() => {
-    const initialGraph = generateRandomGraph(nodeCount, true);
+    const initialGraph = generateSpacedGraph(nodeCount);
     console.log("Initial graph:", initialGraph);
 
     const initialPathOptions = findAllPaths(initialGraph.edges, "S", "T")
@@ -67,7 +67,7 @@ const FordFulkersonGamePage = ({ handleRoundComplete }) => {
         : 6;
     setNodeCount(newNodeCount);
 
-    const newGraph = generateRandomGraph(newNodeCount, true);
+    const newGraph = generateSpacedGraph(newNodeCount);
     const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
       .filter((path) => calculateResidualCapacity(path, newGraph.edges) > 0)
       .slice(0, 3);
@@ -494,6 +494,40 @@ const updateEdgeFlows = (edges, path, flow) => {
     }
     return edge;
   });
+};
+
+const generateSpacedGraph = (nodeCount) => {
+  const graph = generateRandomGraph(nodeCount, true);
+
+  // Calculate positions for evenly spaced nodes in a wider layout
+  const width = 900;
+  const height = 500;
+  const centerY = height / 2;
+  const startX = 100;
+  const endX = width - 100;
+
+  // Position nodes in a more spread out manner
+  const middleNodes = graph.nodes.filter((n) => n.id !== "S" && n.id !== "T");
+  const spacing = (endX - startX) / (middleNodes.length + 1);
+
+  graph.nodes = graph.nodes.map((node) => {
+    if (node.id === "S") {
+      return { ...node, x: startX, y: centerY };
+    }
+    if (node.id === "T") {
+      return { ...node, x: endX, y: centerY };
+    }
+
+    const index = middleNodes.findIndex((n) => n.id === node.id);
+    return {
+      ...node,
+      x: startX + spacing * (index + 1),
+      // Add vertical offset for better edge separation
+      y: centerY + (index % 2 === 0 ? -80 : 80),
+    };
+  });
+
+  return graph;
 };
 
 export default FordFulkersonGamePage;
