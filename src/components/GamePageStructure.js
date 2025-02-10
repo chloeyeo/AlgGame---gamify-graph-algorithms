@@ -167,6 +167,7 @@ export default function GamePageStructure({
   initialMessage = "Start from any node!",
   GraphVisualisationComponent = GraphVisualisation,
   isFordFulkerson = false,
+  children,
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
@@ -495,7 +496,7 @@ export default function GamePageStructure({
       </h1>
 
       <div className="flex flex-col flex-1">
-        {/* Top Controls Bar - Reorganized for mobile */}
+        {/* Top Controls Bar */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-2">
           {/* Scores Section */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 lg:flex lg:gap-6 text-xs lg:text-lg mb-2 lg:mb-0">
@@ -541,7 +542,7 @@ export default function GamePageStructure({
           </div>
         </div>
 
-        {/* Rest of the content remains the same */}
+        {/* Graph Container */}
         <div className={`flex-1 relative mx-auto w-full lg:w-4/5 mb-4`}>
           <div
             className={`h-full bg-white border border-gray-300 rounded-lg overflow-hidden ${
@@ -578,6 +579,9 @@ export default function GamePageStructure({
             </div>
           </div>
         </div>
+
+        {/* Render children (FlowQuestions) only for Ford-Fulkerson */}
+        {isFordFulkerson && children}
       </div>
     </main>
   );

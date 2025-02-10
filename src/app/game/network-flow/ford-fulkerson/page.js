@@ -30,6 +30,11 @@ const FordFulkersonGamePage = () => {
 
     console.log("Initial path options:", initialPathOptions);
 
+    // Initialize flows Map with zero flows for all edges
+    const initialFlows = new Map(
+      initialGraph.edges.map((e) => [`${e.source}-${e.target}`, 0])
+    );
+
     return {
       ...initialGraph,
       currentPath: [],
@@ -45,6 +50,7 @@ const FordFulkersonGamePage = () => {
       correctAnswers: {},
       score: 0,
       feedback: null,
+      flows: initialFlows,
     };
   });
 
@@ -75,6 +81,7 @@ const FordFulkersonGamePage = () => {
       userAnswers: {},
       correctAnswers: {},
       pathFlow: 0,
+      flows: new Map(),
     });
   };
 
@@ -170,21 +177,32 @@ const FordFulkersonGamePage = () => {
   };
 
   const handlePathSelect = (selectedPath) => {
-    const isCorrect = isValidAugmentingPath(selectedPath, graphState.edges);
+    // Create a flows Map from the current edge flows
+    const flows = new Map(
+      graphState.edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
+    );
+
+    const isCorrect = isValidAugmentingPath(
+      selectedPath,
+      graphState.edges,
+      flows
+    );
+    const correctPath = findOptimalPath(graphState.edges, flows);
 
     setGraphState((prev) => ({
       ...prev,
       selectedPath,
       gamePhase: "UPDATE_FLOWS",
-      flowOptions: generateFlowOptions(selectedPath, prev.edges),
+      flowOptions: generateFlowOptions(selectedPath, prev.edges, flows),
       userAnswers: {
         ...prev.userAnswers,
         pathSelection: selectedPath,
       },
       correctAnswers: {
         ...prev.correctAnswers,
-        pathSelection: findOptimalPath(prev.edges),
+        pathSelection: correctPath,
       },
+      flows,
       score: prev.score + (isCorrect ? 10 : -5),
       feedback: isCorrect
         ? "Correct! Now select the flow value."
@@ -247,17 +265,12 @@ const FordFulkersonGamePage = () => {
         GraphVisualisationComponent={FordFulkersonGraphVisualisation}
         isFordFulkerson={true}
       >
-        <div className="flex flex-col space-y-4 w-full max-w-md mx-auto mt-4">
+        <div className="absolute bottom-4 left-0 right-0 mx-auto w-full max-w-2xl px-4 z-10">
           <FlowQuestions
             graphState={graphState}
             onPathSelect={handlePathSelect}
             onFlowSelect={handleFlowSelect}
           />
-          {graphState.feedback && (
-            <div className="mt-4 p-3 rounded bg-blue-50 text-blue-800">
-              {graphState.feedback}
-            </div>
-          )}
         </div>
       </GamePageStructure>
     </div>
@@ -291,7 +304,7 @@ const findAllPaths = (edges, source, sink, path = [], visited = new Set()) => {
   return paths;
 };
 
-const calculateResidualCapacity = (path, edges) => {
+const calculateResidualCapacity = (path, edges, flows = new Map()) => {
   let minCapacity = Infinity;
 
   for (let i = 0; i < path.length - 1; i++) {
@@ -304,43 +317,37 @@ const calculateResidualCapacity = (path, edges) => {
         (e.source === next && e.target === current)
     );
 
-    if (edge) {
-      if (edge.source === current) {
-        minCapacity = Math.min(minCapacity, edge.capacity - (edge.flow || 0));
-      } else {
-        minCapacity = Math.min(minCapacity, edge.flow || 0);
-      }
+    if (!edge) return 0;
+
+    const edgeKey = `${edge.source}-${edge.target}`;
+    const reverseKey = `${edge.target}-${edge.source}`;
+
+    let residualCapacity;
+    if (edge.source === current) {
+      residualCapacity = edge.capacity - (edge.flow || 0);
+    } else {
+      residualCapacity = edge.flow || 0;
     }
+
+    minCapacity = Math.min(minCapacity, residualCapacity);
   }
 
   return minCapacity;
 };
 
-const isValidAugmentingPath = (path, edges) => {
-  if (!path || path.length < 2) return false;
-
-  for (let i = 0; i < path.length - 1; i++) {
-    const edge = edges.find(
-      (e) =>
-        (e.source === path[i] && e.target === path[i + 1]) ||
-        (e.source === path[i + 1] && e.target === path[i])
-    );
-
-    if (!edge) return false;
-
-    const residualCapacity =
-      edge.source === path[i]
-        ? edge.capacity - (edge.flow || 0)
-        : edge.flow || 0;
-
-    if (residualCapacity <= 0) return false;
-  }
-
-  return true;
+const isValidAugmentingPath = (path, edges, flows) => {
+  // Check if path exists and has residual capacity
+  const capacity = calculateResidualCapacity(path, edges, flows);
+  return capacity > 0;
 };
 
-const findOptimalPath = (edges) => {
-  return findPath("S", "T", edges);
+const findOptimalPath = (edges, flows) => {
+  return findPath(
+    "S",
+    "T",
+    edges,
+    new Map(edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0]))
+  );
 };
 
 const updateEdgeFlows = (edges, path, flow) => {
