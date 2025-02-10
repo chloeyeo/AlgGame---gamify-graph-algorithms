@@ -186,7 +186,7 @@ const FordFulkersonGamePage = () => {
     const updatedEdges = graphState.edges.map((edge) => ({
       ...edge,
       state: isEdgeInPath(edge, selectedPath) ? "current path" : undefined,
-      isHighlighted: false,
+      currentEdge: false, // Reset current edge highlight
     }));
 
     const flows = new Map(
@@ -198,7 +198,11 @@ const FordFulkersonGamePage = () => {
       graphState.edges,
       flows
     );
-    const flowOptions = generateFlowOptions(bottleneck);
+    const flowOptions = generateFlowOptions(
+      selectedPath,
+      graphState.edges,
+      flows
+    );
 
     setGraphState((prev) => ({
       ...prev,
@@ -211,9 +215,14 @@ const FordFulkersonGamePage = () => {
   };
 
   const handleFlowSelect = (selectedFlow) => {
+    const flows = new Map(
+      graphState.edges.map((e) => [`${e.source}-${e.target}`, e.flow || 0])
+    );
+
     const bottleneck = calculateBottleneck(
       graphState.selectedPath,
-      graphState.edges
+      graphState.edges,
+      flows
     );
 
     if (selectedFlow === bottleneck) {
@@ -224,6 +233,7 @@ const FordFulkersonGamePage = () => {
         edgeFlowOptions: generateEdgeFlowOptions(selectedFlow),
         currentEdgeIndex: 0,
         feedback: "Correct! Now update each edge's flow.",
+        flows: flows,
       }));
     } else {
       setGraphState((prev) => ({
@@ -235,6 +245,8 @@ const FordFulkersonGamePage = () => {
 
   const handleEdgeFlowSelect = (selectedEdgeFlow) => {
     const currentEdge = getCurrentEdgeFromPath();
+    if (!currentEdge) return;
+
     const correctFlow = calculateCorrectEdgeFlow(currentEdge);
     const isCorrect = selectedEdgeFlow === correctFlow;
 
@@ -353,6 +365,13 @@ const FordFulkersonGamePage = () => {
 
   const getCurrentEdgeFromPath = () => {
     const { selectedPath, currentEdgeIndex } = graphState;
+    if (
+      !selectedPath ||
+      currentEdgeIndex === undefined ||
+      currentEdgeIndex >= selectedPath.length - 1
+    ) {
+      return null;
+    }
     return {
       source: selectedPath[currentEdgeIndex],
       target: selectedPath[currentEdgeIndex + 1],
@@ -360,7 +379,9 @@ const FordFulkersonGamePage = () => {
   };
 
   const calculateCorrectEdgeFlow = (edge) => {
-    const { selectedFlow, selectedPath } = graphState;
+    const { selectedFlow, selectedPath, flows } = graphState;
+    if (!selectedFlow || !selectedPath) return 0;
+
     const isForward =
       selectedPath.indexOf(edge.source) < selectedPath.indexOf(edge.target);
     return isForward ? selectedFlow : -selectedFlow;

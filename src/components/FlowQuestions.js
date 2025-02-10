@@ -7,7 +7,7 @@ export const FlowQuestions = ({
   onFlowSelect,
   onEdgeFlowSelect,
 }) => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
 
   const {
     gamePhase,

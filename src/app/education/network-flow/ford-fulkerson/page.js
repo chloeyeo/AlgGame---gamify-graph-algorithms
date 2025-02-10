@@ -405,13 +405,14 @@ export const EDGE_TYPES = {
   NORMAL: { color: "#000000" }, // Black
 };
 
-export const getEdgeStyle = (edge, isCorrect) => ({
-  stroke: edge.isHighlighted
-    ? "#4CAF50"
-    : edge.state === "current path"
-    ? "#FFA726"
-    : "#999",
-  strokeWidth: edge.isHighlighted ? 3 : edge.state === "current path" ? 2 : 1,
+export const getEdgeStyle = (edge) => ({
+  stroke:
+    edge.state === "current path"
+      ? "#4285F4" // Blue for current path
+      : edge.currentEdge
+      ? "#E91E63" // Pink for current edge (matching legend)
+      : "#999", // Default gray
+  strokeWidth: edge.state === "current path" || edge.currentEdge ? 2 : 1,
   strokeDasharray: edge.state === "current path" ? "5,5" : "none",
 });
 
@@ -564,7 +565,7 @@ export const FordFulkersonGraphVisualisation = ({ graphState }) => {
         {(graphState?.edges || []).map((edge, idx) => {
           const source = graphState?.nodes?.find((n) => n.id === edge.source);
           const target = graphState?.nodes?.find((n) => n.id === edge.target);
-          const style = getEdgeStyle(edge, false);
+          const style = getEdgeStyle(edge);
           const paths = drawArrowPath(source, target);
 
           return (
