@@ -9,7 +9,11 @@ const fs = require("fs").promises;
 // Configure multer for image upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/profile-images/");
+    // Use absolute path
+    const uploadPath = path.join(__dirname, "../../uploads/profile-images");
+    // Ensure directory exists
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -87,11 +91,9 @@ router.put("/update-username", auth, async (req, res) => {
 // Update profile image route
 router.put("/update-profile-image", auth, async (req, res) => {
   try {
-    // Create uploads directory first
     const uploadDir = path.join(__dirname, "../../uploads/profile-images");
     await fs.mkdir(uploadDir, { recursive: true });
 
-    // Now handle the upload
     upload.single("image")(req, res, async function (err) {
       if (err) {
         console.error("Multer error:", err);
@@ -123,6 +125,7 @@ router.put("/update-profile-image", auth, async (req, res) => {
         }
       }
 
+      // Update the image URL to match the static serve path
       const imageUrl = `/uploads/profile-images/${req.file.filename}`;
       user.profileImage = imageUrl;
       await user.save();

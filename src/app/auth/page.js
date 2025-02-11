@@ -47,7 +47,7 @@ const AuthPage = () => {
       } else {
         // Register request
         response = await axios.post(`${API_URL}/api/auth/register`, {
-          username: formData.email.split("@")[0], // You might want to add a separate username field
+          username: formData.username,
           email: formData.email,
           password: formData.password,
         });
