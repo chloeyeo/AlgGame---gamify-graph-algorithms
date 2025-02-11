@@ -33,7 +33,6 @@ const AuthPage = () => {
       let response;
 
       if (isLogin) {
-        // Login request
         response = await axios.post(
           `${API_URL}/api/auth/login`,
           { emailOrUsername: formData.email, password: formData.password },
@@ -45,12 +44,25 @@ const AuthPage = () => {
           }
         );
       } else {
-        // Register request
-        response = await axios.post(`${API_URL}/api/auth/register`, {
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        });
+        // Registration request
+        if (!formData.username || !formData.email || !formData.password) {
+          toast.error("All fields are required");
+          return;
+        }
+
+        response = await axios.post(
+          `${API_URL}/api/auth/register`,
+          {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
       }
 
       const { token, user } = response.data;
@@ -84,7 +96,25 @@ const AuthPage = () => {
           {isLogin ? "Welcome Back!" : "Create Account"}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+              />
+            </div>
+          )}
           <div>
             <label
               htmlFor="email"
