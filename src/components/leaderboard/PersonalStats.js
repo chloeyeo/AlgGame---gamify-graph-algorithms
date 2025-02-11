@@ -121,7 +121,7 @@ const PersonalStats = () => {
                         Score
                       </th>
                       <th className="px-2 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-16">
-                        Time
+                        Submitted Time
                       </th>
                       <th className="px-2 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-16">
                         Moves
@@ -146,7 +146,22 @@ const PersonalStats = () => {
                             {score.score}
                           </td>
                           <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-800">
-                            {Math.floor(score.timeSpent / 1000)}s
+                            {score.createdAt &&
+                            new Date(score.createdAt).toString() !==
+                              "Invalid Date"
+                              ? new Date(score.createdAt).toLocaleString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                    timeZoneName: "short",
+                                  }
+                                )
+                              : "N/A"}
                           </td>
                           <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-800">
                             {score.movesCount}

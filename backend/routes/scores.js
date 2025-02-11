@@ -89,6 +89,7 @@ router.get("/personal", auth, async (req, res) => {
               movesCount: "$movesCount",
               difficulty: "$difficulty",
               _id: "$_id",
+              createdAt: "$createdAt",
             },
           },
         },

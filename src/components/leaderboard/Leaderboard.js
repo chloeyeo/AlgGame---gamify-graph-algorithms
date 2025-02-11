@@ -137,7 +137,7 @@ const Leaderboard = ({ algorithm }) => {
                 Score
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
-                Time
+                Submitted Time
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
                 Moves
@@ -164,7 +164,18 @@ const Leaderboard = ({ algorithm }) => {
                   {entry.score}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
-                  {Math.floor(entry.timeSpent / 1000)}s
+                  {entry.createdAt &&
+                  new Date(entry.createdAt).toString() !== "Invalid Date"
+                    ? new Date(entry.createdAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                        timeZoneName: "short",
+                      })
+                    : "N/A"}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
                   {entry.movesCount}
