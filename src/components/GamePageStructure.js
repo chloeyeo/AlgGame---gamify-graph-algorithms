@@ -358,25 +358,6 @@ export default function GamePageStructure({
     }
   };
 
-  // // Handle game completion
-  // useEffect(() => {
-  //   const checkGameCompletion = async () => {
-  //     if (
-  //       isGameComplete(graphState) &&
-  //       !scoreSubmitted &&
-  //       !submitAttempted.current
-  //     ) {
-  //       try {
-  //         await submitScore();
-  //       } catch (error) {
-  //         console.error("Score submission error:", error);
-  //       }
-  //     }
-  //   };
-
-  //   checkGameCompletion();
-  // }, [graphState, isGameComplete, scoreSubmitted]);
-
   useEffect(() => {
     if (isGameComplete(graphState)) {
       // For Ford-Fulkerson, only show completion when the last edge of the path is updated
@@ -387,7 +368,6 @@ export default function GamePageStructure({
         // Check if we're on the last edge of the path
         const isLastEdge =
           graphState.currentEdgeIndex === currentPath.length - 2;
-
         if (!isLastEdge) return;
       }
 
@@ -399,6 +379,7 @@ export default function GamePageStructure({
         },
       });
 
+      // Use setTimeout to ensure state updates are batched
       setTimeout(() => {
         const algorithm = title.toLowerCase().includes("kruskal")
           ? "kruskal"
@@ -411,27 +392,21 @@ export default function GamePageStructure({
           : "default";
 
         handleRoundComplete(score, algorithm);
-        setScore(0);
-        setMoves(0);
       }, 2000);
     }
-  }, [graphState, isGameComplete, round, score]);
-
-  useEffect(() => {
-    if (score > bestScore) {
-      setBestScore(score);
-    }
-  }, [score]);
+  }, [graphState, isGameComplete]);
 
   const handleRoundComplete = async (currentScore, algorithm) => {
+    // Prevent multiple executions
+    if (submitAttempted.current) return;
+    submitAttempted.current = true;
+
     // Update total score before generating new state
     const newTotalScore = totalScore + currentScore;
     setTotalScore(newTotalScore);
-    console.log("Updated total score:", newTotalScore);
 
     // Reset score submission state for next round
     setScoreSubmitted(false);
-    submitAttempted.current = false;
 
     // Submit score after each round
     try {
@@ -450,7 +425,6 @@ export default function GamePageStructure({
 
     // Special handling for Ford-Fulkerson
     if (isFordFulkerson) {
-      // Generate new graph for next round
       const newGraph = generateRandomGraph(nodeCount, true);
       const newPathOptions = findAllPaths(newGraph.edges, "S", "T")
         .filter((path) => calculateResidualCapacity(path, newGraph.edges) > 0)
@@ -476,6 +450,7 @@ export default function GamePageStructure({
       setRound((prev) => prev + 1);
       setScore(0);
       setMoves(0);
+      submitAttempted.current = false;
       return;
     }
 
@@ -511,7 +486,14 @@ export default function GamePageStructure({
     setScore(0);
     setMoves(0);
     setMessage("Start the next round!");
+    submitAttempted.current = false;
   };
+
+  useEffect(() => {
+    if (score > bestScore) {
+      setBestScore(score);
+    }
+  }, [score]);
 
   if (!difficulty) {
     return <DifficultySelector onSelect={onDifficultySelect} />;
