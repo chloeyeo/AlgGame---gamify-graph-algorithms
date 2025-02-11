@@ -239,7 +239,7 @@ export default function GamePageStructure({
   };
 
   const submitScore = async () => {
-    console.log("Submitting score:", score);
+    console.log("Submitting total score:", totalScore);
     if (submitAttempted.current) return;
 
     const token = localStorage.getItem("token");
@@ -259,7 +259,7 @@ export default function GamePageStructure({
         credentials: "include",
         body: JSON.stringify({
           algorithm: getAlgorithmFromTitle(title),
-          score,
+          score: totalScore,
           timeSpent: Date.now() - startTime,
           movesCount: moves,
           difficulty: difficulty,
@@ -358,24 +358,24 @@ export default function GamePageStructure({
     }
   };
 
-  // Handle game completion
-  useEffect(() => {
-    const checkGameCompletion = async () => {
-      if (
-        isGameComplete(graphState) &&
-        !scoreSubmitted &&
-        !submitAttempted.current
-      ) {
-        try {
-          await submitScore();
-        } catch (error) {
-          console.error("Score submission error:", error);
-        }
-      }
-    };
+  // // Handle game completion
+  // useEffect(() => {
+  //   const checkGameCompletion = async () => {
+  //     if (
+  //       isGameComplete(graphState) &&
+  //       !scoreSubmitted &&
+  //       !submitAttempted.current
+  //     ) {
+  //       try {
+  //         await submitScore();
+  //       } catch (error) {
+  //         console.error("Score submission error:", error);
+  //       }
+  //     }
+  //   };
 
-    checkGameCompletion();
-  }, [graphState, isGameComplete, scoreSubmitted]);
+  //   checkGameCompletion();
+  // }, [graphState, isGameComplete, scoreSubmitted]);
 
   useEffect(() => {
     if (isGameComplete(graphState)) {
