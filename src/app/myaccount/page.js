@@ -4,11 +4,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Sidebar from "@/components/Sidebar";
 import AchievementDisplay from "@/components/profile/AchievementDisplay";
+import { PencilIcon } from "@heroicons/react/24/outline";
 
 export default function MyAccountPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("details");
+  const [isEditing, setIsEditing] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [error, setError] = useState("");
   const [achievements, setAchievements] = useState([]);
   const [stats, setStats] = useState({
     totalGames: 0,
@@ -27,6 +31,7 @@ export default function MyAccountPage() {
 
     try {
       setUser(JSON.parse(userData));
+      setNewUsername(JSON.parse(userData).username);
     } catch (error) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -78,6 +83,36 @@ export default function MyAccountPage() {
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
     toast.success("Signed out successfully");
     router.replace("/auth");
+  };
+
+  const handleUsernameUpdate = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/users/update-username", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username: newUsername }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update username");
+      }
+
+      // Update local storage
+      const userData = JSON.parse(localStorage.getItem("user"));
+      const updatedUser = { ...userData, username: newUsername };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      setIsEditing(false);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   if (!user) return null;
@@ -141,7 +176,49 @@ export default function MyAccountPage() {
                     <label className="block text-sm font-medium text-gray-600 bg-black bg-opacity-30 p-1">
                       Username
                     </label>
-                    <p className="mt-1">{user?.username}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      {isEditing ? (
+                        <div className="flex flex-col w-full gap-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={newUsername}
+                              onChange={(e) => setNewUsername(e.target.value)}
+                              className="px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <button
+                              onClick={handleUsernameUpdate}
+                              className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIsEditing(false);
+                                setNewUsername(user.username);
+                                setError("");
+                              }}
+                              className="px-3 py-1 text-sm bg-gray-100 rounded text-black hover:bg-gray-200"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                          {error && (
+                            <p className="text-sm text-red-500">{error}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <p>{user.username}</p>
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="p-1 text-black hover:text-gray-800"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="border rounded p-4">
                     <label className="block text-sm font-medium text-gray-600 bg-black bg-opacity-30 p-1">
