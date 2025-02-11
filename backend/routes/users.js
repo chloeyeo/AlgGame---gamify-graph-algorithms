@@ -1,7 +1,20 @@
+const express = require("express");
+const router = express.Router();
+const auth = require("../middleware/auth");
+const User = require("../models/User");
+
+// Update username route
 router.put("/update-username", auth, async (req, res) => {
   try {
     const { username } = req.body;
     const userId = req.user.userId;
+
+    // Validate username
+    if (!username || username.trim().length < 3) {
+      return res.status(400).json({
+        message: "Username must be at least 3 characters long",
+      });
+    }
 
     // Check if username is already taken
     const existingUser = await User.findOne({
@@ -11,7 +24,7 @@ router.put("/update-username", auth, async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({
-        message: "Username is already taken",
+        message: "Sorry, that username is already taken",
       });
     }
 
@@ -37,3 +50,5 @@ router.put("/update-username", auth, async (req, res) => {
     });
   }
 });
+
+module.exports = router;

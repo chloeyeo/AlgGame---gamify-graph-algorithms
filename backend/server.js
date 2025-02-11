@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
 const scoreRoutes = require("./routes/scores");
+const userRoutes = require("./routes/users");
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use("/api/users", userRoutes);
 
 // Basic health check route
 app.get("/health", (_, res) => {
