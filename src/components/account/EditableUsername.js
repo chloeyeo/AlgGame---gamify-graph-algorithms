@@ -11,7 +11,7 @@ const EditableUsername = ({ initialUsername, onUpdate }) => {
     try {
       // Check if username is unchanged
       if (username === initialUsername) {
-        setError("This is already your current username");
+        setError("This username is already yours!");
         return;
       }
 
@@ -28,10 +28,7 @@ const EditableUsername = ({ initialUsername, onUpdate }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 400) {
-          throw new Error("Sorry, that username is already taken");
-        }
-        throw new Error(data.error || "Failed to update username");
+        throw new Error(data.message || "Failed to update username");
       }
 
       // Update local storage with new username
@@ -61,7 +58,7 @@ const EditableUsername = ({ initialUsername, onUpdate }) => {
           />
           <button
             onClick={handleSubmit}
-            className="px-3 py-1 text-sm text-white bg-blue-300 rounded hover:bg-blue-600"
+            className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
           >
             Save
           </button>
@@ -71,12 +68,12 @@ const EditableUsername = ({ initialUsername, onUpdate }) => {
               setUsername(initialUsername);
               setError("");
             }}
-            className="px-3 py-1 text-sm bg-gray-300 text-black hover:text-black"
+            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
           >
             Cancel
           </button>
         </div>
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
       </div>
     );
   }
@@ -86,7 +83,7 @@ const EditableUsername = ({ initialUsername, onUpdate }) => {
       <span className="text-lg font-medium">{username}</span>
       <button
         onClick={() => setIsEditing(true)}
-        className="p-1 text-black hover:text-gray-800 transition-colors"
+        className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
       >
         <PencilIcon className="w-5 h-5" />
       </button>

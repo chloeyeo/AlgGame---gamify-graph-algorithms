@@ -7,7 +7,7 @@ export async function PUT(request) {
     const token = request.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json(
-        { error: "Authentication required" },
+        { message: "Authentication required" },
         { status: 401 }
       );
     }
@@ -26,7 +26,7 @@ export async function PUT(request) {
   } catch (error) {
     console.error("Update username error:", error);
     return NextResponse.json(
-      { error: error.response?.data?.message || "Failed to update username" },
+      { message: error.response?.data?.message || "Failed to update username" },
       { status: error.response?.status || 500 }
     );
   }

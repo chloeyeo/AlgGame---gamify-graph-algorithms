@@ -232,11 +232,11 @@ export default function MyAccountPage() {
               <div className="mt-8">
                 <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
                 <div className="space-y-4">
-                  <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
+                  {/* <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Change Password
-                  </button>
+                  </button> */}
                   <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
-                    Update Profile
+                    Update Profile Image
                   </button>
                   <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Notification Settings
