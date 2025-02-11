@@ -239,6 +239,7 @@ export default function GamePageStructure({
   };
 
   const submitScore = async () => {
+    console.log("Submitting score:", score);
     if (submitAttempted.current) return;
 
     const token = localStorage.getItem("token");
@@ -423,7 +424,29 @@ export default function GamePageStructure({
   }, [score]);
 
   const handleRoundComplete = async (currentScore, algorithm) => {
-    const token = localStorage.getItem("token");
+    // Update total score before generating new state
+    const newTotalScore = totalScore + currentScore;
+    setTotalScore(newTotalScore);
+    console.log("Updated total score:", newTotalScore);
+
+    // Reset score submission state for next round
+    setScoreSubmitted(false);
+    submitAttempted.current = false;
+
+    // Submit score after each round
+    try {
+      await submitScore();
+    } catch (error) {
+      console.error("Failed to submit round score:", error);
+    }
+
+    // Clear overlay message after a delay
+    setTimeout(() => {
+      setOverlayState({
+        show: false,
+        content: { type: "", text: "" },
+      });
+    }, 2000);
 
     // Special handling for Ford-Fulkerson
     if (isFordFulkerson) {
@@ -451,11 +474,12 @@ export default function GamePageStructure({
 
       setGraphState(newState);
       setRound((prev) => prev + 1);
-      setTotalScore((prev) => prev + currentScore);
+      setScore(0);
+      setMoves(0);
       return;
     }
 
-    // Keep existing logic for other algorithms unchanged
+    // Generate new state for next round
     let newState;
     if (
       algorithm === "kruskal" ||
@@ -479,13 +503,14 @@ export default function GamePageStructure({
         queue: algorithm === "bfs" ? [] : undefined,
         visitedNodes: [],
         backtrackedNodes: algorithm === "dfs" ? [] : undefined,
-        round: 1,
       };
     }
 
     setGraphState(newState);
     setRound((prev) => prev + 1);
-    setTotalScore((prev) => prev + currentScore);
+    setScore(0);
+    setMoves(0);
+    setMessage("Start the next round!");
   };
 
   if (!difficulty) {
