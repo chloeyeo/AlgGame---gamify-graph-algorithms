@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Sidebar from "@/components/Sidebar";
 import AchievementDisplay from "@/components/profile/AchievementDisplay";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function MyAccountPage() {
   const router = useRouter();
@@ -19,6 +19,8 @@ export default function MyAccountPage() {
     bestScores: {},
     achievementsCount: 0,
   });
+  const [profileImage, setProfileImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -115,6 +117,66 @@ export default function MyAccountPage() {
     }
   };
 
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const token = localStorage.getItem("token");
+        const response = await fetch("/api/users/update-profile-image", {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update profile image");
+        }
+
+        const data = await response.json();
+        // Update local storage with new image URL
+        const userData = JSON.parse(localStorage.getItem("user"));
+        const updatedUser = { ...userData, profileImage: data.imageUrl };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      } catch (error) {
+        toast.error("Failed to update profile image");
+      }
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/users/delete-profile-image", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete profile image");
+      }
+
+      // Reset to default image
+      const userData = JSON.parse(localStorage.getItem("user"));
+      const updatedUser = { ...userData, profileImage: null };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    } catch (error) {
+      toast.error("Failed to delete profile image");
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -154,12 +216,26 @@ export default function MyAccountPage() {
           {activeTab === "details" ? (
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                <div className="relative w-16 h-16 lg:w-20 lg:h-20 group">
                   <img
-                    src="/images/lion.png"
+                    src={user?.profileImage || "/images/lion.png"}
                     alt="Profile"
-                    className="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-contain"
+                    className="w-full h-full rounded-full object-cover"
                   />
+                  <div
+                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={handleImageClick}
+                  >
+                    <PencilIcon className="w-6 h-6 text-white" />
+                  </div>
+                  {user?.profileImage && (
+                    <button
+                      onClick={handleDeleteImage}
+                      className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">{user?.username}</h2>
@@ -235,9 +311,9 @@ export default function MyAccountPage() {
                   {/* <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Change Password
                   </button> */}
-                  <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
+                  {/* <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Update Profile Image
-                  </button>
+                  </button> */}
                   <button className="w-full px-4 py-2 text-left border rounded active:bg-gray-50 hover:bg-gray-50 transition-colors">
                     Notification Settings
                   </button>
@@ -249,6 +325,13 @@ export default function MyAccountPage() {
           )}
         </div>
       </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageChange}
+        accept="image/*"
+        className="hidden"
+      />
     </div>
   );
 }
