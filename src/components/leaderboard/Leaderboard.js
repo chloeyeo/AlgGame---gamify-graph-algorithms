@@ -124,7 +124,7 @@ const Leaderboard = ({ algorithm }) => {
         ))}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto no-scrollbar">
         <table className="min-w-full">
           <thead className="bg-gray-50">
             <tr>
