@@ -135,7 +135,7 @@ const Leaderboard = ({ algorithm }) => {
                 Player
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
-                Score
+                Total Score
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase w-20">
                 Submitted Time
