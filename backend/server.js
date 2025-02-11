@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
 const scoreRoutes = require("./routes/scores");
 const userRoutes = require("./routes/users");
+const path = require("path");
+const fs = require("fs");
 
 dotenv.config();
 
@@ -31,6 +33,18 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Create uploads directory if it doesn't exist
+const uploadDir = path.join(__dirname, "../uploads/profile-images");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Serve static files - add this before routes
+app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
+
+// Your routes
 app.use("/api/users", userRoutes);
 
 // Basic health check route

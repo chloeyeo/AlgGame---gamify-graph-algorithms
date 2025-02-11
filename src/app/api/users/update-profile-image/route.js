@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { BACKEND_URL } from "@/constants/constants";
-import axios from "axios";
 
 export async function PUT(request) {
   try {
@@ -13,26 +12,44 @@ export async function PUT(request) {
     }
 
     const formData = await request.formData();
+    const file = formData.get("image");
 
-    const response = await axios.put(
+    if (!file) {
+      return NextResponse.json(
+        { message: "No image file provided" },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch(
       `${BACKEND_URL}/api/users/update-profile-image`,
-      formData,
       {
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
+        body: formData,
       }
     );
 
-    return NextResponse.json(response.data);
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error("Non-JSON response:", await response.text());
+      throw new Error("Server returned invalid response");
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to update profile image");
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
   } catch (error) {
+    console.error("Profile image upload error:", error);
     return NextResponse.json(
-      {
-        message:
-          error.response?.data?.message || "Failed to update profile image",
-      },
-      { status: error.response?.status || 500 }
+      { message: error.message || "Failed to update profile image" },
+      { status: 500 }
     );
   }
 }

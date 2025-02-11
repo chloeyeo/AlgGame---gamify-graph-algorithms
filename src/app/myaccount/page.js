@@ -138,17 +138,24 @@ export default function MyAccountPage() {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to update profile image");
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to update profile image"
+          );
         }
 
         const data = await response.json();
+        console.log("Upload response:", data);
+
         // Update local storage with new image URL
         const userData = JSON.parse(localStorage.getItem("user"));
         const updatedUser = { ...userData, profileImage: data.imageUrl };
         localStorage.setItem("user", JSON.stringify(updatedUser));
         setUser(updatedUser);
+        toast.success("Profile image updated successfully");
       } catch (error) {
-        toast.error("Failed to update profile image");
+        console.error("Upload error:", error);
+        toast.error(error.message || "Failed to update profile image");
       }
     }
   };
@@ -236,6 +243,13 @@ export default function MyAccountPage() {
                       <XMarkIcon className="w-4 h-4" />
                     </button>
                   )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">{user?.username}</h2>
@@ -325,13 +339,6 @@ export default function MyAccountPage() {
           )}
         </div>
       </div>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleImageChange}
-        accept="image/*"
-        className="hidden"
-      />
     </div>
   );
 }
