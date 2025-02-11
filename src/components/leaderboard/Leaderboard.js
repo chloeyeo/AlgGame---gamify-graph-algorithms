@@ -45,6 +45,7 @@ const Leaderboard = ({ algorithm }) => {
             timeSpent: entry.timeSpent || 0,
             movesCount: entry.movesCount || 0,
             difficulty: entry.difficulty || "easy",
+            createdAt: entry.createdAt,
           }));
           setLeaderboardData(processedData);
         } else {
