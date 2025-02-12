@@ -238,56 +238,35 @@ export default function GamePageStructure({
     submitAttempted.current = false;
   };
 
-  const submitScore = async () => {
-    console.log("Submitting total score:", totalScore);
-    if (submitAttempted.current) return;
+  const submitScore = async (scoreData) => {
+    console.log("Attempting to submit score:", scoreData); // Debug log
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setMessage("Please log in to save your score to the leaderboard!");
-      return;
+    if (!scoreData.algorithm || !scoreData.difficulty) {
+      console.error("Missing required score data:", scoreData);
+      throw new Error("Missing required score data");
     }
 
     try {
-      setIsSubmitting(true);
       const response = await fetch("/api/scores", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        body: JSON.stringify({
-          algorithm: getAlgorithmFromTitle(title),
-          score: totalScore,
-          timeSpent: Date.now() - startTime,
-          movesCount: moves,
-          difficulty: difficulty,
-        }),
+        body: JSON.stringify(scoreData),
       });
 
-      const contentType = response.headers.get("content-type");
-      let data;
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        throw new Error("Received non-JSON response from server");
-      }
-
       if (!response.ok) {
-        throw new Error(data.message || "Failed to submit score");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit score");
       }
 
-      setScoreSubmitted(true);
-      setMessage("Score submitted successfully!");
-      submitAttempted.current = true;
+      const data = await response.json();
+      console.log("Score submission response:", data); // Debug log
+      return data;
     } catch (error) {
       console.error("Score submission error:", error);
-      setMessage(
-        "Game completed but score submission failed. Please try again."
-      );
-      setIsSubmitting(false);
+      throw error;
     }
   };
 
@@ -371,28 +350,42 @@ export default function GamePageStructure({
         if (!isLastEdge) return;
       }
 
-      setOverlayState({
-        show: true,
-        content: {
-          type: "success",
-          text: `Round ${round} Complete! Starting next round...`,
-        },
-      });
+      // Calculate time spent
+      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
 
-      // Use setTimeout to ensure state updates are batched
-      setTimeout(() => {
-        const algorithm = title.toLowerCase().includes("kruskal")
-          ? "kruskal"
-          : title.toLowerCase().includes("prim")
-          ? "prim"
-          : title.toLowerCase().includes("dijkstra")
-          ? "dijkstra"
-          : title.toLowerCase().includes("a*")
-          ? "astar"
-          : "default";
+      // Submit score first
+      const scoreData = {
+        algorithm: pathname.split("/").pop(),
+        score: totalScore + score, // Include current round score
+        timeSpent: timeSpent,
+        movesCount: moves,
+        difficulty: difficulty,
+      };
 
-        handleRoundComplete(score, algorithm);
-      }, 2000);
+      console.log("Submitting final score:", scoreData); // Debug log
+
+      submitScore(scoreData)
+        .then(() => {
+          console.log("Score submitted successfully"); // Debug log
+
+          setOverlayState({
+            show: true,
+            content: {
+              type: "success",
+              text: `Round ${round} Complete! Starting next round...`,
+            },
+          });
+
+          // Wait for score submission before starting next round
+          setTimeout(() => {
+            const algorithm = getAlgorithmFromTitle(title);
+            handleRoundComplete(score, algorithm);
+          }, 2000);
+        })
+        .catch((error) => {
+          console.error("Failed to submit score:", error);
+          toast.error("Failed to submit score. Please try again.");
+        });
     }
   }, [graphState, isGameComplete]);
 
@@ -401,19 +394,9 @@ export default function GamePageStructure({
     if (submitAttempted.current) return;
     submitAttempted.current = true;
 
-    // Update total score before generating new state
+    // Update total score
     const newTotalScore = totalScore + currentScore;
     setTotalScore(newTotalScore);
-
-    // Reset score submission state for next round
-    setScoreSubmitted(false);
-
-    // Submit score after each round
-    try {
-      await submitScore();
-    } catch (error) {
-      console.error("Failed to submit round score:", error);
-    }
 
     // Clear overlay message after a delay
     setTimeout(() => {
