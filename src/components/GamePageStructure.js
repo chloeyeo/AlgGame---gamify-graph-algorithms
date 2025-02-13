@@ -452,7 +452,7 @@ export default function GamePageStructure({
         nodes: nodes.map((node) => ({
           ...node,
           visited: false,
-          backtracked: algorithm === "dfs",
+          backtracked: false,
           current: false,
         })),
         edges,
