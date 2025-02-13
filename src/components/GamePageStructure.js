@@ -242,9 +242,13 @@ export default function GamePageStructure({
   const submitScore = async (scoreData) => {
     console.log("Attempting to submit score:", scoreData);
 
-    // Clean up algorithm name for Dijkstra's
+    // Clean up algorithm names
     if (scoreData.algorithm === "dijkstras") {
       scoreData.algorithm = "dijkstra";
+    } else if (scoreData.algorithm === "kruskals") {
+      scoreData.algorithm = "kruskal";
+    } else if (scoreData.algorithm === "prims") {
+      scoreData.algorithm = "prim";
     }
 
     if (!scoreData.algorithm || !scoreData.difficulty) {
