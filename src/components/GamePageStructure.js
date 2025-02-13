@@ -357,6 +357,10 @@ export default function GamePageStructure({
         if (!isLastEdge) return;
       }
 
+      // Prevent multiple executions
+      if (submitAttempted.current) return;
+      submitAttempted.current = true;
+
       // Calculate time spent
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
 
@@ -389,24 +393,19 @@ export default function GamePageStructure({
             },
           });
 
-          // Wait for score submission before starting next round
-          setTimeout(() => {
-            const algorithm = getAlgorithmFromTitle(title);
-            handleRoundComplete(score, algorithm);
-          }, 2000);
+          // Immediately call handleRoundComplete instead of setTimeout
+          const algorithm = getAlgorithmFromTitle(title);
+          handleRoundComplete(score, algorithm);
         })
         .catch((error) => {
           console.error("Failed to submit score:", error);
           toast.error("Failed to submit score. Please try again.");
+          submitAttempted.current = false; // Reset flag on error
         });
     }
   }, [graphState, isGameComplete]);
 
   const handleRoundComplete = async (currentScore, algorithm) => {
-    // Prevent multiple executions
-    if (submitAttempted.current) return;
-    submitAttempted.current = true;
-
     // Update total score
     const newTotalScore = totalScore + currentScore;
     setTotalScore(newTotalScore);
