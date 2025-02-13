@@ -6,7 +6,6 @@ import { BACKEND_URL } from "@/constants/constants";
 const PersonalStats = () => {
   const [personalStats, setPersonalStats] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("easy");
   const difficulties = ["easy", "medium", "hard"];
 
@@ -15,7 +14,7 @@ const PersonalStats = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          setError("Please log in to view your personal stats");
+          setPersonalStats([]);
           setLoading(false);
           return;
         }
@@ -28,18 +27,14 @@ const PersonalStats = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          setPersonalStats([]);
+        } else {
+          const data = await response.json();
+          setPersonalStats(data.error ? [] : data);
         }
-
-        const data = await response.json();
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        setPersonalStats(data);
       } catch (err) {
         console.error("Personal stats error:", err);
-        setError(err.message || "Failed to fetch personal stats");
+        setPersonalStats([]);
       } finally {
         setLoading(false);
       }
@@ -49,7 +44,6 @@ const PersonalStats = () => {
   }, []);
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
 
   const getMedalIcon = (rank) => {
     switch (rank) {
