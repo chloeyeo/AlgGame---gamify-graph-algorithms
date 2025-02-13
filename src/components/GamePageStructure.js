@@ -179,6 +179,7 @@ export default function GamePageStructure({
   const [activeTab, setActiveTab] = useState(0);
   const [currentGraphStates, setCurrentGraphStates] = useState([graphState]);
   const [moves, setMoves] = useState(0);
+  const [totalMoves, setTotalMoves] = useState(0);
   const [isSpeakingFeedback, setIsSpeakingFeedback] = useState(false);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -299,9 +300,13 @@ export default function GamePageStructure({
       message: customMessage,
     } = isValidMove(graphState, nodeId, currentStep);
 
+    // Increment moves counter for every valid click attempt
+    setMoves((m) => m + 1);
+
     if (validMove) {
       setCurrentStep((step) => step + 1);
-      setScore((s) => s + getScore(nodeStatus));
+      const moveScore = getScore(nodeStatus);
+      setScore((s) => s + moveScore);
       setGraphState(newState);
       setMessage(customMessage || getMessage(nodeStatus, nodeId));
       setOverlayState({
@@ -310,16 +315,13 @@ export default function GamePageStructure({
       });
     } else {
       setScore((s) => s - 5);
-      setMessage(
-        customMessage || `Invalid move! That's not the correct DFS step.`
-      );
+      setMessage(customMessage || `Invalid move! That's not the correct step.`);
       setOverlayState({
         show: true,
         content: { type: "incorrect", text: "Incorrect!" },
       });
     }
 
-    setMoves((m) => m + 1);
     setTimeout(
       () => setOverlayState((prev) => ({ ...prev, show: false })),
       1000
@@ -359,11 +361,17 @@ export default function GamePageStructure({
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
 
       // Submit score first
+      const newTotalScore = totalScore + score;
+      const newTotalMoves = totalMoves + moves;
+
+      setTotalScore(newTotalScore);
+      setTotalMoves(newTotalMoves);
+
       const scoreData = {
         algorithm: pathname.split("/").pop(),
-        score: totalScore + score, // Include current round score
+        score: newTotalScore,
         timeSpent: timeSpent,
-        movesCount: moves,
+        movesCount: newTotalMoves,
         difficulty: difficulty,
       };
 
@@ -528,6 +536,7 @@ export default function GamePageStructure({
             <div>Best: {bestScore}</div>
             <div>Score: {score}</div>
             <div>Moves: {moves}</div>
+            <div>Total Moves: {totalMoves}</div>
           </div>
 
           {/* Feedback Section */}
