@@ -28,14 +28,17 @@ const scoreSchema = new mongoose.Schema({
   score: {
     type: Number,
     required: true,
+    set: (v) => Number(v),
   },
   timeSpent: {
     type: Number,
     required: true,
+    set: (v) => Number(v),
   },
   movesCount: {
     type: Number,
     required: true,
+    set: (v) => Number(v),
   },
   createdAt: {
     type: Date,
