@@ -239,7 +239,12 @@ export default function GamePageStructure({
   };
 
   const submitScore = async (scoreData) => {
-    console.log("Attempting to submit score:", scoreData); // Debug log
+    console.log("Attempting to submit score:", scoreData);
+
+    // Clean up algorithm name for Dijkstra's
+    if (scoreData.algorithm === "dijkstras") {
+      scoreData.algorithm = "dijkstra";
+    }
 
     if (!scoreData.algorithm || !scoreData.difficulty) {
       console.error("Missing required score data:", scoreData);
@@ -262,7 +267,7 @@ export default function GamePageStructure({
       }
 
       const data = await response.json();
-      console.log("Score submission response:", data); // Debug log
+      console.log("Score submission response:", data);
       return data;
     } catch (error) {
       console.error("Score submission error:", error);
