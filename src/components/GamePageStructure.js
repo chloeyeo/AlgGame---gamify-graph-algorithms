@@ -532,10 +532,10 @@ export default function GamePageStructure({
           {/* Scores Section */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 lg:flex lg:gap-6 text-xs lg:text-lg mb-2 lg:mb-0">
             <div>Round: {round}</div>
-            <div>Total: {totalScore}</div>
-            <div>Best: {bestScore}</div>
-            <div>Score: {score}</div>
-            <div>Moves: {moves}</div>
+            <div>Total Score: {totalScore}</div>
+            <div>Best Round Score: {bestScore}</div>
+            <div>Current Score: {score}</div>
+            <div>Current Moves: {moves}</div>
             <div>Total Moves: {totalMoves}</div>
           </div>
 
